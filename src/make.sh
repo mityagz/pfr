@@ -1,0 +1,1 @@
+g++ -DHAVE_MKSTEMP ping_m.cpp ping_sig_alrm.cpp ping_send_v4.cpp ping_proc_v4.cpp error.cpp ping_signal.cpp ping_host_serv.cpp ping_sock_ntop_host.cpp  ping_inet_ntop.cpp ping_inet_pton_ipv4.cpp ping_inet_ntop.cpp ping_calloc.cpp ping_readloop.cpp ping_wrapsock.cpp ping_wrapunix.cpp -fpermissive
