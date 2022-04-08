@@ -1,0 +1,36 @@
+#include    <cstring>
+#include    <malloc.h>
+#include    "ping0.h"
+#include    "ping_data.h"
+
+
+
+void send_v4(void) {
+    int len;
+    struct icmp *icmp;
+
+    icmp = (struct icmp *) sendbuf;
+    icmp->icmp_type = ICMP_ECHO;
+    icmp->icmp_code = 0;
+    icmp->icmp_id = pid;
+    icmp->icmp_seq = nsent++;
+    //memset(icmp->icmp_data, 0xa5, datalen); /* fill with pattern */
+    //Gettimeofday((struct timeval *) icmp->icmp_data, NULL);
+    
+    /* struct icmp_d fills */
+    icmp_payload *icmp_d = (icmp_payload *)malloc(sizeof(icmp_payload));
+    Gettimeofday((struct timeval *) icmp_d->tv, NULL);
+    icmp_d->peer_id = 1;
+    icmp_d->probe_id = 5;
+    icmp_d->thread_id = 6;
+    icmp_d->timestamp = 1;
+
+    memcpy(sendbuf + 8, icmp_d, sizeof(icmp_payload));
+
+    //len = 8 + datalen;      /* checksum ICMP header and data */
+    len = 8 + sizeof(icmp_payload);      /* checksum ICMP header and data */
+    icmp->icmp_cksum = 0;
+    icmp->icmp_cksum = in_cksum((u_short *) icmp, len);
+    Sendto(sockfd, sendbuf, len, 0, pr->sasend, pr->salen);
+    free(icmp_d);
+}
