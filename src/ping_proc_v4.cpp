@@ -22,7 +22,17 @@ void proc_v4(char *ptr, ssize_t len, struct msghdr *msg, struct timeval *tvrecv)
         tv_sub(tvrecv, tvsend);
         rtt = tvrecv->tv_sec * 1000.0 + tvrecv->tv_usec / 1000.0;
 
-        printf("%d bytes from %s: seq=%u, ttl=%d, rtt=%.3f ms\n", icmplen, Sock_ntop_host(pr->sarecv, pr->salen), icmp->icmp_seq, ip->ip_ttl, rtt);
+        struct in_addr src = ip->ip_src;
+        struct in_addr dst = ip->ip_dst;
+
+        char str_src[INET_ADDRSTRLEN];
+        char str_dst[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &(src), str_src,  INET_ADDRSTRLEN);
+        inet_ntop(AF_INET, &(dst), str_dst,  INET_ADDRSTRLEN);
+
+
+        //printf("%d bytes from %s: seq=%u, ttl=%d, rtt=%.3f ms\n", icmplen, Sock_ntop_host(pr->sarecv, pr->salen), icmp->icmp_seq, ip->ip_ttl, rtt);
+        printf("%d bytes from %s: to: %s seq=%u, ttl=%d, rtt=%.3f ms\n", icmplen, str_src, str_dst, icmp->icmp_seq, ip->ip_ttl, rtt);
     } else if (verbose) {
         printf("  %d bytes from %s: type = %d, code = %d\n", icmplen, Sock_ntop_host(pr->sarecv, pr->salen), icmp->icmp_type, icmp->icmp_code);
         ;
