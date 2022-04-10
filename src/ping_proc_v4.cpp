@@ -1,4 +1,23 @@
 #include    "ping0.h"
+#include    "ping_data.h"
+#include <climits>
+
+
+
+template <typename T>
+ T swap_endian(T u) {
+ static_assert (CHAR_BIT == 8, "CHAR_BIT != 8");
+            union {
+                       T u;
+                          unsigned char u8[sizeof(T)];
+                         } source, dest;
+              
+                      source.u = u;
+                    for (size_t k = 0; k < sizeof(T); k++)
+                                 dest.u8[k] = source.u8[sizeof(T) - k - 1];
+                    
+                                return dest.u;
+                        }
 
 void proc_v4(char *ptr, ssize_t len, struct msghdr *msg, struct timeval *tvrecv) {
     int hlen1, icmplen;
@@ -18,7 +37,9 @@ void proc_v4(char *ptr, ssize_t len, struct msghdr *msg, struct timeval *tvrecv)
             return;         /* not a response to our ECHO_REQUEST */
         if (icmplen < 16)
             return;         /* not enough data to use */
-        tvsend = (struct timeval *) icmp->icmp_data;
+        //tvsend = (struct timeval *) icmp->icmp_data;
+        icmp_payload *icmp_d = (icmp_payload *) icmp->icmp_data;
+        tvsend = (struct timeval *) &(icmp_d->tv);
         tv_sub(tvrecv, tvsend);
         rtt = tvrecv->tv_sec * 1000.0 + tvrecv->tv_usec / 1000.0;
 
@@ -30,9 +51,14 @@ void proc_v4(char *ptr, ssize_t len, struct msghdr *msg, struct timeval *tvrecv)
         inet_ntop(AF_INET, &(src), str_src,  INET_ADDRSTRLEN);
         inet_ntop(AF_INET, &(dst), str_dst,  INET_ADDRSTRLEN);
 
+        uint32_t peer_id = swap_endian<uint32_t>(icmp_d->peer_id);
+        uint64_t probe_id = swap_endian<uint64_t>(icmp_d->probe_id);
+        uint64_t thread_id = swap_endian<uint64_t>(icmp_d->thread_id);
+        uint64_t timestamp = swap_endian<uint64_t>(icmp_d->timestamp);
+
 
         //printf("%d bytes from %s: seq=%u, ttl=%d, rtt=%.3f ms\n", icmplen, Sock_ntop_host(pr->sarecv, pr->salen), icmp->icmp_seq, ip->ip_ttl, rtt);
-        printf("%d bytes from %s: to: %s seq=%u, ttl=%d, rtt=%.3f ms\n", icmplen, str_src, str_dst, icmp->icmp_seq, ip->ip_ttl, rtt);
+        printf("%d bytes from %s: to: %s seq=%u, ttl=%d, rtt=%.3f ms peer_id=%u, probe_id=%lu, thread_id=%lu, timestamp=%lu\n", icmplen, str_src, str_dst, icmp->icmp_seq, ip->ip_ttl, rtt, peer_id, probe_id, thread_id, timestamp);
     } else if (verbose) {
         printf("  %d bytes from %s: type = %d, code = %d\n", icmplen, Sock_ntop_host(pr->sarecv, pr->salen), icmp->icmp_type, icmp->icmp_code);
         ;

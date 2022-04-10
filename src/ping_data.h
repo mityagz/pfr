@@ -1,8 +1,11 @@
 #include <cstdint>
+#include <sys/time.h>
 
 /*
 0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                           timeval tv                          |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                           peer_id                             |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -21,7 +24,8 @@
 */
 
 typedef struct __attribute__((__packed__)) {
- struct timeval *tv;
+ //struct timeval *tv;
+ struct timeval tv;
  uint32_t peer_id;
  uint64_t probe_id;
  uint64_t thread_id;

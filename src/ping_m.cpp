@@ -52,7 +52,8 @@ int mmain(int argc, char **argv) {
         pr->salen = ai->ai_addrlen;
         
         for(int j = 0; j < 4; j++) {
-            readloop();
+            //readloop();
+            ;
         }
     }
         exit(0);

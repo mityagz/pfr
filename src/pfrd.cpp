@@ -38,7 +38,9 @@ int main() {
     int t_ct = pp.size();
     int m_ct = 10000;
     pthread_t thrds[t_ct];
+    pthread_t thrdrd;
     pthread_mutex_t mtxs[m_ct];
+    bool fthread = 0;
 
     //pfr_dst_list pfrList(10);
 
@@ -58,18 +60,26 @@ int main() {
             ct_data++;
         }
 
-        for(int i = 0; i < 2; i++) {
-        //for(int i = 0; i < ct_data; i++) {
+        //for(int i = 0; i < 2; i++) {
+        for(int i = 0; i < ct_data; i++) {
             pthread_create(&thrds[i], NULL, send_req, &itdata[i]);
+        }
+
+        if(!fthread) {
+            pthread_create(&thrdrd, NULL, readloop, NULL);
+            fthread = true;
         }
 
         probe_id++;
 
-        for(int j = 0; j < 2; j++) {
-        //for(int j = 0; j < ct_data; j++) {
+        //for(int j = 0; j < 2; j++) {
+        for(int j = 0; j < ct_data; j++) {
             pthread_join(thrds[j], NULL);
         }
+        
+        //pthread_join(thrdrd, NULL);
+
         testdata();
-        sleep(60);
+        sleep(600);
     }
 }

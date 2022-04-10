@@ -140,8 +140,10 @@ void send_v4(idata *pin, pthread_t pt) {
             icmp_payload *icmp_d = (icmp_payload *)malloc(sizeof(icmp_payload));
             struct timeval  *stv = (struct timeval *)malloc(sizeof(struct timeval));
             //Gettimeofday((struct timeval *) icmp_d->tv, NULL);
-            Gettimeofday((struct timeval *) stv, NULL);
-            icmp_d->tv = stv;
+            //Gettimeofday((struct timeval *) stv, NULL);
+            Gettimeofday((struct timeval *) &(icmp_d->tv), NULL);
+            //icmp_d->tv = *stv;
+
             icmp_d->peer_id = swap_endian<uint32_t>(in->peer_id);
             icmp_d->probe_id = swap_endian<uint32_t>(in->probe_id);
             icmp_d->thread_id = swap_endian<uint64_t>(thId);
