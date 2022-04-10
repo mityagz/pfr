@@ -145,7 +145,7 @@ void send_v4(idata *pin, pthread_t pt) {
             //icmp_d->tv = *stv;
 
             icmp_d->peer_id = swap_endian<uint32_t>(in->peer_id);
-            icmp_d->probe_id = swap_endian<uint32_t>(in->probe_id);
+            icmp_d->probe_id = swap_endian<uint64_t>(in->probe_id);
             icmp_d->thread_id = swap_endian<uint64_t>(thId);
             icmp_d->timestamp = swap_endian<uint64_t>((unsigned long)time(NULL));
 
