@@ -6,6 +6,7 @@
 #include "pfr_dst.h"
 #include "pfr_dst_list.h"
 #include "pfr_peers.h"
+#include "pfr_rdata.h"
 #include "ping0.h"
 
 using namespace std;
@@ -25,9 +26,10 @@ void *send_req(void *pin) {
  send_v4(in, thId);
 }
 
-void testdata();
+void print_rdata();
 
 pfr_dst_list pfrList(10);
+std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>> r;
 
 int main() {
     //main loop 
@@ -79,7 +81,7 @@ int main() {
         
         //pthread_join(thrdrd, NULL);
 
-        testdata();
+        print_rdata();
         sleep(600);
     }
 }

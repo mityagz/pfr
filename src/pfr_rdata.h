@@ -2,8 +2,24 @@
 #include<map>
 #include<vector>
 
+class tparm {
+  int avg_rtt;
+  int lost;
+  int rtt;
+  int timestamp;
+ public:
+  tparm(int rtt, int lost, int timestamp) {
+  this->rtt = rtt;
+  this->lost = lost;
+  this->timestamp;
+  }
+  void print();
+  int get_rtt();
+};
+
 class pfr_rdata {
 //r->{dst_ip}->{peer_id}->{probe_id, thread_id, timestamp, {seq_num}{rtt(curr_timestamp-timestamp)}, avg_rtt, lost(send_pkt-recv_pkt for given probe_id)}
+
 
  class tparm;
  class seq;

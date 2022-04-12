@@ -16,7 +16,7 @@ extern pfr_dst_list pfrList;
 std::map<int, pfr_peer> m;
 pfr_peers pp(m);
 
-
+/*
 class tparm {
  int rtt;
  int avg_rtt;
@@ -30,26 +30,26 @@ class tparm {
     this->timestamp;
   };
 };
+*/
+
+int tparm::get_rtt() { return rtt; }
 
 //       |dsp_ip               |peer_id      |probe_id     |seq_num
-std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>> r;
+extern std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>> r;
 
-void testdata() {
-    tparm *tp = new tparm(0, 1, 2);
-    r["1.1.1.1"][2][0][0] = tp;
-    r["1.1.1.1"][2][1][0] = tp;
-    
-    tp = new tparm(0, 5, 5);
-    r["8.8.8.8"][7][0][0] = tp;
-
+void print_rdata() {
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); ++it0) {
-     std::cout << it0->first << std::endl;
+     std::cout << "dst_ip: " << it0->first << std::endl;
      for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[it0->first].begin(); it1 != r[it0->first].end(); ++it1) {
-      std::cout << it1->first << std::endl;
+      std::cout << "peer_id: " << it1->first << " ";
        for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[it0->first][it1->first].begin(); it2 != r[it0->first][it1->first].end(); ++it2) {
-        std::cout << it2->first << std::endl;
+        std::cout << "probe_id: " << it2->first << " ";
+         for(std::map<int, tparm *>::iterator it3 = r[it0->first][it1->first][it2->first].begin(); it3 != r[it0->first][it1->first][it2->first].end(); ++it3) {
+            std::cout << "seq_num: " << it3->first << "->{ rtt: " << (it3->second)->get_rtt() << " } ";
+         } 
+            std::cout << std::endl;
        }
-     }
+     } 
     }
 }
 
