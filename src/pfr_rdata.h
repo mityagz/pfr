@@ -17,6 +17,8 @@ class tparm {
   int get_rtt();
 };
 
+void pfr_calc_avg_rtt(); // calculate average rtt && saves it to r...[seq == 99]
+
 class pfr_rdata {
 //r->{dst_ip}->{peer_id}->{probe_id, thread_id, timestamp, {seq_num}{rtt(curr_timestamp-timestamp)}, avg_rtt, lost(send_pkt-recv_pkt for given probe_id)}
 

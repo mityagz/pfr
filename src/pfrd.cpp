@@ -82,6 +82,7 @@ int main() {
         //pthread_join(thrdrd, NULL);
 
         print_rdata();
+        pfr_calc_avg_rtt();
         sleep(600);
     }
 }
