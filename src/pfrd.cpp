@@ -72,7 +72,6 @@ int main() {
             fthread = true;
         }
 
-        probe_id++;
 
         //for(int j = 0; j < 2; j++) {
         for(int j = 0; j < ct_data; j++) {
@@ -82,7 +81,10 @@ int main() {
         //pthread_join(thrdrd, NULL);
 
         print_rdata();
-        pfr_calc_avg_rtt();
+        pfr_calc_avg_rtt(probe_id);
+        pfr_print_avg_rtt(probe_id);
+
+        probe_id++;
         sleep(600);
     }
 }

@@ -63,7 +63,7 @@ void proc_v4(char *ptr, ssize_t len, struct msghdr *msg, struct timeval *tvrecv)
         //printf("%d bytes from %s: seq=%u, ttl=%d, rtt=%.3f ms\n", icmplen, Sock_ntop_host(pr->sarecv, pr->salen), icmp->icmp_seq, ip->ip_ttl, rtt);
         printf("%d bytes from %s: to: %s seq=%u, ttl=%d, rtt=%.3f ms peer_id=%u, probe_id=%lu, thread_id=%lu, timestamp=%lu\n", icmplen, str_src, str_dst, icmp->icmp_seq, ip->ip_ttl, rtt, peer_id, probe_id, thread_id, timestamp);
         
-        r[str_src][peer_id][probe_id][icmp->icmp_seq] = new tparm(rtt, 0, timestamp);
+        r[str_src][peer_id][probe_id][icmp->icmp_seq] = new tparm(rtt, 0, 0, timestamp);
 
     } else if (verbose) {
         printf("  %d bytes from %s: type = %d, code = %d\n", icmplen, Sock_ntop_host(pr->sarecv, pr->salen), icmp->icmp_type, icmp->icmp_code);

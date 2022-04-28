@@ -3,21 +3,24 @@
 #include<vector>
 
 class tparm {
-  int avg_rtt;
+  double avg_rtt;
   int lost;
-  int rtt;
+  double rtt;
   int timestamp;
  public:
-  tparm(int rtt, int lost, int timestamp) {
+  tparm(double rtt, double avg_rtt, int lost, int timestamp) {
   this->rtt = rtt;
+  this->avg_rtt = avg_rtt;;
   this->lost = lost;
-  this->timestamp;
+  this->timestamp = timestamp;
   }
   void print();
-  int get_rtt();
+  double get_rtt();
+  double get_avg_rtt();
 };
 
-void pfr_calc_avg_rtt(); // calculate average rtt && saves it to r...[seq == 99]
+void pfr_calc_avg_rtt(int probe_id); // calculate average rtt && saves it to r...[seq == 99]
+void pfr_print_avg_rtt(int probe_id); // print average rtt from [seq == 99]
 
 class pfr_rdata {
 //r->{dst_ip}->{peer_id}->{probe_id, thread_id, timestamp, {seq_num}{rtt(curr_timestamp-timestamp)}, avg_rtt, lost(send_pkt-recv_pkt for given probe_id)}
