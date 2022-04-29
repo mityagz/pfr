@@ -8,9 +8,9 @@
 
 extern pfr_dst_list pfrList;
 
-//r->{dst_ip}->{peer_id}->{probe_id, thread_id, timestamp, {seq_num}{rtt(curr_timestamp-timestamp)}, avg_rtt, lost(send_pkt-recv_pkt for given probe_id)}
-//r{dst_ip}{peer_id}->{probe (thread_id, timestamp)}{seq}{tparm}
-// std::map<std::string, peer> dst_ip; 
+//r->{dst_ip}->{probe_id}->{peer_id, thread_id, timestamp, {seq_num}{rtt(curr_timestamp-timestamp)}, avg_rtt, lost(send_pkt-recv_pkt for given probe_id)}
+//r{dst_ip}{probe_id}->{peer (thread_id, timestamp)}{seq}{tparm}
+// std::map<std::string, probe> dst_ip; 
 
 
 std::map<int, pfr_peer> m;
@@ -35,7 +35,7 @@ class tparm {
 double tparm::get_rtt() { return rtt; }
 double tparm::get_avg_rtt() { return avg_rtt; }
 
-//       |dsp_ip               |peer_id      |probe_id     |seq_num
+//       |dsp_ip               |probe_id      |peer_id     |seq_num
 extern std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>> r;
 
 void pfr_calc_avg_rtt(int probe_id) {
@@ -45,15 +45,16 @@ void pfr_calc_avg_rtt(int probe_id) {
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); ++it0) {
      //std::cout << "dst_ip: " << it0->first << std::endl;
      for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[it0->first].begin(); it1 != r[it0->first].end(); ++it1) {
-      //std::cout << "peer_id: " << it1->first << " ";
-       for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[it0->first][it1->first].begin(); it2 != r[it0->first][it1->first].end(); ++it2) {
-            //std::cout << "probe_id: " << it2->first << " ";
-         for(std::map<int, tparm *>::iterator it3 = r[it0->first][it1->first][probe_id].begin(); it3 != r[it0->first][it1->first][probe_id].end(); ++it3) {
+      //std::cout << "probe_id: " << it1->first << " ";
+       for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[it0->first][probe_id].begin(); it2 != r[it0->first][probe_id].end(); ++it2) {
+            //std::cout << "peer_id: " << it2->first << " ";
+         for(std::map<int, tparm *>::iterator it3 = r[it0->first][probe_id][it2->first].begin(); it3 != r[it0->first][probe_id][it2->first].end(); ++it3) {
             //std::cout << "seq_num: " << it3->first << "->{ rtt: " << (it3->second)->get_rtt() << " } ";
             curr_rtt += (it3->second)->get_rtt();
             cnt_rtt++;
          } 
-         r[it0->first][it1->first][probe_id][99] = new tparm(0, curr_rtt / cnt_rtt, 0, 0);
+         r[it0->first][probe_id][it2->first][99] = new tparm(0, curr_rtt / cnt_rtt, 0, 0);
+         //r[it0->first][it1->first][probe_id][99] = new tparm(0, curr_rtt / cnt_rtt, 0, 0);
          //r[it0->first][it1->first][it2->first][99] = new tparm(0, curr_rtt / cnt_rtt, 0, 0);
          //std::cout << "curr_rtt: " << curr_rtt << " cnt_rtt: " << cnt_rtt << " curr_rtt / cnt_rtt: " << curr_rtt / cnt_rtt << std::endl;
          curr_rtt = 0;
@@ -67,10 +68,10 @@ void pfr_print_avg_rtt(int probe_id) {
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); ++it0) {
      //std::cout << "dst_ip: " << it0->first << std::endl;
      for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[it0->first].begin(); it1 != r[it0->first].end(); ++it1) {
-      //std::cout << "peer_id: " << it1->first << " ";
+      //std::cout << "probe_id: " << it1->first << " ";
        for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[it0->first][it1->first].begin(); it2 != r[it0->first][it1->first].end(); ++it2) {
-            //std::cout << "probe_id: " << it2->first << " ";
-           std::cout << "dst_ip: " << it0->first << " :peer_id " << it1->first << " :probe_id: " << it2->first << ": avg_rtt: " << r[it0->first][it1->first][it2->first][99]->get_avg_rtt() << std::endl;
+            //std::cout << "peer_id: " << it2->first << " ";
+           std::cout << "dst_ip: " << it0->first << " :probe_id " << it1->first << " :peer_id: " << it2->first << ": avg_rtt: " << r[it0->first][it1->first][it2->first][99]->get_avg_rtt() << std::endl;
        }
      } 
     }
@@ -81,12 +82,12 @@ void print_rdata() {
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); ++it0) {
      std::cout << "dst_ip: " << it0->first << std::endl;
      for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[it0->first].begin(); it1 != r[it0->first].end(); ++it1) {
-      std::cout << "peer_id: " << it1->first << " ";
+      std::cout << "probe_id: " << it1->first << " " << std::endl;
        for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[it0->first][it1->first].begin(); it2 != r[it0->first][it1->first].end(); ++it2) {
-        if(it2->first == 0)
-            std::cout << "probe_id: " << it2->first << " ";
-        else
-            std::cout << "           probe_id: " << it2->first << " ";
+        //if(it2->first == 0)
+            std::cout << "peer_id: " << it2->first << " ";
+        //else
+            //std::cout << "           peer_id: " << it2->first << " ";
          for(std::map<int, tparm *>::iterator it3 = r[it0->first][it1->first][it2->first].begin(); it3 != r[it0->first][it1->first][it2->first].end(); ++it3) {
             std::cout << "seq_num: " << it3->first << "->{ rtt: " << (it3->second)->get_rtt() << " } ";
          } 

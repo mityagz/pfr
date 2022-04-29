@@ -37,7 +37,8 @@ void     proc_v6(char *, ssize_t, struct msghdr *, struct timeval *);
 void     send_v4(idata *, pthread_t);
 //void     send_v4(void);
 void     send_v6(void);
-void     readloop(void);
+//void     readloop(void);
+void   *   readloop(void *);
 void     sig_alrm(int);
 void     tv_sub(struct timeval *, struct timeval *);
 
