@@ -57,7 +57,7 @@ void pfr_route_print(int probe_id) {
     for(std::map<std::string, std::map<int, rt_parm *>>::iterator it0 = route.begin(); it0 != route.end(); ++it0) {
      for(std::map<int, rt_parm *>::iterator it1 = route[it0->first].begin(); it1 != route[it0->first].end(); ++it1) {
         probe_id = it1->first;
-        std::cout << "ROUTE_PRINT: dst_ip: " << it0->first << " : probe_id: " << probe_id << " :peer_id: " << route[it0->first][probe_id]->get_curr_peer() << " : cmin_rtt : " << route[it0->first][probe_id]->get_cmin_rtt() << std::endl;
+        std::cout << "ROUTE_PRINT: dst_ip: " << it0->first << " : probe_id: " << probe_id << " :prev_peer: " << route[it0->first][probe_id]->get_prev_peer() << " :prev_min: " << route[it0->first][probe_id]->get_pmin_rtt() << " :peer_id: " << route[it0->first][probe_id]->get_curr_peer() << " : cmin_rtt : " << route[it0->first][probe_id]->get_cmin_rtt() << std::endl;
      } 
     }
 }
@@ -87,13 +87,17 @@ void pfr_route_scan(int probe_id) {
             }
        }
        if(probe_id == 0) {
-         std::cout << "ROUTE0:  probe_id: " << probe_id << " dst_ip: " << it0->first << " : peer_id: " << peer_id << " : curr_peer : " << route[it0->first][probe_id]->get_curr_peer() << " : cmin_rtt : " << route[it0->first][probe_id]->get_cmin_rtt() << std::endl;
+         //std::cout << "ROUTE0:  probe_id: " << probe_id << " dst_ip: " << it0->first << " : peer_id: " << peer_id << " : curr_peer : " << route[it0->first][probe_id]->get_curr_peer() << " : cmin_rtt : " << route[it0->first][probe_id]->get_cmin_rtt() << std::endl;
        } else if(probe_id > 0) {
-         std::cout << "ROUTE01: probe_id: " << probe_id << " dst_ip: " << it0->first << " : peer_id: " << peer_id << std::endl;
-         std::cout << "ROUTE1:  probe_id: " << probe_id << " dst_ip: " << it0->first << " : peer_id: " << peer_id << " : curr_peer: " << route[it0->first][probe_id - 1]->get_curr_peer() << " : cmin_rtt : " << route[it0->first][probe_id - 1]->get_cmin_rtt() << std::endl;
-        //route[it0->first][probe_id] = \
-            new rt_parm(route[it0->first][probe_id - 1]->get_curr_peer(), route[it0->first][probe_id - 1]->get_cmin_rtt(), peer_id, min_rtt);
-         
+         //std::cout << "ROUTE01:  probe_id: " << probe_id << " dst_ip: " << it0->first << " : peer_id: " << peer_id << std::endl;
+         //std::cout << "ROUTE1:  probe_id: " << probe_id << " dst_ip: " << it0->first << " : peer_id: " << peer_id << " : curr_peer: " << route[it0->first][probe_id - 1]->get_curr_peer() << " : cmin_rtt : " << route[it0->first][probe_id - 1]->get_cmin_rtt() << std::endl;
+         if(route.count(it0->first) == 1 && route[it0->first].count(probe_id - 1) == 1) {
+            route[it0->first][probe_id] = \
+                new rt_parm(route[it0->first][probe_id - 1]->get_curr_peer(), route[it0->first][probe_id - 1]->get_cmin_rtt(), peer_id, min_rtt);
+         } else {
+            route[it0->first][probe_id] = \
+                new rt_parm(peer_id, min_rtt, peer_id, min_rtt);
+         }
        }
     }
 }

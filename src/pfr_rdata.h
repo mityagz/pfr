@@ -36,7 +36,7 @@ class rt_parm {
 };
 
 void pfr_route_scan(int probe_id); // finds min average rtt from [seq == 99]
-void pfr_route_pront(int probe_id); // print min average rtt from [seq == 99]
+void pfr_route_print(int probe_id); // print min average rtt from [seq == 99]
 
 class pfr_rdata {
 //r->{dst_ip}->{probe_id}->{peer_id, thread_id, timestamp, {seq_num}{rtt(curr_timestamp-timestamp)}, avg_rtt, lost(send_pkt-recv_pkt for given probe_id)}
