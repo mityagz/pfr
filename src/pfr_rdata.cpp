@@ -99,6 +99,9 @@ void pfr_route_scan(int probe_id) {
                 new rt_parm(peer_id, min_rtt, peer_id, min_rtt);
          }
        }
+       min_rtt = 50000; 
+       curr_rtt = 0; 
+       peer_id = 0; 
     }
 }
 
