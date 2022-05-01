@@ -30,6 +30,7 @@ void print_rdata();
 
 pfr_dst_list pfrList(10);
 std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>> r;
+std::map<std::string, std::map<int, rt_parm *>> route;
 
 int main() {
     //main loop 
@@ -83,6 +84,8 @@ int main() {
         print_rdata();
         pfr_calc_avg_rtt(probe_id);
         pfr_print_avg_rtt(probe_id);
+        pfr_route_scan(probe_id);
+        pfr_route_print(probe_id);
 
         probe_id++;
         sleep(600);

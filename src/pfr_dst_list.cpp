@@ -41,7 +41,8 @@ pfr_sql_list pfr_dst_list::get_pfr_dst_sql() {
 #endif
     } 
 
-    res = PQexec(conn, "select  id, ipv4_dst_address, ipv6_dst_address, description from pfr_dst limit 5");
+    res = PQexec(conn, "select  id, ipv4_dst_address, ipv6_dst_address, description from pfr_dst");
+    //res = PQexec(conn, "select  id, ipv4_dst_address, ipv6_dst_address, description from pfr_dst limit 5");
     int ncols = PQnfields(res);
     /*
     printf("There are %d columns:", ncols);
