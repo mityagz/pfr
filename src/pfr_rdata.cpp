@@ -53,6 +53,25 @@ extern std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>
 //              |dst_ip               |probe_id
 extern std::map<std::string, std::map<int, rt_parm *>> route;
 
+void pfr_route_free(int probe_id) {
+    for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); ++it0) {
+     std::cout << "dst_ip: " << it0->first << std::endl;
+     for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[it0->first].begin(); it1 != r[it0->first].end(); ++it1) {
+      std::cout << "probe_id: " << it1->first << " " << std::endl;
+       for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[it0->first][it1->first].begin(); it2 != r[it0->first][it1->first].end(); ++it2) {
+        //if(it2->first == 0)
+            std::cout << "peer_id: " << it2->first << " ";
+        //else
+            //std::cout << "           peer_id: " << it2->first << " ";
+         for(std::map<int, tparm *>::iterator it3 = r[it0->first][it1->first][it2->first].begin(); it3 != r[it0->first][it1->first][it2->first].end(); ++it3) {
+            std::cout << "seq_num: " << it3->first << "->{ rtt: " << (it3->second)->get_rtt() << " } ";
+         } 
+            std::cout << std::endl;
+       }
+     } 
+    }
+}
+
 void pfr_route_print(int probe_id) {
     for(std::map<std::string, std::map<int, rt_parm *>>::iterator it0 = route.begin(); it0 != route.end(); ++it0) {
      for(std::map<int, rt_parm *>::iterator it1 = route[it0->first].begin(); it1 != route[it0->first].end(); ++it1) {
