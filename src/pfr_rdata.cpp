@@ -54,19 +54,23 @@ extern std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>
 extern std::map<std::string, std::map<int, rt_parm *>> route;
 
 void pfr_route_free(int probe_id) {
+    if(probe_id < 2) return;
+    probe_id -= 2;
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); ++it0) {
      std::string dst_ip = it0->first;
-     for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[dst_ip].begin(); it1 != r[dst_ip].end(); ++it1) {
-      int probe_id = it1->first;
        for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end(); ++it2) {
         int peer_id = it2->first;
          for(std::map<int, tparm *>::iterator it3 = r[dst_ip][probe_id][peer_id].begin(); it3 != r[dst_ip][probe_id][peer_id].end(); ++it3) {
-            std::cout << "seq_num: " << it3->first << "->{ rtt: " << (it3->second)->get_rtt() << " } ";
+            int seq_id = it3->first;
+            delete r[dst_ip][probe_id][peer_id][seq_id];
+            r[dst_ip][probe_id][peer_id].erase(seq_id);
          } 
-            std::cout << std::endl;
+         r[dst_ip][probe_id].erase(peer_id);
        }
-     } 
+       delete route[dst_ip][probe_id];
+       route[dst_ip].erase(probe_id);
     }
+    std::cout << "ROUTE_FREE: probe_id: " << probe_id << std::endl;
 }
 
 void pfr_route_print(int probe_id) {

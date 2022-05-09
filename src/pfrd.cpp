@@ -86,7 +86,7 @@ int main() {
         pfr_print_avg_rtt(probe_id);
         pfr_route_scan(probe_id);
         pfr_route_print(probe_id);
-        //pfr_route_free(probe_id);
+        pfr_route_free(probe_id);
 
         probe_id++;
         sleep(600);
