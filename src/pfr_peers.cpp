@@ -122,6 +122,7 @@ pfr_peers::pfr_peers(std::map<int, pfr_peer> &m) {
             //                              laddress, ipv4_peer_address, lipv4_peer_address, ipv6_peer_address, lipv6_peer_address, \
             //                              type, sp_name, pfr_dst_id)));
         }
+        PQclear(res);
         PQfinish(conn);
 
         for(std::map<int, pfr_peer>::iterator it = pfr_peers::pfr_peers_v.begin(); it != pfr_peers::pfr_peers_v.end(); ++it) {

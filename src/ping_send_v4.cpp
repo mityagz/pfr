@@ -121,7 +121,7 @@ void send_v4(idata *pin, pthread_t pt) {
         h = Sock_ntop_host(ai->ai_addr, ai->ai_addrlen);
 
         pr->sasend = ai->ai_addr;
-        pr->sarecv = (sockaddr*)Calloc(1, ai->ai_addrlen);
+        //pr->sarecv = (sockaddr*)Calloc(1, ai->ai_addrlen);
         pr->salen = ai->ai_addrlen;
 
 
@@ -191,6 +191,9 @@ void send_v4(idata *pin, pthread_t pt) {
       } 
       it++;
       usleep(20000);
+      //free(h);
+      free(ai);
+      //free(pr->sarecv);
     }
     close(sockwr);
     /*

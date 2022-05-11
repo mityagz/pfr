@@ -65,6 +65,7 @@ pfr_sql_list pfr_dst_list::get_pfr_dst_sql() {
         psl.pfr_sql_list_add(pfr_sql(id, ipv4_dst_address, ipv6_dst_address, description));
         //std::cout << id << ':' << ipv4_dst_address << ':' << ipv6_dst_address << ':' <<  description << '\n';
     }
+    PQclear(res);
     PQfinish(conn);
     return(psl);
 }
