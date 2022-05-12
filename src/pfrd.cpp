@@ -89,6 +89,7 @@ int main() {
         pfr_route_free(probe_id);
 
         probe_id++;
+        //exit(0);
         sleep(600);
     }
 }

@@ -64,8 +64,16 @@ void send_v4(idata *pin, pthread_t pt) {
     char *host0 = "10.229.4.0";
     opterr = 0;     // don't want getopt() writing to stderr
 
-    ai = Host_serv(host0, NULL, 0, 0);
-    h = Sock_ntop_host(ai->ai_addr, ai->ai_addrlen);
+    //ai = Host_serv(host0, NULL, 0, 0);
+    //h = Sock_ntop_host(ai->ai_addr, ai->ai_addrlen);
+    //
+    //struct addrinfo hints, *ai;
+    struct addrinfo hints;
+    bzero(&hints, sizeof(struct addrinfo));
+    hints.ai_flags = AI_CANONNAME;  /* always return canonical name */
+    hints.ai_family = 0;       /* 0, AF_INET, AF_INET6, etc. */
+    hints.ai_socktype = 0;   /* 0, SOCK_STREAM, SOCK_DGRAM, etc. */
+    getaddrinfo(host0, NULL, &hints, &ai);
 
     if (ai->ai_family == AF_INET) {
                     pr = &proto_v4;
@@ -78,11 +86,10 @@ void send_v4(idata *pin, pthread_t pt) {
     } else
                 err_quit("unknown address family %d", ai->ai_family);
     pr->sasend = ai->ai_addr;
-    pr->sarecv = (sockaddr*)Calloc(1, ai->ai_addrlen);
+    //pr->sarecv = (sockaddr*)Calloc(1, ai->ai_addrlen);
     pr->salen = ai->ai_addrlen;
 
     sockwr = Socket(pr->sasend->sa_family, SOCK_RAW, pr->icmpproto);
-    ///std::cout << "TRAP0" << std::endl;
 
     setuid(getuid());               // don't need special permissions any more
     if (pr->finit)
@@ -93,6 +100,8 @@ void send_v4(idata *pin, pthread_t pt) {
 
     idata *in = (idata*)pin;
     auto k = in->mm.find(in->peer_id);
+    
+    freeaddrinfo(ai);
 
     /*
     pthread_mutex_lock(&in->mtx[0]);
@@ -117,8 +126,9 @@ void send_v4(idata *pin, pthread_t pt) {
         int hid = (*it).get_id();
         std::string hip = (*it).get_ipv4();
 
-        ai = Host_serv(((*it).get_ipv4()).std::string::c_str(), NULL, 0, 0);
-        h = Sock_ntop_host(ai->ai_addr, ai->ai_addrlen);
+        //ai = Host_serv(((*it).get_ipv4()).std::string::c_str(), NULL, 0, 0);
+        //h = Sock_ntop_host(ai->ai_addr, ai->ai_addrlen);
+        getaddrinfo(((*it).get_ipv4()).std::string::c_str(), NULL, &hints, &ai);
 
         pr->sasend = ai->ai_addr;
         //pr->sarecv = (sockaddr*)Calloc(1, ai->ai_addrlen);
@@ -191,9 +201,7 @@ void send_v4(idata *pin, pthread_t pt) {
       } 
       it++;
       usleep(20000);
-      //free(h);
-      free(ai);
-      //free(pr->sarecv);
+      freeaddrinfo(ai);
     }
     close(sockwr);
     /*
