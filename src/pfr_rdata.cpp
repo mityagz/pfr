@@ -37,7 +37,9 @@ extern int scan_new_cnt;
 extern int del_scan_new_cnt;
 extern int del_proc_v4_new_cnt;
 
-pthread_mutex_t mtr;
+extern int printr_new_cnt;
+
+extern pthread_mutex_t mtr;
 
 double tparm::get_rtt() { return rtt; }
 double tparm::get_avg_rtt() { return avg_rtt; }
@@ -61,17 +63,21 @@ extern std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>
 extern std::map<std::string, std::map<int, rt_parm *>> route;
 
 void pfr_route_free(int probe_id) {
-    ///if(probe_id < 2) return;
-    ///probe_id -= 2;
+    if(probe_id < 2) return;
+    probe_id -= 2;
     pthread_mutex_lock(&mtr); 
+    std::string dst_ip;
+    //int probe_id;
+    int peer_id;
+    int seq_id;
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); it0++) {
-     std::string dst_ip = it0->first;
-     for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[dst_ip].begin(); it1 != r[dst_ip].end(); it1++) {
-      int probe_id = it1->first;
+     dst_ip = it0->first;
+     //for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[dst_ip].begin(); it1 != r[dst_ip].end(); it1++) {
+      //probe_id = it1->first;
        for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end(); it2++) {
-        int peer_id = it2->first;
+        peer_id = it2->first;
          for(std::map<int, tparm *>::iterator it3 = r[dst_ip][probe_id][peer_id].begin(); it3 != r[dst_ip][probe_id][peer_id].end(); it3++) {
-            int seq_id = it3->first;
+            seq_id = it3->first;
             delete r[dst_ip][probe_id][peer_id][seq_id];
             r[dst_ip][probe_id][peer_id].erase(seq_id);
             std::cout << "ROUTE_FREE delete r[" << dst_ip << "][" << probe_id << "][" << peer_id << "][" << seq_id << "]" << std::endl;
@@ -83,9 +89,9 @@ void pfr_route_free(int probe_id) {
        route[dst_ip].erase(probe_id);
        std::cout << "ROUTE_FREE delete route[" << dst_ip << "][" << probe_id << "]" << std::endl;
        del_scan_new_cnt++;
-     } //
+     //} //
     }
-    std::cout << "ROUTE_FREE: probe_id: " << probe_id << std::endl;
+    //std::cout << "ROUTE_FREE: probe_id: " << probe_id << std::endl;
     pthread_mutex_unlock(&mtr); 
 }
 
@@ -102,7 +108,7 @@ void pfr_route_scan(int probe_id) {
     double min_rtt = 50000; 
     double curr_rtt = 0; 
     int peer_id = 0; 
-    pthread_mutex_lock(&mtr); 
+    //pthread_mutex_lock(&mtr); 
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); it0++) {
         std::string dst_ip = it0->first;
        for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end(); it2++) {
@@ -139,14 +145,14 @@ void pfr_route_scan(int probe_id) {
        curr_rtt = 0; 
        peer_id = 0; 
     }
-    pthread_mutex_unlock(&mtr); 
+    //pthread_mutex_unlock(&mtr); 
 }
 
 void pfr_calc_avg_rtt(int probe_id) {
     double avg_rtt = 0;
     double curr_rtt = 0;
     int cnt_rtt = 0;
-    pthread_mutex_lock(&mtr); 
+    //pthread_mutex_lock(&mtr); 
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); it0++) {
      //std::cout << "dst_ip: " << it0->first << std::endl;
      for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[it0->first].begin(); it1 != r[it0->first].end(); it1++) {
@@ -165,7 +171,7 @@ void pfr_calc_avg_rtt(int probe_id) {
        }
      } 
     }
-    pthread_mutex_unlock(&mtr); 
+    //pthread_mutex_unlock(&mtr); 
 }
 
 void pfr_print_avg_rtt(int probe_id) {
@@ -194,6 +200,7 @@ void print_rdata() {
             //std::cout << "           peer_id: " << it2->first << " ";
          for(std::map<int, tparm *>::iterator it3 = r[it0->first][it1->first][it2->first].begin(); it3 != r[it0->first][it1->first][it2->first].end(); it3++) {
             std::cout << "seq_num: " << it3->first << "->{ rtt: " << (it3->second)->get_rtt() << " } ";
+            printr_new_cnt++;
          } 
             std::cout << std::endl;
        }

@@ -1,5 +1,10 @@
 #include	"ping0.h"
 
+extern pthread_mutex_t mtr;
+extern int send_stopped;
+extern int req_stopped;
+
+
 void * readloop(void  *ina) {
 //void readloop(void) {
 	int				size;
@@ -38,7 +43,10 @@ void * readloop(void  *ina) {
 		}
 
 		Gettimeofday(&tval, NULL);
+        pthread_mutex_lock(&mtr);
 		(*pr->fproc)(recvbuf, n, &msg, &tval);
+        pthread_mutex_unlock(&mtr);
+        if(req_stopped == 1) send_stopped = 1;
     /*
       */
 	}
