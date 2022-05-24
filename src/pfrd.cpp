@@ -93,7 +93,7 @@ int main() {
         }
         
         req_stopped = 1;
-        sleep(60);
+        sleep(6);
         
         //pthread_join(thrdrd, NULL);
         
@@ -114,13 +114,14 @@ int main() {
          std::cout << "del_avg_rtt_new_cnt: " << del_avg_rtt_new_cnt << std::endl;
          std::cout << "del_scan_new_cnt: " << del_scan_new_cnt << std::endl;
          std::cout << "printr_new_cnt: " << printr_new_cnt << std::endl;
+         std::cout << "probe_id: " << probe_id << std::endl;
         }
 
         //pthread_mutex_unlock(&mtr);
-        //if(probe_id > 3) {
-         //exit(0);
+        //if(probe_id > 5) {
+        // exit(0);
         //}
         probe_id++;
-        sleep(600);
+        sleep(300);
     }
 }
