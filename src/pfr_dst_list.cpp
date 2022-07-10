@@ -2,6 +2,9 @@
 #include <string>
 #include <iostream>
 #include <libpq-fe.h>
+#include <semaphore.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 #include "pfr_dst_list.h"
 #include "pfr_dst.h"
 #include "pfr_sql.h"
@@ -15,6 +18,59 @@ pfr_dst_list::pfr_dst_list(int nlist) {
         for(int i = 0; i < pslq.size(); i++) {
             pfrDstList.push_back(pfr_dst(pslq[i].pfr_sql_get_id(), pslq[i].pfr_sql_get_ipv4(), pslq[i].pfr_sql_get_ipv6(), pslq[i].pfr_sql_get_descr()));
         }
+}
+
+pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
+        const char *key_sem0 = "/key_sem0";
+        sem_t *sem0;
+
+        const char *shm_key_p0 = "/tmp/key0_shm0";
+        key_t shm_key0;
+        int shm_id = 0;
+        void *shm_addr;
+        char *ret_shm_addr;
+
+        shm_key0 = ftok(shm_key_p0, 1);
+        if(shm_key0 == -1) {
+            perror("ftok error");
+            exit(1);
+        }
+
+        sem0 = sem_open(key_sem0, 0, 0);
+
+        if(sem_wait(sem0) == 0) {
+            std::cout << "SEM0: Locked!" << std::endl;
+        }
+
+        shm_id = shmget(shm_key0, 0, 0);
+        if(shm_id == -1) {
+           perror("Shared memory 0");
+           exit(1);
+        }
+
+        shm_addr = shmat(shm_id, NULL, 0);
+        if(shm_addr == (void *) -1) {
+           perror("Shared memory attach");
+           exit(1);
+        }
+                                 
+        std::cout << "shm_addr: " << shm_addr << std::endl;
+        //ret_shm_addr = (char *)std::memcpy(shm_addr, (void *) dst_ip_str, dst_ip_str_len);
+        ret_shm_addr = (char *)shm_addr;
+        std::cout << "ret_shm_addr: " << ret_shm_addr << std::endl;
+        std::cout << "-----------------------------------------------: " << std::endl;
+
+
+        shmdt(shm_addr);
+        if(sem_post(sem0) == 0) {
+           std::cout << "SEM0: UnLocked!" << std::endl;
+        }
+
+        /*
+        for(int i = 0; i < pslq.size(); i++) {
+            pfrDstList.push_back(pfr_dst(pslq[i].pfr_sql_get_id(), pslq[i].pfr_sql_get_ipv4(), pslq[i].pfr_sql_get_ipv6(), pslq[i].pfr_sql_get_descr()));
+        }
+        */
 }
 
 pfr_sql_list pfr_dst_list::get_pfr_dst_sql() {

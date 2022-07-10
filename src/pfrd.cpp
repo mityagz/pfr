@@ -28,7 +28,9 @@ void *send_req(void *pin) {
 
 void print_rdata();
 
-pfr_dst_list pfrList(10);
+//pfr_dst_list pfrList(10);
+pfr_dst_list pfrList(10, 10);
+
 std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>> r;
 std::map<std::string, std::map<int, rt_parm *>> route;
 
@@ -60,6 +62,8 @@ int main() {
     pthread_mutex_t mtxs[m_ct];
 
     //pfr_dst_list pfrList(10);
+
+    exit(0);
 
     for(;;) {
 
@@ -122,6 +126,6 @@ int main() {
         // exit(0);
         //}
         probe_id++;
-        sleep(300);
+        sleep(600);
     }
 }
