@@ -1,14 +1,19 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <sstream>
+#include <cstring>
 #include <libpq-fe.h>
 #include <semaphore.h>
+#include <iomanip>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include "pfr_dst_list.h"
 #include "pfr_dst.h"
 #include "pfr_sql.h"
 #include "pfr_sql_list.h"
+
+pfr_dst_list::pfr_dst_list() {}
 
 pfr_dst_list::pfr_dst_list(int nlist) {
         //this->nlist = nlist;
@@ -29,6 +34,7 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
         int shm_id = 0;
         void *shm_addr;
         char *ret_shm_addr;
+        const char* delimiters = ":";
 
         shm_key0 = ftok(shm_key_p0, 1);
         if(shm_key0 == -1) {
@@ -39,7 +45,7 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
         sem0 = sem_open(key_sem0, 0, 0);
 
         if(sem_wait(sem0) == 0) {
-            std::cout << "SEM0: Locked!" << std::endl;
+            //std::cout << "SEM0: Locked!" << std::endl;
         }
 
         shm_id = shmget(shm_key0, 0, 0);
@@ -54,23 +60,32 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
            exit(1);
         }
                                  
+        /*
         std::cout << "shm_addr: " << shm_addr << std::endl;
-        //ret_shm_addr = (char *)std::memcpy(shm_addr, (void *) dst_ip_str, dst_ip_str_len);
         ret_shm_addr = (char *)shm_addr;
         std::cout << "ret_shm_addr: " << ret_shm_addr << std::endl;
         std::cout << "-----------------------------------------------: " << std::endl;
+        */
+        ret_shm_addr = (char *)shm_addr;
 
+        int dst_id = 0;
+        char *token = std::strtok(ret_shm_addr, delimiters);
+        while (token) {
+            //std::cout << dst_id << ":" << token << std::endl;
+            token = std::strtok(nullptr, delimiters);
+            if(token != NULL) {
+             pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));
+             dst_id++;
+             //if(dst_id > 1000)
+               //  break;
+            }
+        }
 
         shmdt(shm_addr);
         if(sem_post(sem0) == 0) {
-           std::cout << "SEM0: UnLocked!" << std::endl;
+           //std::cout << "SEM0: UnLocked!" << std::endl;
         }
 
-        /*
-        for(int i = 0; i < pslq.size(); i++) {
-            pfrDstList.push_back(pfr_dst(pslq[i].pfr_sql_get_id(), pslq[i].pfr_sql_get_ipv4(), pslq[i].pfr_sql_get_ipv6(), pslq[i].pfr_sql_get_descr()));
-        }
-        */
 }
 
 pfr_sql_list pfr_dst_list::get_pfr_dst_sql() {
@@ -131,4 +146,8 @@ void pfr_dst_list::pfr_dst_print() {
             pfrDstList[i].pfr_dst_print();
         }
     
+}
+
+int pfr_dst_list::size() {
+    return pfrDstList.size();
 }

@@ -187,7 +187,7 @@ void send_v4(idata *pin, pthread_t pt) {
                 std::cout << "EXIT(1)" << std::endl;
                 pthread_mutex_unlock(&in->mtx[0]);
                 
-                exit(1);
+                //exit(1);
             }
             //pthread_sigmask(SIG_SETMASK, &orig, 0);
 

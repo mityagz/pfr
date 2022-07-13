@@ -15,7 +15,13 @@ void * readloop(void  *ina) {
 	ssize_t			n;
 	struct timeval	tval;
 
-	int sockrd = Socket(pr->sasend->sa_family, SOCK_RAW, pr->icmpproto);
+
+    struct proto    proto_v4 = { proc_v4, NULL, NULL, NULL, NULL, 0, IPPROTO_ICMP };
+    pr = &proto_v4;
+
+	//int sockrd = Socket(pr->sasend->sa_family, SOCK_RAW, pr->icmpproto);
+	int sockrd = Socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+
 	setuid(getuid());		/* don't need special permissions any more */
 	if (pr->finit)
 		(*pr->finit)();

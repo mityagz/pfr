@@ -39,9 +39,11 @@ class pfr_dst_list {
       int print() { return index; }
     };
 
+    pfr_dst_list();
     pfr_dst_list(int nlist);
     pfr_dst_list(int nlist, int nnlist);
     void pfr_dst_print();
+    int size();
     pfr_sql_list get_pfr_dst_sql();
     iterator begin() { return iterator(*this); }
     iterator end() { return iterator(*this, true); }

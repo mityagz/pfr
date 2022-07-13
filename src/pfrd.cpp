@@ -29,7 +29,9 @@ void *send_req(void *pin) {
 void print_rdata();
 
 //pfr_dst_list pfrList(10);
-pfr_dst_list pfrList(10, 10);
+//pfr_dst_list pfrList(10, 10);
+pfr_dst_list pfrL;
+pfr_dst_list &pfrList = pfrL;
 
 std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>> r;
 std::map<std::string, std::map<int, rt_parm *>> route;
@@ -63,9 +65,13 @@ int main() {
 
     //pfr_dst_list pfrList(10);
 
-    exit(0);
-
     for(;;) {
+        pfrList = pfr_dst_list(10, 10);
+        if(pfrList.size() < 3) {
+            sleep(60);
+            //std::cout << "MISS: " << std::endl;
+            continue;
+        }
 
     static int probe_id = 0;
     int ct_data = 0;
@@ -75,7 +81,6 @@ int main() {
         }
 
         for(std::map<int, pfr_peer>::iterator itm = m.begin(); itm != m.end(); ++itm) {
-            //cout << itm->first << ":" << (itm->second).pfr_peer_get_id() << ":" << (itm->second).pfr_peer_get_pe_ip() << endl;
             int p_id = itm->first;
             itdata[ct_data] = (idata){ .mm = m, .peer_id = p_id, .probe_id = probe_id, .dst_list = &pfrList, .mtx = mtxs };
             ct_data++;
@@ -87,14 +92,16 @@ int main() {
             fthread = true;
         }
 
+
         for(int i = 0; i < ct_data; i++) {
-            pthread_create(&thrds[i], NULL, send_req, &itdata[i]);
+             pthread_create(&thrds[i], NULL, send_req, &itdata[i]);
         }
 
 
         for(int j = 0; j < ct_data; j++) {
             pthread_join(thrds[j], NULL);
         }
+
         
         req_stopped = 1;
         sleep(6);
