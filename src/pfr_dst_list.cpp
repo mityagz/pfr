@@ -71,7 +71,7 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
         int dst_id = 0;
         char *token = std::strtok(ret_shm_addr, delimiters);
         while (token) {
-            //std::cout << dst_id << ":" << token << std::endl;
+            ///std::cout << dst_id << ":" << token << std::endl;
             token = std::strtok(nullptr, delimiters);
             if(token != NULL) {
              pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));
