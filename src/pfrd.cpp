@@ -63,18 +63,20 @@ int main() {
     int m_ct = 10000;
     pthread_mutex_t mtxs[m_ct];
 
-    ////pfr_dst_list pfrList(10);
+    //pfr_dst_list pfrList(10);
+    pfrList = pfr_dst_list(10, 10);
 
     for(;;) {
-        pfrList = pfr_dst_list(10, 10);
-        if(pfrList.size() < 3) {
-            sleep(60);
-            //std::cout << "MISS: " << std::endl;
-            continue;
-        }
+        //pfrList = pfr_dst_list(10, 10);
+        std::cout << "begin for: " << std::endl;
 
-    static int probe_id = 0;
-    int ct_data = 0;
+        static int probe_id = 0;
+        int ct_data = 0;
+
+        if(probe_id > 0) {
+            std::cout << "probe_id > 0: " << probe_id << std::endl;
+            pfrList = pfr_dst_list(10, 10, pfrList);
+        }
 
         for(int i = 0; i < t_ct; i++) {
             pthread_mutex_init(&mtxs[i], NULL);
@@ -133,6 +135,8 @@ int main() {
         // exit(0);
         //}
         probe_id++;
+        std::cout << "MISS600: " << std::endl;
         sleep(600);
+        std::cout << "MISS601: " << std::endl;
     }
 }

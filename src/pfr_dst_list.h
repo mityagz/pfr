@@ -42,6 +42,7 @@ class pfr_dst_list {
     pfr_dst_list();
     pfr_dst_list(int nlist);
     pfr_dst_list(int nlist, int nnlist);
+    pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList);
     void pfr_dst_print();
     int size();
     pfr_sql_list get_pfr_dst_sql();
