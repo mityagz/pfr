@@ -8,6 +8,7 @@ pfrd_SOURCES= \
 	pfr_sql.cpp \
 	pfr_sql_list.cpp \
 	pfr_rdata.cpp \
+	pfr_rtr.cpp \
 	error.cpp \
 	ping_calloc.cpp \
 	ping_data.cpp \

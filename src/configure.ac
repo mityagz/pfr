@@ -26,6 +26,7 @@ AC_CHECK_HEADER([glib.h])
 #PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.28])
 #AC_CHECK_LIB([glib], [main])
 AC_CHECK_LIB([pthread], [main])
+AC_CHECK_LIB([netconf], [main])
 
 
 CFLAGS="$CFLAGS $GLIB_CFLAGS -std=gnu99 $(echo '${UFLAGS}')"
