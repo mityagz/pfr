@@ -31,6 +31,7 @@ class pfr_asbrs {
         class pfr_peers p;
     public:
         pfr_asbrs();
+        ~pfr_asbrs();
         pfr_asbrs(int id, std::string ip, class pfr_asbr_parm &parm);
         pfr_asbrs(class pfr_peers &peers);
         pfr_asbrs(std::map<int, pfr_peer> &mm);

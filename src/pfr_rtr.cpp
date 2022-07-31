@@ -132,6 +132,8 @@ pfr_asbr_parm::pfr_asbr_parm(std::string peer_name, std::string ip) {
 
 }
 
+struct nc_session *pfr_asbr_parm::get_session() { return netconf_conn; }
+
 pfr_asbrs::pfr_asbrs() {}
 pfr_asbrs::pfr_asbrs(int id, std::string ip, class pfr_asbr_parm &parm) {}
 pfr_asbrs::pfr_asbrs(class pfr_peers &peers) {}
@@ -157,6 +159,15 @@ pfr_asbrs::pfr_asbrs(std::map<int, pfr_peer> &p) {
  for(std::map<std::string, pfr_asbr_parm>::iterator itb = asbrs.begin(); itb != asbrs.end(); ++itb) {
   std::string ip = itb->first;
   std::cout << "ASBR Peer ip of loopback: " << ip << std::endl;
+ }
+}
+
+pfr_asbrs::~pfr_asbrs() {
+ for(std::map<std::string, pfr_asbr_parm>::iterator itb = asbrs.begin(); itb != asbrs.end(); ++itb) {
+  std::string ip = itb->first;
+  pfr_asbr_parm parm = itb->second;
+  struct nc_session * s = parm.get_session();
+  nc_session_free(s);
  }
 }
 
