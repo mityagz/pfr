@@ -142,8 +142,6 @@ int main() {
         // exit(0);
         //}
         probe_id++;
-        std::cout << "MISS600: " << std::endl;
         sleep(600);
-        std::cout << "MISS601: " << std::endl;
     }
 }

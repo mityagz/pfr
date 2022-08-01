@@ -83,21 +83,6 @@ void clb_error_print(const char* tag,
         fprintf(stderr, "NETCONF %s: %s (%s) - %s\n", severity, tag, type, message);
 }
 
-/*
-char * pw(const char *u, const char *h) { 
-     char *pass = "pp";
-     char *p = (char *)malloc(strlen(pass));
-     strcpy(p, pass);
-     return p; 
-}
-
-char * pw0(const char *username, const char *hostname, const char *priv_key_file) {  
-     char *pass = "pp";
-     char *p = (char *)malloc(strlen(pass));
-     strcpy(p, pass);
-     return priv_key_file; 
-}
-*/
 
 pfr_asbr_parm::pfr_asbr_parm() {}
 pfr_asbr_parm::pfr_asbr_parm(std::string peer_name, std::string ip) {
@@ -108,17 +93,11 @@ pfr_asbr_parm::pfr_asbr_parm(std::string peer_name, std::string ip) {
  nc_ssh_pref(NC_SSH_AUTH_PUBLIC_KEYS, 3);
  nc_verbosity(verbose);
  nc_callback_print(clb_print);
+ 
+ // move to config
  nc_callback_error_reply(clb_error_print);
  nc_set_keypair_path("/root/.ssh/id_rsa", "/root/.ssh/id_rsa.pub");
 
- //char *(*func)(const char *username, const char *hostname) = pw;
- //char *(*func)(const char *username, const char *hostname, const char *priv_key_file) = pw0;   
-
- //void nc_callback_sshauth_passphrase  (   char *(*)(const char *username, const char *hostname, const char *priv_key_file)    func    )   
- //void nc_callback_sshauth_password    (   char *(*)(const char *username, const char *hostname)   func    )   
-
- //nc_callback_sshauth_password(func);   
- //nc_callback_sshauth_passphrase(func);   
  ncsession = nc_session_connect(ip.c_str(), 0, "pfr", 0); 
 
  if(ncsession == NULL) {
@@ -141,9 +120,6 @@ pfr_asbrs::pfr_asbrs(std::map<int, pfr_peer> &p) {
  for(std::map<int, pfr_peer>::iterator itm = p.begin(); itm != p.end(); ++itm) {
   int p_id = itm->first;
   pfr_peer peer = itm->second;
-  std::cout << "ASBR Peer Id: " << peer.pfr_peer_get_id() << std::endl;
-  std::cout << "ASBR Peer ip: " << peer.pfr_peer_get_pe_ip() << std::endl;
-  //std::cout << "ASBR Peer name: " << peer.pfr_peer_get_pe_name() << std::endl;
   
   // map peer_id to asbr loopback
   int peer_id = peer.pfr_peer_get_id();

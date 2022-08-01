@@ -35,24 +35,11 @@ class pfr_asbrs {
         pfr_asbrs(int id, std::string ip, class pfr_asbr_parm &parm);
         pfr_asbrs(class pfr_peers &peers);
         pfr_asbrs(std::map<int, pfr_peer> &mm);
-        //pfr_asbrs(std::map<int, int> &mm);
-        //pfr_asbrs(int a, int b);
 
         void set_asbr(int id, std::string ip, class pfr_asbr_parm &parm);
         class pfr_asbr_parm get_asbr(std::string ip);
         class pfr_asbr_parm get_asbr(int id_peer);
         std::string get_asbr_lo(int id_peer);
 };
-
-/*
-   conn_hash[peer_id] = conn_descripter
-   int pfr_update_jrouter_conf(probe_id) {
-        for dst_ip
-          if:
-           route[dst_ip].[probe_id].[prev_peer_id] != [curr_peer_id]
-           route_pack[prev_peer_id][curr_peer_id].push_back(dst_ip)
-           go to prev delete && go to curr add dst_ip, all in the ephhemerial db
-  } 
-*/
 
 #endif // PFR_RTR_H
