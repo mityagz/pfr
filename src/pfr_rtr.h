@@ -42,4 +42,8 @@ class pfr_asbrs {
         std::string get_asbr_lo(int id_peer);
 };
 
+void pfr_routes_man(int probe_id, std::map<int, pfr_peer> &mm, pfr_asbrs &bbr, std::map<std::string, std::map<int, rt_parm *>> &rroute);
+//void pfr_routes_man(int probe_id);
+void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &bbr, int probe_id, int prev, int curr, std::string dst_ip);
+void pfr_create_xml_jrouter_rt(std::string rt);
 #endif // PFR_RTR_H

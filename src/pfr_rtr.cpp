@@ -1,4 +1,5 @@
 #include <map>
+#include <vector>
 #include <string>
 #include <iostream>
 #include <unistd.h>
@@ -151,3 +152,65 @@ void set_asbr(int id, std::string ip, class pfr_asbr_parm &parm) {}
 class pfr_asbr_parm get_asbr(std::string ip) {}
 class pfr_asbr_parm get_asbr(int id_peer) {}
 std::string pfr_asbrs::get_asbr_lo(int id_peer) { return asbrIdPeer[id_peer]; }
+
+// set of method for manipulation of routes on juniper routers
+// we are going to use netconf and ephemerial db
+void pfr_routes_man(int probe_id, std::map<int, pfr_peer> &mm, \
+                    pfr_asbrs &bbr, std::map<std::string, std::map<int, rt_parm *>> &rroute) {
+ for(std::map<std::string, std::map<int, rt_parm *>>::iterator it0 = rroute.begin(); it0 != rroute.end(); it0++) {
+    for(std::map<int, rt_parm *>::iterator it1 = rroute[it0->first].begin(); it1 != rroute[it0->first].end(); it1++) {
+        probe_id = it1->first;
+        std::string dst_ip = it0->first;
+        int prev_peer_id = rroute[it0->first][probe_id]->get_prev_peer();
+        int prev_min = rroute[it0->first][probe_id]->get_pmin_rtt();
+        int curr_peer_id = rroute[it0->first][probe_id]->get_curr_peer();
+        int cmin_rtt = rroute[it0->first][probe_id]->get_cmin_rtt();
+        pfr_create_set_jrouter_rt(mm, bbr, probe_id, prev_peer_id, curr_peer_id, dst_ip);
+    } 
+ } 
+ //
+ // get routes from devices?
+ // 
+ //pfr_get_jrouter_rt(probe_id, prev, curr);
+ //pfr_send_jrouter_rt(probe_id, prev, curr, dst_ip);
+}
+
+// get route conf from device to create route_out[][] structure if pfrd was reloaded/restarteed
+void pfr_get_jrouter_rt() {}
+// get route conf from device to return map of strings
+std::map<std::string, std::string> pfr_get_jrouter_rt1() {}
+
+std::vector<std::string> pfr_update_jrouter_rt() {}
+
+int pfr_set_jrouter_rt() {}
+
+void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mmm, pfr_asbrs &bbr, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
+    if(probe_id > 0) {
+    int id = (mmm[curr_peer_id]).pfr_peer_get_id();
+    std::string ipasbr = (mmm[curr_peer_id]).pfr_peer_get_pe_ip();
+    std::string nameasbr = (mmm[curr_peer_id]).get_pe_name();
+    std::cout << "pfr_create_set_jrouter_rt(): " << "probe_id: " << probe_id \
+              << ":dst_ip: " << dst_ip \
+              << ":prev_peer_id: " << prev_peer_id \
+              << ":curr_peer_id: " << curr_peer_id \
+              << ":peer_id from mm: " << id \
+              << ":ipasbr from mm: " << ipasbr \
+              << ":nameasbr from mm: " << nameasbr \
+              << std::endl;
+    }
+// create from route[][]
+// set of commands like:
+// del routing-instances i routing-options static route 3.3.3.3/32 next-hop 5.5.5.5 community 3333:10000
+// set routing-instances i routing-options static route 3.3.3.3/32 next-hop 5.5.5.5 community 3333:10000
+// pfr_create_xml_jrouter_rt(dst_ip);
+}
+
+void pfr_create_xml_jrouter_rt(std::string rt) {
+// const char *rr0 = "<rpc> \
+//  <load-configuration action=\"set\"> \
+//  <configuration-set>";
+//  //set system host-name PE0
+//  const char *rr2 = "</configuration-set> \
+//  </load-configuration> \
+//  </rpc>";
+}

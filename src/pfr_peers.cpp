@@ -36,6 +36,8 @@ class pfr_peer {
     int pfr_dst_id;
    public:
    */
+pfr_peer::pfr_peer() {}
+//pfr_peer::pfr_peer(const pfr_peer &) {}
 pfr_peer::pfr_peer(int id, int peer_group_id, std::string pe_ip, std::string pe, int interface_id, std::string address, \
              std::string ipv4_peer_address, std::string ipv6_peer_address, \
              std::string sp_name, int pfr_dst_id) : id(id), pe_ip(pe_ip) {
@@ -44,13 +46,20 @@ pfr_peer::pfr_peer(int id, int peer_group_id, std::string pe_ip, std::string pe,
 //             std::string lipv6_peer_address, std::string type, std::string sp_name, int pfr_dst_id) {
 }
 
-int pfr_peer::pfr_peer_get_id() {
-        return id;
-}
-
-std::string pfr_peer::pfr_peer_get_pe_ip() {
-        return pe_ip;
-}
+int pfr_peer::pfr_peer_get_id() { return id; }
+int pfr_peer::peer_group_get_id() { return peer_group_id; }
+std::string pfr_peer::pfr_peer_get_pe_ip() { return pe_ip; }
+std::string pfr_peer::get_pe_name() { return pe; }
+int pfr_peer::get_interface_id() { return interface_id; }
+std::string pfr_peer::get_address() { return address; }
+std::string pfr_peer::get_laddress() { return laddress; }
+std::string pfr_peer::get_ipv4_peer_address() { return ipv4_peer_address; }
+std::string pfr_peer::get_lipv4_peer_address() { return lipv4_peer_address; }
+std::string pfr_peer::get_ipv6_peer_address() { return ipv6_peer_address; }
+std::string pfr_peer::get_lipv6_peer_address() { return lipv6_peer_address; }
+std::string pfr_peer::get_type() { return type; }
+std::string pfr_peer::get_sp_name() { return sp_name; }
+int         pfr_peer::get_pfr_dst_id() { return pfr_dst_id; }
 
 //class pfr_peers {
 //    std::map<int, pfr_peer> pfr_peers_v;

@@ -72,7 +72,6 @@ int main() {
 
     for(;;) {
         //pfrList = pfr_dst_list(10, 10);
-        std::cout << "begin for: " << std::endl;
 
         static int probe_id = 0;
         int ct_data = 0;
@@ -115,17 +114,17 @@ int main() {
         //pthread_join(thrdrd, NULL);
         
         if(send_stopped == 1) {
-         print_rdata();
+         //print_rdata();
          pfr_calc_avg_rtt(probe_id);
-         pfr_print_avg_rtt(probe_id);
+         //pfr_print_avg_rtt(probe_id);
          pfr_route_scan(probe_id);
          pfr_route_free(probe_id);
-         pfr_route_print(probe_id);
+         //pfr_route_print(probe_id);
          send_stopped = 0;
          req_stopped = 0;
 
          //start routes manipulation
-         //pfr_routes_man(probe_id, m, br);
+         pfr_routes_man(probe_id, m, br, route);
 
          std::cout << "proc_v4_new_cnt: " << proc_v4_new_cnt << std::endl;
          std::cout << "avg_rtt_new_cnt: " << avg_rtt_new_cnt << std::endl;
@@ -137,10 +136,6 @@ int main() {
          std::cout << "probe_id: " << probe_id << std::endl;
         }
 
-        //pthread_mutex_unlock(&mtr);
-        //if(probe_id > 5) {
-        // exit(0);
-        //}
         probe_id++;
         sleep(600);
     }
