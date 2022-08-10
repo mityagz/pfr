@@ -34,7 +34,9 @@ void print_rdata();
 pfr_dst_list pfrL;
 pfr_dst_list &pfrList = pfrL;
 
+//       |dsp_ip               |probe_id     |peer_id      |seq_num
 std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>> r;
+//       |dsp_ip               |probe_id
 std::map<std::string, std::map<int, rt_parm *>> route;
 
 int proc_v4_new_cnt = 0;
