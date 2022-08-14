@@ -1,6 +1,7 @@
 #include<string>
 #include<map>
 #include<vector>
+#include "pfr_dst_list.h"
 
 class tparm {
   double avg_rtt;
@@ -22,6 +23,7 @@ class tparm {
 void pfr_calc_avg_rtt(int probe_id); // calculate average rtt && saves it to r...[seq == 99]
 void pfr_print_avg_rtt(int probe_id); // print average rtt from [seq == 99]
 void pfr_route_free(int probe_id); // free/delete route 
+void pfr_route_update(int probe_id, pfr_dst_list &p); // update from ipfix 
 
 class rt_parm {
     int prev_peer_id;

@@ -116,6 +116,8 @@ int main() {
         //pthread_join(thrdrd, NULL);
         
         if(send_stopped == 1) {
+         pfr_route_update(probe_id, pfrList);
+         sleep(60);
          //print_rdata();
          pfr_calc_avg_rtt(probe_id);
          //pfr_print_avg_rtt(probe_id);
@@ -138,7 +140,8 @@ int main() {
          std::cout << "probe_id: " << probe_id << std::endl;
         }
 
+
         probe_id++;
-        sleep(600);
+        sleep(1200);
     }
 }
