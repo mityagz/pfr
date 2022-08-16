@@ -166,7 +166,8 @@ void send_v4(idata *pin, pthread_t pt) {
             icmp->icmp_cksum = in_cksum((u_short *) icmp, len);
 
             pthread_mutex_lock(&in->mtx[0]);
-            std::cout << "Peer_id:" << in->peer_id << " Probe_id:" << in->probe_id << " sockwr:" << sockwr << " id:" << (*it).get_id() << " seq:" << seq << " thid:" << thId << ":" << (*it).get_ipv4(); // << std::endl;
+            // by mitya 15.07.2022
+            ///std::cout << "Peer_id:" << in->peer_id << " Probe_id:" << in->probe_id << " sockwr:" << sockwr << " id:" << (*it).get_id() << " seq:" << seq << " thid:" << thId << ":" << (*it).get_ipv4(); // << std::endl;
             pthread_mutex_unlock(&in->mtx[0]);
             
             /*
@@ -182,9 +183,10 @@ void send_v4(idata *pin, pthread_t pt) {
             int ret = 0;
             if((ret = sendto(sockwr, sendbuf, len, 0, pr->sasend, pr->salen)) == -1) {
                 pthread_mutex_lock(&in->mtx[0]);
-                std::cout << "ThreadId: " << thId << std::endl;
-                std::cout << "ret: " << ret << std::endl;
-                std::cout << "EXIT(1)" << std::endl;
+                // by mitya 16.07.2022
+                ///std::cout << "ThreadId: " << thId << std::endl;
+                ///std::cout << "ret: " << ret << std::endl;
+                ///std::cout << "EXIT(1)" << std::endl;
                 pthread_mutex_unlock(&in->mtx[0]);
                 
                 //exit(1);
@@ -192,7 +194,8 @@ void send_v4(idata *pin, pthread_t pt) {
             //pthread_sigmask(SIG_SETMASK, &orig, 0);
 
                 pthread_mutex_lock(&in->mtx[0]);
-                std::cout << ":ret: " << ret << std::endl;
+                // by mitya 15.07.2022
+                ///std::cout << ":ret: " << ret << std::endl;
                 pthread_mutex_unlock(&in->mtx[0]);
             //Sendto(sockwr, sendbuf, len, 0, pr->sasend, pr->salen);
             free(stv);

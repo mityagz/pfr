@@ -29,6 +29,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
         const char *key_sem0 = "/key_sem0";
         sem_t *sem0;
 
+        std::cout << "pfr_dst_list(int, int, prevdstList)" << std::endl;
+
         const char *shm_key_p0 = "/tmp/key0_shm0";
         key_t shm_key0;
         int shm_id = 0;
@@ -65,7 +67,7 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
         int dst_id = 0;
         char *token = std::strtok(ret_shm_addr, delimiters);
         while (token) {
-            ///std::cout << dst_id << ":" << token << std::endl;
+            std::cout << dst_id << ":" << token << std::endl;
             token = std::strtok(nullptr, delimiters);
             if(token != NULL) {
              pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));
@@ -95,6 +97,7 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
 pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
         const char *key_sem0 = "/key_sem0";
         sem_t *sem0;
+        std::cout << "pfr_dst_list(int, int)" << std::endl;
 
         const char *shm_key_p0 = "/tmp/key0_shm0";
         key_t shm_key0;
@@ -138,7 +141,7 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
         int dst_id = 0;
         char *token = std::strtok(ret_shm_addr, delimiters);
         while (token) {
-            ///std::cout << dst_id << ":" << token << std::endl;
+            std::cout << dst_id << ":" << token << std::endl;
             token = std::strtok(nullptr, delimiters);
             if(token != NULL) {
              pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));

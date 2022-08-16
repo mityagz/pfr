@@ -142,6 +142,6 @@ int main() {
 
 
         probe_id++;
-        sleep(1200);
+        sleep(700);
     }
 }
