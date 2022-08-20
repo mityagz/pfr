@@ -8,10 +8,15 @@
 #include <iomanip>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/syslog_sink.h>
+#include <spdlog/sinks/basic_file_sink.h>
 #include "pfr_dst_list.h"
 #include "pfr_dst.h"
 #include "pfr_sql.h"
 #include "pfr_sql_list.h"
+
+extern std::shared_ptr<spdlog::logger> syslog_logger;
 
 pfr_dst_list::pfr_dst_list() {}
 
@@ -29,7 +34,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
         const char *key_sem0 = "/key_sem0";
         sem_t *sem0;
 
-        std::cout << "pfr_dst_list(int, int, prevdstList)" << std::endl;
+        //std::cout << "pfr_dst_list(int, int, prevdstList)" << std::endl;
+        syslog_logger->debug("pfr_dst_list(int, int, prevdstList)");
 
         const char *shm_key_p0 = "/tmp/key0_shm0";
         key_t shm_key0;
@@ -47,7 +53,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
         sem0 = sem_open(key_sem0, 0, 0);
 
         if(sem_wait(sem0) == 0) {
-            std::cout << "SEM0: Locked! overload" << std::endl;
+            //std::cout << "SEM0: Locked! overload" << std::endl;
+            syslog_logger->debug("SEM0: Locked! overload");
         }
 
         shm_id = shmget(shm_key0, 0, 0);
@@ -67,7 +74,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
         int dst_id = 0;
         char *token = std::strtok(ret_shm_addr, delimiters);
         while (token) {
-            std::cout << dst_id << ":" << token << std::endl;
+            //std::cout << dst_id << ":" << token << std::endl;
+            syslog_logger->debug("{}:{}", dst_id, token);
             token = std::strtok(nullptr, delimiters);
             if(token != NULL) {
              pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));
@@ -89,7 +97,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
 
         shmdt(shm_addr);
         if(sem_post(sem0) == 0) {
-           std::cout << "SEM0: UnLocked! overload" << std::endl;
+           //std::cout << "SEM0: UnLocked! overload" << std::endl;
+           syslog_logger->debug("SEM0: UnLocked! overload");
         }
 
 }
@@ -97,7 +106,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
 pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
         const char *key_sem0 = "/key_sem0";
         sem_t *sem0;
-        std::cout << "pfr_dst_list(int, int)" << std::endl;
+        //std::cout << "pfr_dst_list(int, int)" << std::endl;
+        syslog_logger->debug("pfr_dst_list(int, int)");
 
         const char *shm_key_p0 = "/tmp/key0_shm0";
         key_t shm_key0;
@@ -141,7 +151,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
         int dst_id = 0;
         char *token = std::strtok(ret_shm_addr, delimiters);
         while (token) {
-            std::cout << dst_id << ":" << token << std::endl;
+            //std::cout << dst_id << ":" << token << std::endl;
+            syslog_logger->debug("{}:{}", dst_id, token);
             token = std::strtok(nullptr, delimiters);
             if(token != NULL) {
              pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));

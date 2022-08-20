@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include <libnetconf.h>
 #include <libnetconf_ssh.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/syslog_sink.h>
+#include <spdlog/sinks/basic_file_sink.h>
 #include "pfr_dst.h"
 #include "pfr_dst_list.h"
 #include "pfr_peers.h"
@@ -13,6 +16,7 @@
 #include "ping0.h"
 
 extern std::map<std::string, std::map<int, rt_parm *>> route;
+extern std::shared_ptr<spdlog::logger> syslog_logger;
 
 /*
 class pfr_asbr_parm {
@@ -107,7 +111,8 @@ pfr_asbr_parm::pfr_asbr_parm(std::string peer_name, std::string ip) {
  }
 
  if(nc_session_get_status(ncsession) == NC_SESSION_STATUS_WORKING) {
-    printf("NC_SESSION_STATUS_WORKING\n");
+    //printf("NC_SESSION_STATUS_WORKING\n");
+    syslog_logger->debug("NC_SESSION_STATUS_WORKING");
     netconf_conn = ncsession;
  }
 }
@@ -135,8 +140,10 @@ pfr_asbrs::pfr_asbrs(std::map<int, pfr_peer> &p) {
 
  for(std::map<std::string, pfr_asbr_parm>::iterator itb = asbrs.begin(); itb != asbrs.end(); ++itb) {
   std::string ip = itb->first;
-  std::cout << "ASBR Peer ip of loopback: " << ip << std::endl;
-  std::cout << "ASBR ncsession: " << asbrs[ip].get_session() << std::endl;
+  //std::cout << "ASBR Peer ip of loopback: " << ip << std::endl;
+  //std::cout << "ASBR ncsession: " << asbrs[ip].get_session() << std::endl;
+  syslog_logger->debug("ASBR Peer ip of loopback: {}", ip);
+  //syslog_logger->debug("ASBR ncsession: {}", asbrs[ip].get_session());
   sleep(5);
  }
 }
@@ -202,19 +209,30 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
             std::string plo0asbr = br.get_asbr_lo(prev_peer_id);
             pfr_asbr_parm pp = br.get_asbr(plo0asbr);
             struct nc_session *pncs = pp.get_session();
+            /*
             std::cout << "ppfr_create_set_jrouter_rt(): " << plo0asbr << std::endl;
             std::cout << "ppfr_create_set_jrouter_rt() nc_session: " << pncs << std::endl;
             std::cout << "ppfr_create_set_jrouter_rt(): " << prts << std::endl;
+            */
+            syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", plo0asbr);
+            //syslog_logger->debug("ppfr_create_set_jrouter_rt() nc_session: {}", pncs);
+            syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", prts);
         } 
         std::string rts = "set routing-instances i routing-options static route " + dst_ip \
                         + "/32 next-hop " + nh + " community 3333:10000 tag " + std::to_string(id);
     std::string lo0asbr = br.get_asbr_lo(curr_peer_id);
     pfr_asbr_parm p = br.get_asbr(lo0asbr);
     struct nc_session *ncs = p.get_session();
+    /*
     std::cout << "pfr_create_set_jrouter_rt(): " << lo0asbr << std::endl;
     std::cout << "pfr_create_set_jrouter_rt() nc_session: " << ncs << std::endl;
     std::cout << "pfr_create_set_jrouter_rt(): " << rts << std::endl;
     std::cout << "----------------------------------------------------------" << std::endl;
+    */
+    syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", lo0asbr);
+    //syslog_logger->debug("ppfr_create_set_jrouter_rt() nc_session: {}", ncs);
+    syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", rts);
+    syslog_logger->debug("-------------------------------------------------------------------");
     pfr_create_xml_jrouter_rt(rts, ncs);
    }
 // create from route[][]

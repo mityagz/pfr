@@ -6,6 +6,7 @@
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <cstddef>
+#include <spdlog/spdlog.h>
 
 #define BUFSIZE     1500
 

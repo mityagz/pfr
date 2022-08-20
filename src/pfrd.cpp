@@ -3,6 +3,10 @@
 #include <map>
 #include <vector>
 #include <unistd.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/syslog_sink.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <typeinfo>
 #include "pfr_dst.h"
 #include "pfr_dst_list.h"
 #include "pfr_peers.h"
@@ -53,6 +57,8 @@ pthread_mutex_t mtr;
 int send_stopped = 0;
 int req_stopped = 0;
 
+std::shared_ptr<spdlog::logger> syslog_logger;
+
 int main() {
     //main loop 
     //data for thread peer_id, probe_id, thread_id, timestamp
@@ -65,6 +71,11 @@ int main() {
     bool fthread = 0;
     int m_ct = 10000;
     pthread_mutex_t mtxs[m_ct];
+
+    std::string ident = "pfrd";
+    syslog_logger = spdlog::syslog_logger_mt("pfr_syslog", ident, LOG_PID, LOG_LOCAL5);
+    syslog_logger->set_level(spdlog::level::debug);
+    syslog_logger->debug("pfrd was started...");
 
     //pfr_dst_list pfrList(10);
     pfrList = pfr_dst_list(10, 10);
@@ -79,7 +90,8 @@ int main() {
         int ct_data = 0;
 
         if(probe_id > 0) {
-            std::cout << "probe_id > 0: " << probe_id << std::endl;
+            //std::cout << "probe_id > 0: " << probe_id << std::endl;
+            syslog_logger->debug("probe_id > 0: {}", probe_id);
             pfrList = pfr_dst_list(10, 10, pfrList);
         }
 
@@ -130,6 +142,16 @@ int main() {
          //start routes manipulation
          pfr_routes_man(probe_id, m, br, route);
 
+         syslog_logger->debug("proc_v4_new_cnt: {}", proc_v4_new_cnt);
+         syslog_logger->debug("avg_rtt_new_cnt: {}", avg_rtt_new_cnt);
+         syslog_logger->debug("scan_new_cnt: {}", scan_new_cnt);
+         syslog_logger->debug("del_proc_v4_new_cnt: {}", del_proc_v4_new_cnt);
+         syslog_logger->debug("del_avg_rtt_new_cnt: {}", del_avg_rtt_new_cnt);
+         syslog_logger->debug("del_scan_new_cnt: {}", del_scan_new_cnt);
+         syslog_logger->debug("printr_new_cnt: {}", printr_new_cnt);
+         syslog_logger->debug("probe_id: {}", probe_id);
+
+         /*
          std::cout << "proc_v4_new_cnt: " << proc_v4_new_cnt << std::endl;
          std::cout << "avg_rtt_new_cnt: " << avg_rtt_new_cnt << std::endl;
          std::cout << "scan_new_cnt: " << scan_new_cnt << std::endl;
@@ -138,6 +160,7 @@ int main() {
          std::cout << "del_scan_new_cnt: " << del_scan_new_cnt << std::endl;
          std::cout << "printr_new_cnt: " << printr_new_cnt << std::endl;
          std::cout << "probe_id: " << probe_id << std::endl;
+         */
         }
 
 
