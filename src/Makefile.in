@@ -96,8 +96,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_pfrd_OBJECTS = pfrd.$(OBJEXT) pfr_dst.$(OBJEXT) \
 	pfr_dst_list.$(OBJEXT) pfr_peers.$(OBJEXT) pfr_sql.$(OBJEXT) \
-	pfr_sql_list.$(OBJEXT) pfr_rdata.$(OBJEXT) error.$(OBJEXT) \
-	ping_calloc.$(OBJEXT) ping_data.$(OBJEXT) \
+	pfr_sql_list.$(OBJEXT) pfr_rdata.$(OBJEXT) pfr_rtr.$(OBJEXT) \
+	error.$(OBJEXT) ping_calloc.$(OBJEXT) ping_data.$(OBJEXT) \
 	ping_host_serv.$(OBJEXT) ping_in_cksum.$(OBJEXT) \
 	ping_inet_ntop.$(OBJEXT) ping_inet_pton_ipv4.$(OBJEXT) \
 	ping_m.$(OBJEXT) ping_proc_v4.$(OBJEXT) \
@@ -282,6 +282,7 @@ pfrd_SOURCES = \
 	pfr_sql.cpp \
 	pfr_sql_list.cpp \
 	pfr_rdata.cpp \
+	pfr_rtr.cpp \
 	error.cpp \
 	ping_calloc.cpp \
 	ping_data.cpp \
@@ -412,6 +413,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfr_dst_list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfr_peers.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfr_rdata.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfr_rtr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfr_sql.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfr_sql_list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfrd.Po@am__quote@

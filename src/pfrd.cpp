@@ -56,6 +56,7 @@ pthread_mutex_t mtr;
 
 int send_stopped = 0;
 int req_stopped = 0;
+pthread_mutex_t mt_req_send;
 
 std::shared_ptr<spdlog::logger> syslog_logger;
 
@@ -121,12 +122,14 @@ int main() {
             pthread_join(thrds[j], NULL);
         }
 
-        
+        pthread_mutex_lock(&mt_req_send); 
         req_stopped = 1;
+        pthread_mutex_unlock(&mt_req_send); 
         sleep(6);
         
         //pthread_join(thrdrd, NULL);
         
+        pthread_mutex_lock(&mt_req_send);
         if(send_stopped == 1) {
          pfr_route_update(probe_id, pfrList);
          sleep(60);
@@ -136,6 +139,7 @@ int main() {
          pfr_route_scan(probe_id);
          pfr_route_free(probe_id);
          //pfr_route_print(probe_id);
+         
          send_stopped = 0;
          req_stopped = 0;
 
@@ -162,6 +166,7 @@ int main() {
          std::cout << "probe_id: " << probe_id << std::endl;
          */
         }
+        pthread_mutex_unlock(&mt_req_send);
 
 
         probe_id++;

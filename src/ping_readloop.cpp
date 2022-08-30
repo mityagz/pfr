@@ -1,6 +1,7 @@
 #include	"ping0.h"
 
 extern pthread_mutex_t mtr;
+extern pthread_mutex_t mt_req_send;
 extern int send_stopped;
 extern int req_stopped;
 
@@ -52,7 +53,12 @@ void * readloop(void  *ina) {
         pthread_mutex_lock(&mtr);
 		(*pr->fproc)(recvbuf, n, &msg, &tval);
         pthread_mutex_unlock(&mtr);
-        if(req_stopped == 1) send_stopped = 1;
+        
+        pthread_mutex_lock(&mt_req_send);
+        if(req_stopped == 1) {
+            send_stopped = 1;
+        }
+        pthread_mutex_unlock(&mt_req_send);
     /*
       */
 	}
