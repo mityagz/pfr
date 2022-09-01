@@ -125,6 +125,7 @@ int main() {
         pthread_mutex_lock(&mt_req_send); 
         req_stopped = 1;
         pthread_mutex_unlock(&mt_req_send); 
+        syslog_logger->debug("sleep(6)");
         sleep(6);
         
         //pthread_join(thrdrd, NULL);
@@ -132,6 +133,7 @@ int main() {
         pthread_mutex_lock(&mt_req_send);
         if(send_stopped == 1) {
          pfr_route_update(probe_id, pfrList);
+         syslog_logger->debug("sleep(60)");
          sleep(60);
          //print_rdata();
          pfr_calc_avg_rtt(probe_id);
@@ -170,6 +172,7 @@ int main() {
 
 
         probe_id++;
+        syslog_logger->debug("sleep(700)");
         sleep(700);
     }
 }
