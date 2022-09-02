@@ -185,7 +185,11 @@ void pfr_route_scan(int probe_id) {
             if(probe_id == 0) {
                 if(r[dst_ip][probe_id][it2->first][99] != NULL) 
                  min_rtt = r[dst_ip][probe_id][it2->first][99]->get_avg_rtt();
-                route[it0->first][probe_id] = new rt_parm(0, min_rtt, 0, min_rtt);
+                
+                syslog_logger->debug("pfr_route_scan(): probe_id : {} : {} : {}", probe_id, 0, it2->first);
+                // by mitya 02.09.2022
+                //route[it0->first][probe_id] = new rt_parm(0, min_rtt, 0, min_rtt);
+                route[it0->first][probe_id] = new rt_parm(0, min_rtt, it2->first, min_rtt);
                 peer_id = it2->first;
                 scan_new_cnt++;
                 break;
@@ -201,13 +205,25 @@ void pfr_route_scan(int probe_id) {
        if(probe_id == 0) {
        } else if(probe_id > 0) {
          if(route.count(dst_ip) == 1 && route[dst_ip].count(probe_id - 1) == 1) {
-            route[dst_ip][probe_id] = \
-                new rt_parm(route[dst_ip][probe_id - 1]->get_curr_peer(), route[dst_ip][probe_id - 1]->get_cmin_rtt(), peer_id, min_rtt);
+            // by mitya 02.09.2022
+            //route[dst_ip][probe_id] = \
+            //    new rt_parm(route[dst_ip][probe_id - 1]->get_curr_peer(), route[dst_ip][probe_id - 1]->get_cmin_rtt(), peer_id, min_rtt);
+            if(peer_id == 0) { 
+                route[dst_ip][probe_id] = \
+                    new rt_parm(route[dst_ip][probe_id - 1]->get_curr_peer(), route[dst_ip][probe_id - 1]->get_cmin_rtt(), \
+                            route[dst_ip][probe_id - 1]->get_curr_peer(), min_rtt);
+                syslog_logger->debug("pfr_route_scan(): x -> x : probe_id : {} : {} : {}", probe_id, route[dst_ip][probe_id - 1]->get_curr_peer(), peer_id);
                 scan_new_cnt++;
+            } else {
+                route[dst_ip][probe_id] = \
+                    new rt_parm(route[dst_ip][probe_id - 1]->get_curr_peer(), route[dst_ip][probe_id - 1]->get_cmin_rtt(), peer_id, min_rtt);
+                syslog_logger->debug("pfr_route_scan(): x y : probe_id : {} : {} : {}", probe_id, route[dst_ip][probe_id - 1]->get_curr_peer(), peer_id);
+            }
          } else {
             route[dst_ip][probe_id] = \
                 new rt_parm(peer_id, min_rtt, peer_id, min_rtt);
                 scan_new_cnt++;
+                syslog_logger->debug("pfr_route_scan() probe_id - 1 ne : probe_id : {} : {} : {}", probe_id, peer_id, peer_id);
          }
        }
        min_rtt = 50000; 
