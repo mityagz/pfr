@@ -200,7 +200,7 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
     std::string ipasbr = (mm[curr_peer_id]).pfr_peer_get_pe_ip();
     std::string nameasbr = (mm[curr_peer_id]).get_pe_name();
     std::string nh = (mm[curr_peer_id]).get_ipv4_peer_address();
-        if(probe_id > 1) {
+        if(probe_id > 1 && prev_peer_id != 0) {
             int pid = (mm[prev_peer_id]).pfr_peer_get_id();
             std::string pipasbr = (mm[prev_peer_id]).pfr_peer_get_pe_ip();
             std::string pnameasbr = (mm[prev_peer_id]).get_pe_name();
