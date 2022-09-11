@@ -60,6 +60,9 @@ pthread_mutex_t mt_req_send;
 
 std::shared_ptr<spdlog::logger> syslog_logger;
 
+// conf parameters
+int pfr_ping_req = 5;
+
 int main() {
     //main loop 
     //data for thread peer_id, probe_id, thread_id, timestamp

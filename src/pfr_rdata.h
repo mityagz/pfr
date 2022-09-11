@@ -18,6 +18,8 @@ class tparm {
   void print();
   double get_rtt();
   double get_avg_rtt();
+  int get_timestamp();
+  int get_lost();
 };
 
 void pfr_calc_avg_rtt(int probe_id); // calculate average rtt && saves it to r...[seq == 99]
