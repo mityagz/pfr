@@ -4769,6 +4769,84 @@ _ACEOF
 
 fi
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lnetconf" >&5
+$as_echo_n "checking for main in -lnetconf... " >&6; }
+if ${ac_cv_lib_netconf_main+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lnetconf  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_netconf_main=yes
+else
+  ac_cv_lib_netconf_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_netconf_main" >&5
+$as_echo "$ac_cv_lib_netconf_main" >&6; }
+if test "x$ac_cv_lib_netconf_main" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBNETCONF 1
+_ACEOF
+
+  LIBS="-lnetconf $LIBS"
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lspdlog" >&5
+$as_echo_n "checking for main in -lspdlog... " >&6; }
+if ${ac_cv_lib_spdlog_main+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lspdlog  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_spdlog_main=yes
+else
+  ac_cv_lib_spdlog_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_spdlog_main" >&5
+$as_echo "$ac_cv_lib_spdlog_main" >&6; }
+if test "x$ac_cv_lib_spdlog_main" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBSPDLOG 1
+_ACEOF
+
+  LIBS="-lspdlog $LIBS"
+
+fi
+
 
 
 CFLAGS="$CFLAGS $GLIB_CFLAGS -std=gnu99 $(echo '${UFLAGS}')"
