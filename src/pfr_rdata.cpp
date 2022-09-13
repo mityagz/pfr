@@ -4,6 +4,7 @@
 #include <set>
 #include <iostream>
 #include <spdlog/spdlog.h>
+#include <math.h>
 #include <spdlog/sinks/syslog_sink.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include "pfr_rdata.h"
@@ -268,12 +269,14 @@ void pfr_calc_avg_rtt(int probe_id) {
             cnt_rtt++;
             alive++;
          } 
-         r[dst_ip][probe_id][peer_id][99] = new tparm(0, curr_rtt / cnt_rtt, pfr_ping_req - alive, ts);
+         double avg_rtt = ceil(curr_rtt * 100 / cnt_rtt) / 100.0;
+         r[dst_ip][probe_id][peer_id][99] = new tparm(0, avg_rtt, pfr_ping_req - alive, ts);
          avg_rtt_new_cnt++;
          curr_rtt = 0;
          cnt_rtt = 0;
          alive = 0;
          ts = 0;
+         avg_rtt = 0;
        }
      //} 
     }

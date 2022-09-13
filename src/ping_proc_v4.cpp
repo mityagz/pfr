@@ -1,3 +1,4 @@
+#include <math.h>
 #include    "ping0.h"
 #include    "ping_data.h"
 #include    "pfr_rdata.h"
