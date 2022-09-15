@@ -40,6 +40,21 @@ class rt_parm {
     double get_cmin_rtt();
 };
 
+class tlog {
+    int peer_id;
+    double rtt;
+    double avg_rtt;
+    int lost;
+    int timestamp;
+ public:
+    tlog(int peer_id, double rtt, double avg_rtt, int lost, int timestamp);
+    int get_peer();
+    double get_rtt();
+    double get_avg_rtt();
+    int get_lost();
+    int get_timestamp();
+};
+
 void pfr_route_scan(int probe_id); // finds min average rtt from [seq == 99]
 void pfr_route_print(int probe_id); // print min average rtt from [seq == 99]
 

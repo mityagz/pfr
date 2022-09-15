@@ -43,6 +43,10 @@ std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>> r;
 //       |dsp_ip               |probe_id
 std::map<std::string, std::map<int, rt_parm *>> route;
 
+//       |dsp_ip               |probe_id     |peer_id
+std::map<std::string, std::map<int, std::map<int,  tlog *>>> route_log0;
+std::map<std::string, std::map<int, tlog *>> route_log1;
+
 int proc_v4_new_cnt = 0;
 int avg_rtt_new_cnt = 0;
 int scan_new_cnt = 0;

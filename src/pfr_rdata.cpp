@@ -36,6 +36,22 @@ class tparm {
     this->timestamp;
   };
 };
+
+class tlog {
+    int peer_id;
+    double rtt;
+    double avg_rtt;
+    int lost;
+    int timestamp;
+    public:
+     tlog(int peer_id, double rtt, double avg_rtt, int lost, int timestamp);
+     int get_peer();
+     double get_rtt();
+     double get_avg_rtt();
+     int get_lost();
+     int get_timestamp();
+};
+
 */
 
 extern int avg_rtt_new_cnt;
@@ -52,6 +68,19 @@ double tparm::get_rtt() { return rtt; }
 double tparm::get_avg_rtt() { return avg_rtt; }
 int    tparm::get_timestamp() { return timestamp; }
 int    tparm::get_lost() { return lost; }
+
+tlog::tlog(int peer_id, double rtt, double avg_rtt, int lost, int timestamp) {
+    this->peer_id = peer_id;
+    this->rtt = rtt;
+    this->avg_rtt = avg_rtt;
+    this->lost = lost;
+    this->timestamp;
+}
+int tlog::get_peer() { return peer_id; }
+double tlog::get_rtt() { return rtt; }
+double tlog::get_avg_rtt() { return avg_rtt; }
+int tlog::get_lost() { return lost; }
+int tlog::get_timestamp() {return timestamp; }
 
 rt_parm::rt_parm(int prev_peer_id, double pmin_rtt, int curr_peer_rtt, double cmin_rtt) {
  this->prev_peer_id = prev_peer_id;
@@ -70,6 +99,12 @@ double rt_parm::get_cmin_rtt() { return cmin_rtt; }
 extern std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>> r;
 //              |dst_ip               |probe_id
 extern std::map<std::string, std::map<int, rt_parm *>> route;
+
+
+// log
+//              |dsp_ip               |probe_id     |peer_id
+extern std::map<std::string, std::map<int, std::map<int,  tlog *>>> route_log0;
+extern std::map<std::string, std::map<int, tlog *>> route_log1;
 
 void pfr_route_free(int probe_id) {
     if(probe_id < 2) return;
@@ -216,6 +251,7 @@ void pfr_route_scan(int probe_id) {
        }
        if(probe_id == 0) {
          syslog_logger->info("pfr_log->sql_hist probe_id == 0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+         route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
        } else if(probe_id > 0) {
          if(route.count(dst_ip) == 1 && route[dst_ip].count(probe_id - 1) == 1) {
             if(peer_id == 0) { 
@@ -225,6 +261,9 @@ void pfr_route_scan(int probe_id) {
                             route[dst_ip][probe_id - 1]->get_curr_peer(), min_rtt);
                 syslog_logger->debug("pfr_route_scan(): x -> x : probe_id : {} : {} : {}", probe_id, route[dst_ip][probe_id - 1]->get_curr_peer(), peer_id);
                 syslog_logger->info("pfr_log->sql_hist 2.0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+                //              |dsp_ip               |probe_id     |peer_id
+                //extern std::map<std::string, std::map<int, tlog *>> route_log1;
+                route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
                 scan_new_cnt++;
             } else {
                 // case 2.1 there is answer from dst
@@ -232,6 +271,7 @@ void pfr_route_scan(int probe_id) {
                     new rt_parm(route[dst_ip][probe_id - 1]->get_curr_peer(), route[dst_ip][probe_id - 1]->get_cmin_rtt(), peer_id, min_rtt);
                 syslog_logger->debug("pfr_route_scan(): x -> y : probe_id : {} : {} : {}", probe_id, route[dst_ip][probe_id - 1]->get_curr_peer(), peer_id);
                 syslog_logger->info("pfr_log->sql_hist 2.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+                route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
             }
          } else {
             // case 1.1 there isn't prev answer from dst
@@ -240,6 +280,7 @@ void pfr_route_scan(int probe_id) {
                 scan_new_cnt++;
                 syslog_logger->debug("pfr_route_scan() probe_id - 1: {}: peer_prev_id : {} : probe_id: {}: peer_id{}", probe_id - 1, 0, probe_id, peer_id);
                 syslog_logger->info("pfr_log->sql_hist 1.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+                route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
             }
          }
        min_rtt = 50000; 
