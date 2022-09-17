@@ -114,20 +114,26 @@ int main() {
         }
 
 
+        syslog_logger->debug("0:s Starting readloop thread...");
         if(!fthread) {
             pthread_create(&thrdrd, NULL, readloop, NULL);
             fthread = true;
         }
+        syslog_logger->debug("0:e");
 
 
+        syslog_logger->debug("1:s Starting send_req threads...");
         for(int i = 0; i < ct_data; i++) {
              pthread_create(&thrds[i], NULL, send_req, &itdata[i]);
         }
+        syslog_logger->debug("1:e");
 
 
+        syslog_logger->debug("2:s Joining send_req threads...");
         for(int j = 0; j < ct_data; j++) {
             pthread_join(thrds[j], NULL);
         }
+        syslog_logger->debug("2:e");
 
         pthread_mutex_lock(&mt_req_send); 
         req_stopped = 1;
@@ -139,21 +145,44 @@ int main() {
         
         pthread_mutex_lock(&mt_req_send);
         if(send_stopped == 1) {
+         syslog_logger->debug("3:s Start of pfr_route_update()...");
          pfr_route_update(probe_id, pfrList);
+         syslog_logger->debug("3:e End of pfr_route_update()...");
+
          syslog_logger->debug("sleep(60)");
          sleep(60);
+         
          //print_rdata();
+
+         syslog_logger->debug("4:s Start of pfr_calc_avg_rtt()...");
          pfr_calc_avg_rtt(probe_id);
+         syslog_logger->debug("4:e End of pfr_calc_avg_rtt()...");
+
          //pfr_print_avg_rtt(probe_id);
+
+         syslog_logger->debug("5:s Start of pfr_route_scan()...");
          pfr_route_scan(probe_id);
+         syslog_logger->debug("5:e Start of pfr_route_scan()...");
+
+         syslog_logger->debug("6:s Start of pfr_route_free()...");
          pfr_route_free(probe_id);
+         syslog_logger->debug("6:e End of pfr_route_free()...");
+
          //pfr_route_print(probe_id);
          
+         // pfr_log
+         syslog_logger->debug("7:s Start of pfr_log_print()...");
+         pfr_log_print(probe_id);
+         syslog_logger->debug("7:e End of pfr_log_print()...");
+
+
          send_stopped = 0;
          req_stopped = 0;
 
          //start routes manipulation
+         syslog_logger->debug("8:s Start of pfr_routes_man()...");
          pfr_routes_man(probe_id, m, br, route);
+         syslog_logger->debug("8:e End of pfr_routes_man()...");
 
          syslog_logger->debug("proc_v4_new_cnt: {}", proc_v4_new_cnt);
          syslog_logger->debug("avg_rtt_new_cnt: {}", avg_rtt_new_cnt);
@@ -164,22 +193,12 @@ int main() {
          syslog_logger->debug("printr_new_cnt: {}", printr_new_cnt);
          syslog_logger->debug("probe_id: {}", probe_id);
 
-         /*
-         std::cout << "proc_v4_new_cnt: " << proc_v4_new_cnt << std::endl;
-         std::cout << "avg_rtt_new_cnt: " << avg_rtt_new_cnt << std::endl;
-         std::cout << "scan_new_cnt: " << scan_new_cnt << std::endl;
-         std::cout << "del_proc_v4_new_cnt: " << del_proc_v4_new_cnt << std::endl;
-         std::cout << "del_avg_rtt_new_cnt: " << del_avg_rtt_new_cnt << std::endl;
-         std::cout << "del_scan_new_cnt: " << del_scan_new_cnt << std::endl;
-         std::cout << "printr_new_cnt: " << printr_new_cnt << std::endl;
-         std::cout << "probe_id: " << probe_id << std::endl;
-         */
         }
         pthread_mutex_unlock(&mt_req_send);
 
 
         probe_id++;
-        syslog_logger->debug("sleep(700)");
+        syslog_logger->debug("sleep(700), next for(), probe_id++");
         sleep(700);
     }
 }

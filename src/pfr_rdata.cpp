@@ -212,6 +212,21 @@ void pfr_route_update(int probe_id, pfr_dst_list &dstList) {
     }
 }
 
+void pfr_log_print(int curr_probe_id) {
+//                 |dsp_ip               |probe_id     |peer_id
+// extern std::map<std::string, std::map<int, tlog *>> route_log1;
+    std::string dst_ip;
+    int probe_id;
+    for(std::map<std::string, std::map<int, tlog *>>::iterator it0 = route_log1.begin(); it0 != route_log1.end(); it0++) {
+        dst_ip = it0->first;
+        for(std::map<int, tlog *>::iterator it1 = route_log1[dst_ip].begin(); it1 != route_log1[dst_ip].end(); it1++) {
+            probe_id = it1->first;
+            syslog_logger->debug("pfr_log_print(): dst_ip: {} : curr_probe_id: {} : probe_id : {} : peer_id : {}", dst_ip, curr_probe_id, probe_id,  \
+                      route_log1[dst_ip][probe_id]->get_peer());
+        }
+    }
+}
+
 void pfr_route_scan(int probe_id) {
     double min_rtt = 50000; 
     double curr_rtt = 0; 
