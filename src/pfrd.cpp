@@ -198,7 +198,7 @@ int main() {
 
 
         probe_id++;
-        syslog_logger->debug("sleep(180), next for(), probe_id++");
-        sleep(180);
+        syslog_logger->debug("sleep(700), next for(), probe_id++");
+        sleep(700);
     }
 }
