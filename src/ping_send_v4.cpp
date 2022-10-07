@@ -91,6 +91,19 @@ void send_v4(idata *pin, pthread_t pt) {
 
     sockwr = Socket(pr->sasend->sa_family, SOCK_RAW, pr->icmpproto);
 
+    //
+    /* bind to an address */
+    struct sockaddr_in serveraddr;
+    //int s;
+    memset(&serveraddr, 0x00, sizeof(struct sockaddr_in));
+    serveraddr.sin_family = AF_INET;
+    serveraddr.sin_port = htons(0);
+    serveraddr.sin_addr.s_addr = inet_addr("1.0.5.230"); // todo: conf
+
+    int rc = bind(sockwr, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
+    //
+
+
     setuid(getuid());               // don't need special permissions any more
     if (pr->finit)
         (*pr->finit)();

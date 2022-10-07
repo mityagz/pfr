@@ -6,6 +6,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/syslog_sink.h>
 #include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/rotating_file_sink.h>
 #include <typeinfo>
 #include "pfr_dst.h"
 #include "pfr_dst_list.h"
@@ -80,10 +81,19 @@ int main() {
     int m_ct = 10000;
     pthread_mutex_t mtxs[m_ct];
 
+    /*
     std::string ident = "pfrd";
     syslog_logger = spdlog::syslog_logger_mt("pfr_syslog", ident, LOG_PID, LOG_LOCAL5);
     syslog_logger->set_level(spdlog::level::debug);
     syslog_logger->debug("pfrd was started...");
+    */
+    // Create a file rotating logger with 5mb size max and 3 rotated files
+    int max_log_size = 1048576 * 50;
+    int max_log_files = 5;
+    syslog_logger = spdlog::rotating_logger_mt("pfr_syslog", "/var/log/pfrd.log", max_log_size, max_log_files);
+    syslog_logger->set_level(spdlog::level::debug);
+    syslog_logger->debug("pfrd was started...");
+    spdlog::flush_every(std::chrono::seconds(3));
 
     //pfr_dst_list pfrList(10);
     pfrList = pfr_dst_list(10, 10);
@@ -198,7 +208,7 @@ int main() {
 
 
         probe_id++;
-        syslog_logger->debug("sleep(700), next for(), probe_id++");
-        sleep(700);
+        syslog_logger->debug("sleep(300), next for(), probe_id++");
+        sleep(300);
     }
 }
