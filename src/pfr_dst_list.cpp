@@ -37,7 +37,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
         //std::cout << "pfr_dst_list(int, int, prevdstList)" << std::endl;
         syslog_logger->debug("pfr_dst_list(int, int, prevdstList)");
 
-        const char *shm_key_p0 = "/tmp/key0_shm0";
+        //const char *shm_key_p0 = "/tmp/key0_shm0";
+        const char *shm_key_p0 = "/etc/pfrd.conf";
         key_t shm_key0;
         int shm_id = 0;
         void *shm_addr;
@@ -109,7 +110,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
         //std::cout << "pfr_dst_list(int, int)" << std::endl;
         syslog_logger->debug("pfr_dst_list(int, int)");
 
-        const char *shm_key_p0 = "/tmp/key0_shm0";
+        //const char *shm_key_p0 = "/tmp/key0_shm0";
+        const char *shm_key_p0 = "/etc/pfrd.conf";
         key_t shm_key0;
         int shm_id = 0;
         void *shm_addr;
