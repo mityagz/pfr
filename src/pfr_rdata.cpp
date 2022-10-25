@@ -329,6 +329,7 @@ void pfr_delete(int probe_id) {
 // TODO: conf_deep_delete
  bool delete_flag = true;
  int deep_delete = 3;
+ int peer_id = 0;
  std::map<int, tlog *>::iterator it_peer_id;
  std::string dst_ip;
  if(probe_id <= deep_delete)
@@ -345,7 +346,11 @@ void pfr_delete(int probe_id) {
        }
       }
   }
+  peer_id = route[dst_ip][probe_id]->get_curr_peer();
+  syslog_logger->debug("pfr_delete() : delete_flag {}: dst_ip {} : probe_id - 1: {}: peer_prev_id : {} : probe_id: {}: peer_id {}", delete_flag, dst_ip, probe_id - 1, 0, probe_id, peer_id);
   if(delete_flag) {
+   peer_id = route[dst_ip][probe_id]->get_curr_peer();
+   syslog_logger->debug("pfr_delete() : delete_flag {}: dst_ip {} : probe_id - 1: {}: peer_prev_id : {} : probe_id: {}: peer_id {}", delete_flag, dst_ip, probe_id - 1, 0, probe_id, peer_id);
    // delete r[dst_ip], route [dst_ip]
   }
  }
