@@ -305,6 +305,52 @@ void pfr_route_scan(int probe_id) {
     //pthread_mutex_unlock(&mtr); 
 }
 
+/*
+ 1. first appears:       0 0 no response         -> don't add to route
+                         0 x there is responses  -> add to route
+ 2. following appears:   x 0 no response         -> !update route x -> x -> if there isn't three response, delete from route. we need history_route structure
+                                                    and delete from mxes!
+                                                    pfr_rdata::route_scan()
+                                                    add func pfr_log_print()
+                                                    add func pfr_list_noansw3x()
+                                                    add func pfr_jdel_route(list_noanswer3x)
+                                                    pfr_rdata::pfr_delete() { 
+                                                          r[1.1.1.1][2, 3] -> route[1.1.1.1][3].get_peer() \ 
+                                                          -> delete_route_from_jun() -> delete r[1.1.1.1][2, 3] \
+                                                           -> delete route[1.1.1.1]/route_log1
+                                                    }
+                          x y there is responses  -> update route x -> y
+ 3. dissappear from dst: 
+*/
+
+void pfr_delete(int probe_id) {
+//                |dsp_ip               |probe_id
+//extern std::map<std::string, std::map<int, tlog *>> route_log1;
+// TODO: conf_deep_delete
+ bool delete_flag = true;
+ int deep_delete = 3;
+ std::map<int, tlog *>::iterator it_peer_id;
+ std::string dst_ip;
+ if(probe_id <= deep_delete)
+     return;
+ for(std::map<std::string, std::map<int, tlog *>>::iterator it0 = route_log1.begin(); it0 != route_log1.end(); it0++) {
+  dst_ip = it0->first;
+  for(int i = 0; i <= deep_delete; i++) {
+      if(route_log1[dst_ip].count(probe_id - i) == 1) {
+       if(route_log1[dst_ip][probe_id - i]->get_peer() == 0) {
+
+       } else {
+              delete_flag = false;
+              break;
+       }
+      }
+  }
+  if(delete_flag) {
+   // delete r[dst_ip], route [dst_ip]
+  }
+ }
+}
+
 void pfr_calc_avg_rtt(int probe_id) {
     double avg_rtt = 0;
     double curr_rtt = 0;
