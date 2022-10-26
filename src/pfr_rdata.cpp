@@ -348,7 +348,11 @@ void pfr_delete(int probe_id) {
       }
   }
   if(delete_flag) {
-   peer_id = route[dst_ip][probe_id]->get_curr_peer();
+   if(route_log1.count(dst_ip) == 1 && route_log1[dst_ip].count(probe_id) == 1 && route_log1[dst_ip][probe_id] != NULL) {
+        peer_id = route_log1[dst_ip][probe_id]->get_peer();
+   } else { 
+       peer_id = 0; 
+   }
    syslog_logger->debug("pfr_delete() : delete_flag {}: dst_ip {} : probe_id - 1: {}: peer_prev_id : {} : probe_id: {}: peer_id {}", delete_flag, dst_ip, probe_id - 1, 0, probe_id, peer_id);
    // delete r[dst_ip], route [dst_ip]
    delete_flag = true;
