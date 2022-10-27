@@ -185,6 +185,10 @@ int main() {
          pfr_log_print(probe_id);
          syslog_logger->debug("7:e End of pfr_log_print()...");
 
+         //start routes delete
+         syslog_logger->debug("7.5:s Start of pfr_delete()...");
+         pfr_delete(probe_id);
+         syslog_logger->debug("7.5:e End of pfr_delete()...");
 
          send_stopped = 0;
          req_stopped = 0;
