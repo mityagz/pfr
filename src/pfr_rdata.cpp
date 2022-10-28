@@ -106,6 +106,9 @@ extern std::map<std::string, std::map<int, rt_parm *>> route;
 extern std::map<std::string, std::map<int, std::map<int,  tlog *>>> route_log0;
 extern std::map<std::string, std::map<int, tlog *>> route_log1;
 
+/* This function removes all probe from r[0..probe_id - 2] and route[0..probe_id - 2]
+ * left only two last probe
+*/
 void pfr_route_free(int probe_id) {
     if(probe_id < 2) return;
     probe_id -= 2;
