@@ -143,6 +143,7 @@ void pfr_route_free(int probe_id) {
     pthread_mutex_unlock(&mtr); 
 }
 
+/* Prints content of route[] */
 void pfr_route_print(int probe_id) {
     for(std::map<std::string, std::map<int, rt_parm *>>::iterator it0 = route.begin(); it0 != route.end(); it0++) {
      for(std::map<int, rt_parm *>::iterator it1 = route[it0->first].begin(); it1 != route[it0->first].end(); it1++) {
@@ -153,6 +154,11 @@ void pfr_route_print(int probe_id) {
     std::cout << "ROUTE_FREE: probe_id: " << probe_id << std::endl;
 }
 
+
+/* This function syncs ipfix data and dstList 
+  its removes entities from r[] && route[] which don't exist in ipfix
+  TODO: need to remove entities from mxs too.
+ */
 void pfr_route_update(int probe_id, pfr_dst_list &dstList) {
         std::map<std::string, int> rdst;
         std::set<std::string> deldst;
@@ -215,6 +221,7 @@ void pfr_route_update(int probe_id, pfr_dst_list &dstList) {
     }
 }
 
+/* Print content route_log1 */
 void pfr_log_print(int curr_probe_id) {
 //                 |dsp_ip               |probe_id     |peer_id
 // extern std::map<std::string, std::map<int, tlog *>> route_log1;
