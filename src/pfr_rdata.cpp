@@ -157,8 +157,8 @@ void pfr_route_print(int probe_id) {
 
 /* This function syncs ipfix data and dstList 
   its removes entities from r[] && route[] which don't exist in ipfix
-  TODO: need to remove entities from mxs too.
- */
+  Important: need to remove entities from mxs too before remove from r[] && route[].
+*/
 void pfr_route_update(int probe_id, pfr_dst_list &dstList) {
         std::map<std::string, int> rdst;
         std::set<std::string> deldst;
@@ -237,6 +237,9 @@ void pfr_log_print(int curr_probe_id) {
     }
 }
 
+/* This function calculates min rtt and takes place it route[dst_ip][probe_id] 
+   also this one fills route_log1[probe_id]
+*/
 void pfr_route_scan(int probe_id) {
     double min_rtt = 50000; 
     double curr_rtt = 0; 
@@ -315,7 +318,11 @@ void pfr_route_scan(int probe_id) {
     //pthread_mutex_unlock(&mtr); 
 }
 
-/*
+/* ^---
+ * v---
+ 0. if traffic to dst_ip 0                       -> dst_ip will be removed by pfr_route_update from dstList and rrs, mxs.
+    didn't send
+    because ipfix absent 
  1. first appears:       0 0 no response         -> don't add to route
                          0 x there is responses  -> add to route
  2. following appears:   x 0 no response         -> !update route x -> x -> if there isn't three response, delete from route. we need history_route structure

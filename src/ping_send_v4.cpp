@@ -214,9 +214,11 @@ void send_v4(idata *pin, pthread_t pt) {
             free(stv);
             free(icmp_d);
             usleep(3000);
+            //usleep(300);
       } 
       it++;
-      usleep(20000);
+       //usleep(20000);
+      usleep(2000);
       freeaddrinfo(ai);
     }
     close(sockwr);
