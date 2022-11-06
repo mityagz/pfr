@@ -213,12 +213,14 @@ void send_v4(idata *pin, pthread_t pt) {
             //Sendto(sockwr, sendbuf, len, 0, pr->sasend, pr->salen);
             free(stv);
             free(icmp_d);
-            usleep(3000);
-            //usleep(300);
+            //usleep(3000);
+            usleep(2500);
       } 
       it++;
        //usleep(20000);
-      usleep(2000);
+      //usleep(2000);
+      //usleep(200);
+      //usleep(20);
       freeaddrinfo(ai);
     }
     close(sockwr);

@@ -159,8 +159,8 @@ int main() {
          pfr_route_update(probe_id, pfrList);
          syslog_logger->debug("3:e End of pfr_route_update()...");
 
-         syslog_logger->debug("sleep(60)");
-         sleep(60);
+         syslog_logger->debug("sleep(30)");
+         sleep(30);
          
          //print_rdata();
 
@@ -212,7 +212,7 @@ int main() {
 
 
         probe_id++;
-        syslog_logger->debug("sleep(120), next for(), probe_id++");
-        sleep(120);
+        syslog_logger->debug("sleep(20), next for(), probe_id++");
+        sleep(20);
     }
 }
