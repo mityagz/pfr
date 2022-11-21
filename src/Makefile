@@ -96,8 +96,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_pfrd_OBJECTS = pfrd.$(OBJEXT) pfr_dst.$(OBJEXT) \
 	pfr_dst_list.$(OBJEXT) pfr_peers.$(OBJEXT) pfr_sql.$(OBJEXT) \
-	pfr_sql_list.$(OBJEXT) pfr_rdata.$(OBJEXT) error.$(OBJEXT) \
-	ping_calloc.$(OBJEXT) ping_data.$(OBJEXT) \
+	pfr_sql_list.$(OBJEXT) pfr_rdata.$(OBJEXT) pfr_rtr.$(OBJEXT) \
+	error.$(OBJEXT) ping_calloc.$(OBJEXT) ping_data.$(OBJEXT) \
 	ping_host_serv.$(OBJEXT) ping_in_cksum.$(OBJEXT) \
 	ping_inet_ntop.$(OBJEXT) ping_inet_pton_ipv4.$(OBJEXT) \
 	ping_m.$(OBJEXT) ping_proc_v4.$(OBJEXT) \
@@ -213,7 +213,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS =  
 LIBOBJS =  ${LIBOBJDIR}malloc$U.o
-LIBS = -lpthread -lpq -lcrypt 
+LIBS = -lspdlog -lnetconf -lpthread -lpq -lcrypt 
 LTLIBOBJS =  ${LIBOBJDIR}malloc$U.lo
 MAKEINFO = ${SHELL} /home/mitya/wrk/pfr/src/missing makeinfo
 MKDIR_P = /usr/bin/mkdir -p
@@ -282,6 +282,7 @@ pfrd_SOURCES = \
 	pfr_sql.cpp \
 	pfr_sql_list.cpp \
 	pfr_rdata.cpp \
+	pfr_rtr.cpp \
 	error.cpp \
 	ping_calloc.cpp \
 	ping_data.cpp \
@@ -412,6 +413,7 @@ include ./$(DEPDIR)/pfr_dst.Po
 include ./$(DEPDIR)/pfr_dst_list.Po
 include ./$(DEPDIR)/pfr_peers.Po
 include ./$(DEPDIR)/pfr_rdata.Po
+include ./$(DEPDIR)/pfr_rtr.Po
 include ./$(DEPDIR)/pfr_sql.Po
 include ./$(DEPDIR)/pfr_sql_list.Po
 include ./$(DEPDIR)/pfrd.Po
