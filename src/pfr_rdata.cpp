@@ -369,12 +369,36 @@ void pfr_delete(int probe_id) {
    if(route.count(dst_ip) == 1 && route[dst_ip].count(probe_id) == 1 && route[dst_ip][probe_id] != NULL) {
     peer_id = route[dst_ip][probe_id]->get_curr_peer();
     syslog_logger->debug("pfr_delete() : delete_flag {}: dst_ip {} : probe_id - 1: {}: peer_prev_id : {} : probe_id: {}: peer_id {}", delete_flag, dst_ip, probe_id - 1, 0, probe_id, peer_id);
+    pfr_delete_r_route(dst_ip, peer_id);
    }
    // delete r[dst_ip], route[dst_ip], delete_from_mx(dst_ip, peer_id)
    delete_flag = true;
   }
   delete_flag = true;
  }
+}
+
+void pfr_delete_r_route(std::string dst_ip, int peer_id) {
+    int probe_id = 0;
+    int seq_id = 0;
+    for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it0 = r[dst_ip].begin(); it0 != r[dst_ip].end(); it0++) {
+       probe_id = it0->first;
+       for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end(); it2++) {
+        peer_id = it2->first;
+         for(std::map<int, tparm *>::iterator it3 = r[dst_ip][probe_id][peer_id].begin(); it3 != r[dst_ip][probe_id][peer_id].end(); it3++) {
+            seq_id = it3->first;
+            delete r[dst_ip][probe_id][peer_id][seq_id];
+            r[dst_ip][probe_id][peer_id].erase(seq_id);
+         } 
+         r[dst_ip][probe_id].erase(peer_id);
+       }
+       delete route[dst_ip][probe_id];
+       r[dst_ip].erase(probe_id);
+       route[dst_ip].erase(probe_id);
+    }
+    syslog_logger->debug("pfr_r_route_delete() dst_ip {} : peer_id {}", dst_ip, peer_id);
+    r.erase(dst_ip);
+    route.erase(dst_ip);
 }
 
 void pfr_calc_avg_rtt(int probe_id) {

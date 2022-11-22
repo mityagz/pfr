@@ -28,6 +28,8 @@ void pfr_route_free(int probe_id); // free/delete route
 void pfr_route_update(int probe_id, pfr_dst_list &p); // update from ipfix 
 void pfr_log_print(int probe_id); // delete dst_ip who didn't answer 3 times
 void pfr_delete(int probe_id); // delete dst_ip who didn't answer 3 times
+void pfr_delete_r_route(std::string dst_ip, int peer_id); // delete dst_ip subfunction
+
 
 class rt_parm {
     int prev_peer_id;
