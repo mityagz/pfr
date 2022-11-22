@@ -381,6 +381,7 @@ void pfr_delete(int probe_id) {
 void pfr_delete_r_route(std::string dst_ip, int peer_id) {
     int probe_id = 0;
     int seq_id = 0;
+    int last_peer_id = peer_id;
     for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it0 = r[dst_ip].begin(); it0 != r[dst_ip].end(); it0++) {
        probe_id = it0->first;
        for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end(); it2++) {
@@ -396,7 +397,7 @@ void pfr_delete_r_route(std::string dst_ip, int peer_id) {
        r[dst_ip].erase(probe_id);
        route[dst_ip].erase(probe_id);
     }
-    syslog_logger->debug("pfr_r_route_delete() dst_ip {} : peer_id {}", dst_ip, peer_id);
+    syslog_logger->debug("pfr_r_route_delete() dst_ip {} : peer_id {}", dst_ip, last_peer_id);
     r.erase(dst_ip);
     route.erase(dst_ip);
 }
