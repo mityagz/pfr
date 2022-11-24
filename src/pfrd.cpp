@@ -187,7 +187,7 @@ int main() {
 
          //start routes delete
          syslog_logger->debug("7.5:s Start of pfr_delete()...");
-         pfr_delete(probe_id);
+         pfr_delete(probe_id, m);
          syslog_logger->debug("7.5:e End of pfr_delete()...");
 
          send_stopped = 0;

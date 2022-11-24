@@ -2,6 +2,7 @@
 #include<map>
 #include<vector>
 #include "pfr_dst_list.h"
+#include "pfr_peers.h"
 
 class tparm {
   double avg_rtt;
@@ -27,8 +28,8 @@ void pfr_print_avg_rtt(int probe_id); // print average rtt from [seq == 99]
 void pfr_route_free(int probe_id); // free/delete route 
 void pfr_route_update(int probe_id, pfr_dst_list &p); // update from ipfix 
 void pfr_log_print(int probe_id); // delete dst_ip who didn't answer 3 times
-void pfr_delete(int probe_id); // delete dst_ip who didn't answer 3 times
-void pfr_delete_r_route(std::string dst_ip, int peer_id); // delete dst_ip subfunction
+void pfr_delete(int probe_id, std::map<int, pfr_peer> &p); // delete dst_ip who didn't answer 3 times
+void pfr_delete_r_route(std::map<int, pfr_peer> &p, std::string dst_ip, int peer_id); // delete dst_ip subfunction
 
 
 class rt_parm {
