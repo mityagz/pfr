@@ -245,7 +245,8 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
 //void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
 void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
    syslog_logger->debug("ppfr_delete_set_jrouter_rt(): probe_id: {} : dst_ip {} : {} : {}", probe_id, dst_ip, prev_peer_id, curr_peer_id);
-        if(probe_id > 1 && prev_peer_id != 0) {
+   prev_peer_id = curr_peer_id;
+        //if(probe_id > 1 && prev_peer_id != 0) {
             int pid = (mm[prev_peer_id]).pfr_peer_get_id();
             std::string pipasbr = (mm[prev_peer_id]).pfr_peer_get_pe_ip();
             std::string pnameasbr = (mm[prev_peer_id]).get_pe_name();
@@ -257,7 +258,7 @@ void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, int probe_id, int pr
             //struct nc_session *pncs = pp.get_session();
             //syslog_logger->debug("ppfr_delete_set_jrouter_rt(): {}", plo0asbr);
             syslog_logger->debug("ppfr_delete_set_jrouter_rt(): {}", prts);
-        } 
+        //} 
 } 
 
 void pfr_create_xml_jrouter_rt(std::string rt, struct nc_session *ncs) {
