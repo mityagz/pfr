@@ -341,7 +341,7 @@ void pfr_route_scan(int probe_id) {
  3. dissappear from dst: 
 */
 
-void pfr_delete(int probe_id, std::map<int, pfr_peer> &p) {
+void pfr_delete(int probe_id, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
 //                |dsp_ip               |probe_id
 //extern std::map<std::string, std::map<int, tlog *>> route_log1;
 // TODO: conf_deep_delete
@@ -370,7 +370,7 @@ void pfr_delete(int probe_id, std::map<int, pfr_peer> &p) {
    if(route.count(dst_ip) == 1 && route[dst_ip].count(probe_id) == 1 && route[dst_ip][probe_id] != NULL) {
     peer_id = route[dst_ip][probe_id]->get_curr_peer();
     syslog_logger->debug("pfr_delete() : delete_flag {}: dst_ip {} : probe_id - 1: {}: peer_prev_id : {} : probe_id: {}: peer_id {}", delete_flag, dst_ip, probe_id - 1, 0, probe_id, peer_id);
-    pfr_delete_r_route(p, dst_ip, peer_id);
+    pfr_delete_r_route(p, br, dst_ip, peer_id);
    }
    // delete r[dst_ip], route[dst_ip], delete_from_mx(dst_ip, peer_id)
    delete_flag = true;
@@ -379,7 +379,7 @@ void pfr_delete(int probe_id, std::map<int, pfr_peer> &p) {
  }
 }
 
-void pfr_delete_r_route(std::map<int, pfr_peer> &p, std::string dst_ip, int peer_id) {
+void pfr_delete_r_route(std::map<int, pfr_peer> &p, pfr_asbrs &br, std::string dst_ip, int peer_id) {
     int probe_id = 0;
     int seq_id = 0;
     int last_peer_id = peer_id;
@@ -399,7 +399,7 @@ void pfr_delete_r_route(std::map<int, pfr_peer> &p, std::string dst_ip, int peer
        route[dst_ip].erase(probe_id);
     }
     syslog_logger->debug("pfr_r_route_delete() dst_ip {} : peer_id {}", dst_ip, last_peer_id);
-    pfr_delete_set_jrouter_rt(p, 0, 0, last_peer_id, dst_ip);
+    pfr_delete_set_jrouter_rt(p, br, 0, 0, last_peer_id, dst_ip);
     r.erase(dst_ip);
     route.erase(dst_ip);
 }

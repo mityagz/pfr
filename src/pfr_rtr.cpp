@@ -242,8 +242,8 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
 // set routing-instances i routing-options static route 3.3.3.3/32 next-hop 5.5.5.5 community 3333:10000
 }
 
-//void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
-void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
+void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
+//void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
    syslog_logger->debug("ppfr_delete_set_jrouter_rt(): probe_id: {} : dst_ip {} : {} : {}", probe_id, dst_ip, prev_peer_id, curr_peer_id);
    prev_peer_id = curr_peer_id;
         //if(probe_id > 1 && prev_peer_id != 0) {
@@ -253,10 +253,10 @@ void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, int probe_id, int pr
             std::string pnh = (mm[prev_peer_id]).get_ipv4_peer_address();
             std::string prts = "del routing-instances i routing-options static route " + dst_ip \
                              + "/32 next-hop " + pnh + " community 3333:10000 tag " + std::to_string(pid);
-            //std::string plo0asbr = br.get_asbr_lo(prev_peer_id);
-            //pfr_asbr_parm pp = br.get_asbr(plo0asbr);
-            //struct nc_session *pncs = pp.get_session();
-            //syslog_logger->debug("ppfr_delete_set_jrouter_rt(): {}", plo0asbr);
+            std::string plo0asbr = br.get_asbr_lo(prev_peer_id);
+            pfr_asbr_parm pp = br.get_asbr(plo0asbr);
+            struct nc_session *pncs = pp.get_session();
+            syslog_logger->debug("ppfr_delete_set_jrouter_rt(): {} {}", dst_ip, plo0asbr);
             syslog_logger->debug("ppfr_delete_set_jrouter_rt(): {}", prts);
         //} 
 } 
