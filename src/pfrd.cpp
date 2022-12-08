@@ -156,7 +156,8 @@ int main() {
         pthread_mutex_lock(&mt_req_send);
         if(send_stopped == 1) {
          syslog_logger->debug("3:s Start of pfr_route_update()...");
-         pfr_route_update(probe_id, pfrList);
+         //pfr_route_update(probe_id, pfrList);
+         pfr_route_update(probe_id, pfrList, m, br);
          syslog_logger->debug("3:e End of pfr_route_update()...");
 
          syslog_logger->debug("sleep(30)");

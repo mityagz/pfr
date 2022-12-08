@@ -160,7 +160,7 @@ void pfr_route_print(int probe_id) {
   its removes entities from r[] && route[] which don't exist in ipfix
   Important: need to remove entities from mxs too before remove from r[] && route[].
 */
-void pfr_route_update(int probe_id, pfr_dst_list &dstList) {
+void pfr_route_update(int probe_id, pfr_dst_list &dstList, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
         std::map<std::string, int> rdst;
         std::set<std::string> deldst;
 
@@ -184,6 +184,10 @@ void pfr_route_update(int probe_id, pfr_dst_list &dstList) {
      if(rdst.count(dst_ip) == 1) {
         syslog_logger->debug("ROUTE_UPDATE route[ip] exists in dstList[ip]: {}:{}", cnt_ip, dst_ip);
      } else {
+        // to remove entry from mxs
+        peer_id = route[dst_ip][probe_id]->get_curr_peer();
+        pfr_delete_set_jrouter_rt(p, br, 0, 0, peer_id, dst_ip);
+
         syslog_logger->debug("ROUTE_UPDATE route[ip] doesn't exist in dstList[ip] need to remove from route[]: {}:{}", cnt_ip, dst_ip);
         for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[dst_ip].begin(); it1 != r[dst_ip].end(); it1++) {
             probe_id = it1->first;
@@ -198,17 +202,10 @@ void pfr_route_update(int probe_id, pfr_dst_list &dstList) {
                 del_proc_v4_new_cnt++;
                 r[dst_ip][probe_id].erase(peer_id);
             }
-            // by mitya 16.08.2022
-            ///r[dst_ip][probe_id].erase(peer_id);
             delete route[dst_ip][probe_id];
             route[dst_ip].erase(probe_id);
             r[dst_ip].erase(probe_id);
         }
-        /*
-        delete route[dst_ip][probe_id];
-        route[dst_ip].erase(probe_id);
-        r[dst_ip].erase(probe_id);
-        */
         del_scan_new_cnt++;
 
         std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator itr;
