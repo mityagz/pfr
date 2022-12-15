@@ -185,8 +185,8 @@ void pfr_route_update(int probe_id, pfr_dst_list &dstList, std::map<int, pfr_pee
         syslog_logger->debug("ROUTE_UPDATE route[ip] exists in dstList[ip]: {}:{}", cnt_ip, dst_ip);
      } else {
         // to remove entry from mxs
-        peer_id = route[dst_ip][probe_id]->get_curr_peer();
-        pfr_delete_set_jrouter_rt(p, br, 0, 0, peer_id, dst_ip);
+        //peer_id = route[dst_ip][probe_id]->get_curr_peer();
+        //pfr_delete_set_jrouter_rt(p, br, 0, 0, peer_id, dst_ip);
 
         syslog_logger->debug("ROUTE_UPDATE route[ip] doesn't exist in dstList[ip] need to remove from route[]: {}:{}", cnt_ip, dst_ip);
         for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[dst_ip].begin(); it1 != r[dst_ip].end(); it1++) {
@@ -338,6 +338,9 @@ void pfr_route_scan(int probe_id) {
  3. dissappear from dst: 
 */
 
+/* This function deletes dst_ip && route from mxs 
+ * which no response 3 times
+*/
 void pfr_delete(int probe_id, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
 //                |dsp_ip               |probe_id
 //extern std::map<std::string, std::map<int, tlog *>> route_log1;
@@ -380,6 +383,7 @@ void pfr_delete_r_route(std::map<int, pfr_peer> &p, pfr_asbrs &br, std::string d
     int probe_id = 0;
     int seq_id = 0;
     int last_peer_id = peer_id;
+    syslog_logger->debug("0 pfr_r_route_delete() dst_ip {} : peer_id {}", dst_ip, last_peer_id);
     for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it0 = r[dst_ip].begin(); it0 != r[dst_ip].end(); it0++) {
        probe_id = it0->first;
        for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end(); it2++) {
@@ -395,7 +399,7 @@ void pfr_delete_r_route(std::map<int, pfr_peer> &p, pfr_asbrs &br, std::string d
        r[dst_ip].erase(probe_id);
        route[dst_ip].erase(probe_id);
     }
-    syslog_logger->debug("pfr_r_route_delete() dst_ip {} : peer_id {}", dst_ip, last_peer_id);
+    syslog_logger->debug("1 pfr_r_route_delete() dst_ip {} : peer_id {}", dst_ip, last_peer_id);
     pfr_delete_set_jrouter_rt(p, br, 0, 0, last_peer_id, dst_ip);
     r.erase(dst_ip);
     route.erase(dst_ip);
