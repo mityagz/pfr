@@ -185,8 +185,8 @@ void pfr_route_update(int probe_id, pfr_dst_list &dstList, std::map<int, pfr_pee
         syslog_logger->debug("ROUTE_UPDATE route[ip] exists in dstList[ip]: {}:{}", cnt_ip, dst_ip);
      } else {
         // to remove entry from mxs
-        if(route[dst_ip].count(probe_id) == 1 && route[dst_ip][probe_id]->get_curr_peer() > 0) {
-          peer_id = route[dst_ip][probe_id]->get_curr_peer();
+        if(route[dst_ip].count(probe_id - 1) == 1 && route[dst_ip][probe_id - 1]->get_curr_peer() > 0) {
+          peer_id = route[dst_ip][probe_id - 1]->get_curr_peer();
           pfr_delete_set_jrouter_rt(p, br, 0, 0, peer_id, dst_ip);
         }
 
@@ -348,7 +348,8 @@ void pfr_delete(int probe_id, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
 //extern std::map<std::string, std::map<int, tlog *>> route_log1;
 // TODO: conf_deep_delete
  bool delete_flag = true;
- int deep_delete = 3;
+ //int deep_delete = 3;
+ int deep_delete = 10;
  int peer_id = 0;
  std::map<int, tlog *>::iterator it_peer_id;
  std::string dst_ip;
