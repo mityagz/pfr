@@ -348,8 +348,8 @@ void pfr_delete(int probe_id, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
 //extern std::map<std::string, std::map<int, tlog *>> route_log1;
 // TODO: conf_deep_delete
  bool delete_flag = true;
- //int deep_delete = 3;
- int deep_delete = 10;
+ int deep_delete = 3;
+ //int deep_delete = 10;
  int peer_id = 0;
  std::map<int, tlog *>::iterator it_peer_id;
  std::string dst_ip;
