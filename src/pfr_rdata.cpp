@@ -64,6 +64,11 @@ extern int pfr_ping_req;
 extern int printr_new_cnt;
 
 extern pthread_mutex_t mtr;
+//extern configuration_map_t configuration_map;
+extern std::map<std::string, std::string> configuration_map;
+
+extern int deep_delete; //config_t
+extern double min_rtt; //config_t, was made a global
 
 double tparm::get_rtt() { return rtt; }
 double tparm::get_avg_rtt() { return avg_rtt; }
@@ -241,12 +246,17 @@ void pfr_log_print(int curr_probe_id) {
    also this one fills route_log1[probe_id]
 */
 void pfr_route_scan(int probe_id) {
-    double min_rtt = 50000; 
+    //double min_rtt = 50000; //config_t, was made a global
     double curr_rtt = 0; 
     double avg_rtt = 0; 
     int peer_id = 0; 
     int ts = 0; 
     int lost = 0; 
+
+    if (configuration_map.count("min_rtt") != 0) {
+        //pfr_ping_req = convert_string_to_integer(configuration_map["pfr_ping_req"]);
+    }
+
     std::map<int, std::map<int, tparm *>>::iterator it_peer_id;
     //pthread_mutex_lock(&mtr); 
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); it0++) {
@@ -348,11 +358,18 @@ void pfr_delete(int probe_id, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
 //extern std::map<std::string, std::map<int, tlog *>> route_log1;
 // TODO: conf_deep_delete
  bool delete_flag = true;
- int deep_delete = 3;
+ //int deep_delete = 3; //config_t, was made a global
  //int deep_delete = 10;
  int peer_id = 0;
  std::map<int, tlog *>::iterator it_peer_id;
  std::string dst_ip;
+
+ 
+ if (configuration_map.count("deep_delete") != 0) {
+        //pfr_ping_req = convert_string_to_integer(configuration_map["pfr_ping_req"]);
+ }
+ 
+
  if(probe_id <= deep_delete)
      return;
  for(std::map<std::string, std::map<int, tlog *>>::iterator it0 = route_log1.begin(); it0 != route_log1.end(); it0++) {

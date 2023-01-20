@@ -100,6 +100,7 @@ pfr_asbr_parm::pfr_asbr_parm(std::string peer_name, std::string ip) {
  nc_callback_print(clb_print);
  
  // move to config
+ // config_t
  nc_callback_error_reply(clb_error_print);
  nc_set_keypair_path("/root/.ssh/id_rsa", "/root/.ssh/id_rsa.pub");
 

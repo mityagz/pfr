@@ -17,6 +17,9 @@ struct proto    proto_v4 = { proc_v4, NULL, NULL, NULL, NULL, 0, IPPROTO_ICMP };
 struct proto    proto_v6 = { proc_v6, send_v6, init_v6, NULL, NULL, 0, IPPROTO_ICMPV6 };
 #endif
 
+extern int pfr_ping_req;
+extern std::string src_addr;
+extern int usleep_between_echo;
 
 //icmp_payload icmp_d;
 //int datalen = 56;
@@ -98,7 +101,7 @@ void send_v4(idata *pin, pthread_t pt) {
     memset(&serveraddr, 0x00, sizeof(struct sockaddr_in));
     serveraddr.sin_family = AF_INET;
     serveraddr.sin_port = htons(0);
-    serveraddr.sin_addr.s_addr = inet_addr("1.0.5.230"); // todo: conf
+    serveraddr.sin_addr.s_addr = inet_addr(src_addr.c_str()); // config_t
 
     int rc = bind(sockwr, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
     //
@@ -158,7 +161,7 @@ void send_v4(idata *pin, pthread_t pt) {
     
         // struct icmp_d fills 
        //
-        for(int seq = 0; seq < 5; seq++) {
+        for(int seq = 0; seq < pfr_ping_req; seq++) {
             icmp->icmp_seq = seq;
             icmp_payload *icmp_d = (icmp_payload *)malloc(sizeof(icmp_payload));
             struct timeval  *stv = (struct timeval *)malloc(sizeof(struct timeval));
@@ -214,7 +217,8 @@ void send_v4(idata *pin, pthread_t pt) {
             free(stv);
             free(icmp_d);
             //usleep(3000);
-            usleep(2500);
+            //usleep(2500); //config_t
+            usleep(usleep_between_echo); //config_t
       } 
       it++;
        //usleep(20000);
