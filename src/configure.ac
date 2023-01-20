@@ -28,7 +28,19 @@ AC_CHECK_HEADER([glib.h])
 AC_CHECK_LIB([pthread], [main])
 AC_CHECK_LIB([netconf], [main])
 AC_CHECK_LIB([spdlog], [main])
+AC_CHECK_LIB([boost_system], [main])
+AC_CHECK_LIB([boost_program_options], [main])
+AC_CHECK_LIB([boost_regex], [main])
 
+
+##
+AC_LANG_PUSH([C++])
+AC_CHECK_HEADERS([boost/foreach.hpp], [],[AC_MSG_ERROR(You need the Boost libraries.)])
+AC_LANG_POP([C++])
+##
+
+#AX_BOOST_BASE([MINIMUM-VERSION], [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
+#AX_BOOST_BASE([1.0], )
 
 CFLAGS="$CFLAGS $GLIB_CFLAGS -std=gnu99 $(echo '${UFLAGS}')"
 CPPFLAGS="$CPPFLAGS $GLIB_CPPFLAG"
