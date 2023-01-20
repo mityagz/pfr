@@ -115,6 +115,12 @@ std::map<std::string, std::string> configuration_map;
 std::string global_config_path = "/etc/pfrd.conf";
 
 // this part of code was stolen from fastnetmon
+
+// convert string to integer
+int convert_string_to_integer(std::string line) {
+     return atoi(line.c_str());
+}
+
 bool load_configuration_file() {
     std::ifstream config_file(global_config_path.c_str());
     std::string line;
@@ -152,21 +158,48 @@ bool load_configuration_file() {
     }
 
     if (configuration_map.count("pfr_ping_req") != 0) {
-     //pfr_ping_req = convert_string_to_integer(configuration_map["pfr_ping_req"]);
+     pfr_ping_req = convert_string_to_integer(configuration_map["pfr_ping_req"]);
+    }
+
+    if (configuration_map.count("max_time_of_echo") != 0) {
+     max_time_of_echo = convert_string_to_integer(configuration_map["max_time_of_echo"]);
+    }
+    
+    if (configuration_map.count("deep_delete") != 0) {
+     deep_delete = convert_string_to_integer(configuration_map["deep_delete"]);
+    }
+
+    if (configuration_map.count("min_rtt") != 0) {
+     min_rtt = convert_string_to_integer(configuration_map["min_rtt"]);
+    }
+
+    if (configuration_map.count("usleep_between_echo") != 0) {
+     usleep_between_echo = convert_string_to_integer(configuration_map["usleep_between_echo"]);
+    }
+
+    if (configuration_map.count("sleep_after_join") != 0) {
+     sleep_after_join = convert_string_to_integer(configuration_map["sleep_after_join"]);
+    }
+
+    if (configuration_map.count("sleep_after_update") != 0) {
+     sleep_after_update = convert_string_to_integer(configuration_map["sleep_after_update"]);
+    }
+
+    if (configuration_map.count("sleep_before_next_loop") != 0) {
+     sleep_before_next_loop = convert_string_to_integer(configuration_map["sleep_before_next_loop"]);
+    }
+
+    if (configuration_map.count("src_addr") != 0) {
+     src_addr = configuration_map["src_addr"];
     }
 
    /*
-    if (configuration_map.count("enable_connection_tracking")) {
-    if (configuration_map["enable_connection_tracking"] == "on") {
-        enable_conection_tracking = true;
+    if (configuration_map.count("enable_connection")) {
+    if (configuration_map["enable_connection"] == "on") {
+        enable_conection = true;
     } else {
-        enable_conection_tracking = false;
+        enable_conection = false;
     }
-    }
-
-    if (configuration_map.count("average_calculation_time") != 0) {
-        average_calculation_amount =
-        convert_string_to_integer(configuration_map["average_calculation_time"]);
     }
     */
     return true;
@@ -341,8 +374,8 @@ int main(int argc, char **argv) {
         pthread_mutex_lock(&mt_req_send); 
         req_stopped = 1;
         pthread_mutex_unlock(&mt_req_send); 
-        syslog_logger->debug("sleep(6)");
-        sleep(6); //config_t, sleep_after_join
+        syslog_logger->debug("sleep({})", sleep_after_join);
+        sleep(sleep_after_join); //config_t, sleep_after_join default: 6
         
         //pthread_join(thrdrd, NULL);
         
@@ -353,8 +386,8 @@ int main(int argc, char **argv) {
          pfr_route_update(probe_id, pfrList, m, br);
          syslog_logger->debug("3:e End of pfr_route_update()...");
 
-         syslog_logger->debug("sleep(30)");
-         sleep(30); //config_t, sleep_after_update
+         syslog_logger->debug("sleep({})", sleep_after_update);
+         sleep(sleep_after_update); //config_t, sleep_after_update default: 30
          
          //print_rdata();
 
@@ -406,7 +439,7 @@ int main(int argc, char **argv) {
 
 
         probe_id++;
-        syslog_logger->debug("sleep(20), next for(), probe_id++");
-        sleep(20); //config_t, sleep_before_next_loop
+        syslog_logger->debug("sleep({}), next for(), probe_id++: {}", sleep_before_next_loop, probe_id);
+        sleep(sleep_before_next_loop); //config_t, sleep_before_next_loop default: 20
     }
 }
