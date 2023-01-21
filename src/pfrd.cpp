@@ -205,6 +205,46 @@ bool load_configuration_file() {
     return true;
 }
 
+// check file existence
+bool file_exists(std::string path) {
+    FILE* check_file = fopen(path.c_str(), "r");
+    if (check_file) {
+        fclose(check_file);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool read_pid_from_file(pid_t& pid, std::string pid_path) {
+    std::fstream pid_file(pid_path.c_str(), std::ios_base::in);
+
+    if (pid_file.is_open()) {
+        pid_file >> pid;
+        pid_file.close();
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+bool print_pid_to_file(pid_t pid, std::string pid_path) {
+    std::ofstream pid_file;
+    std::cout << "pid: " << pid << std::endl;
+    std::cout << "pid_path: " << pid_path << std::endl;
+
+    pid_file.open(pid_path.c_str(), std::ios::trunc);
+    if (pid_file.is_open()) {
+        pid_file << pid << "\n";
+        pid_file.close();
+        return true;
+    } else {
+        return false;    
+    }
+}
+
+
 int main(int argc, char **argv) {
     //main loop 
     //data for thread peer_id, probe_id, thread_id, timestamp
@@ -259,10 +299,10 @@ int main(int argc, char **argv) {
                 global_config_path = vm["configuration_file"].as<std::string>();
                 std::cout << "We will use custom path to configuration file: " << global_config_path << std::endl;
            }
-       } catch (po::error& e) {
+    } catch (po::error& e) {
                 std::cerr << "ERROR: " << e.what() << std::endl << std::endl; 
                 exit(EXIT_FAILURE);
-       }
+    }
 
 
      // We use ideas from here https://github.com/bmc/daemonize/blob/master/daemon.c
@@ -288,7 +328,6 @@ int main(int argc, char **argv) {
         }
      }
 
-    load_configuration_file();
 
     /*
     std::string ident = "pfrd";
@@ -301,6 +340,9 @@ int main(int argc, char **argv) {
     int max_log_files = 5; //config_t
     syslog_logger = spdlog::rotating_logger_mt("pfr_syslog", "/var/log/pfrd.log", max_log_size, max_log_files);
     syslog_logger->set_level(spdlog::level::debug);
+    
+    bool load_config_result = load_configuration_file();
+    
     syslog_logger->debug("");
     syslog_logger->debug("-------------------------------------------------------");
     syslog_logger->debug("pfrd was started...");
@@ -309,7 +351,45 @@ int main(int argc, char **argv) {
     syslog_logger->debug("min_rtt: {}", min_rtt);
     syslog_logger->debug("src_addr: {}", src_addr);
     syslog_logger->debug("max_time_of_echo: {}", max_time_of_echo);
+    syslog_logger->debug("pid_file: {}", pid_path);
     spdlog::flush_every(std::chrono::seconds(3)); //config_t
+
+    if (!load_config_result) {
+        syslog_logger->debug("Can't open config file {} please create it!", global_config_path);
+        exit(1);
+    } 
+
+    if (file_exists(pid_path)) {
+        pid_t pid_from_file = 0;
+        if (read_pid_from_file(pid_from_file, pid_path)) {
+            // We could read pid
+            if (pid_from_file > 0) {
+                // We use signal zero for check process existence
+                int kill_result = kill(pid_from_file, 0);
+                if (kill_result == 0) {
+                    syslog_logger->debug("pfrd is already running with pid: {}", pid_from_file);
+                    exit(1);
+                } else {
+                    // Yes, we have pid with pid but it's zero
+                }
+            } else {
+                // pid from file is broken, we assume tool is not running
+            }
+        } else {
+            // We can't open file, let's assume it's broken and tool is not running
+        }
+    } else {
+        // no pid file
+    }
+    
+    // If we not failed in check steps we could run toolkit
+    bool print_pid_to_file_result = print_pid_to_file(getpid(), pid_path);
+    
+    if (!print_pid_to_file_result) {
+        syslog_logger->debug("Could not create pid file, please check permissions: {}", pid_path);
+        syslog_logger->debug("exit(1)");
+        exit(1);
+    }
 
     //pfr_dst_list pfrList(10);
     pfrList = pfr_dst_list(10, 10);
