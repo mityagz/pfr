@@ -94,18 +94,17 @@ pthread_mutex_t mt_req_send;
 std::shared_ptr<spdlog::logger> syslog_logger;
 
 // conf parameters
-int pfr_ping_req; //config_t, pfr_rdata.cpp, ping_send_v4.cpp
+int pfr_ping_req = 5; //config_t, pfr_rdata.cpp, ping_send_v4.cpp
 long int max_time_of_echo = 1200; // max time secs spent to send echo. config_t
 int sleep_after_join = 6;
 int sleep_after_update = 30;
 int sleep_before_next_loop = 20;
 bool enable_conection_tracking = true;
 std::string pid_path;
-int deep_delete; //config_t, pfr_rdata.cpp
-double min_rtt; //config_t, pfr_data.cpp
-std::string src_addr; //config_t, ping_send_v4.cpp
-int usleep_between_echo; //config_t, ping_send_v4.cpp
-
+int deep_delete = 3; //config_t, pfr_rdata.cpp
+double min_rtt = 50000; //config_t, pfr_data.cpp
+std::string src_addr = "1.0.5.230"; //config_t, ping_send_v4.cpp
+int usleep_between_echo = 2500; //config_t, ping_send_v4.cpp
 
 
 // Global map with parsed config file
@@ -125,12 +124,6 @@ bool load_configuration_file() {
     std::ifstream config_file(global_config_path.c_str());
     std::string line;
 
-    deep_delete = 3;
-    min_rtt = 50000;
-    pfr_ping_req = 5;
-    max_time_of_echo = 1200; // max time secs spent to send echo. config_t
-    src_addr = "1.0.5.230";
-    usleep_between_echo = 2500;
     
     if (!config_file.is_open()) {
         syslog_logger->debug("Can't open config file");
@@ -352,6 +345,7 @@ int main(int argc, char **argv) {
     syslog_logger->debug("src_addr: {}", src_addr);
     syslog_logger->debug("max_time_of_echo: {}", max_time_of_echo);
     syslog_logger->debug("pid_file: {}", pid_path);
+    syslog_logger->debug("pid: {}", getpid());
     spdlog::flush_every(std::chrono::seconds(3)); //config_t
 
     if (!load_config_result) {
