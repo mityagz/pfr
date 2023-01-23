@@ -30,12 +30,13 @@ class pfr_peer {
     std::string type;
     std::string sp_name;
     int pfr_dst_id;
+    std::string peer_community;
    public:
     pfr_peer();
     //pfr_peer(const pfr_peer &);
     pfr_peer(int id, int peer_group_id, std::string pe_ip, std::string pe, int interface_id, std::string address, \
              std::string ipv4_peer_address, std::string ipv6_peer_address, \
-             std::string sp_name, int pfr_dst_id);
+             std::string sp_name, int pfr_dst_id, std::string peer_community);
     //pfr_peer(int id, int peer_group_id, std::string pe_ip, std::string pe, int interface_id, std::string address, \
     //         std::string laddress, std::string ipv4_peer_address, std::string lipv4_peer_address, std::string ipv6_peer_address, \
     //         std::string lipv6_peer_address, std::string type, std::string sp_name, int pfr_dst_id);
@@ -53,6 +54,7 @@ class pfr_peer {
     std::string get_type();
     std::string get_sp_name();
     int         get_pfr_dst_id();
+    std::string get_peer_community();
 };
 
 class pfr_peers {

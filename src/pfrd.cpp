@@ -333,6 +333,7 @@ int main(int argc, char **argv) {
     int max_log_files = 5; //config_t
     syslog_logger = spdlog::rotating_logger_mt("pfr_syslog", "/var/log/pfrd.log", max_log_size, max_log_files);
     syslog_logger->set_level(spdlog::level::debug);
+    spdlog::flush_every(std::chrono::seconds(3)); //config_t
     
     bool load_config_result = load_configuration_file();
     
@@ -346,7 +347,6 @@ int main(int argc, char **argv) {
     syslog_logger->debug("max_time_of_echo: {}", max_time_of_echo);
     syslog_logger->debug("pid_file: {}", pid_path);
     syslog_logger->debug("pid: {}", getpid());
-    spdlog::flush_every(std::chrono::seconds(3)); //config_t
 
     if (!load_config_result) {
         syslog_logger->debug("Can't open config file {} please create it!", global_config_path);

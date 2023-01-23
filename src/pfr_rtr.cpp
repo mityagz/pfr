@@ -163,6 +163,28 @@ class pfr_asbr_parm pfr_asbrs::get_asbr(std::string ip) { return asbrs[ip]; }
 class pfr_asbr_parm pfr_asbrs::get_asbr(int id_peer) {}
 std::string pfr_asbrs::get_asbr_lo(int id_peer) { return asbrIdPeer[id_peer]; }
 
+// https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po
+std::string goexec(const char* cmd) {
+    char buffer[128];
+    std::string result = "";
+    FILE* pipe = popen(cmd, "r");
+    if (pipe) {
+        syslog_logger->debug("goexec: {}", cmd);
+    }
+    if (!pipe) throw std::runtime_error("popen() failed!");
+       try {
+            while (fgets(buffer, sizeof buffer, pipe) != NULL) {
+               result += buffer;
+            }
+            syslog_logger->debug("goexec result: {}", result);
+       } catch (...) {
+            pclose(pipe);
+            throw;
+       }
+    pclose(pipe);
+    return result;
+}
+
 // set of method for manipulation of routes on juniper routers
 // we are going to use netconf and ephemerial db
 void pfr_routes_man(int probe_id, std::map<int, pfr_peer> &mm, \
@@ -201,36 +223,32 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
     std::string ipasbr = (mm[curr_peer_id]).pfr_peer_get_pe_ip();
     std::string nameasbr = (mm[curr_peer_id]).get_pe_name();
     std::string nh = (mm[curr_peer_id]).get_ipv4_peer_address();
+    std::string comm = (mm[curr_peer_id]).get_peer_community();
         if(probe_id > 1 && prev_peer_id != 0) {
             int pid = (mm[prev_peer_id]).pfr_peer_get_id();
             std::string pipasbr = (mm[prev_peer_id]).pfr_peer_get_pe_ip();
             std::string pnameasbr = (mm[prev_peer_id]).get_pe_name();
             std::string pnh = (mm[prev_peer_id]).get_ipv4_peer_address();
+            std::string pcomm = (mm[prev_peer_id]).get_peer_community();
             std::string prts = "del routing-instances i routing-options static route " + dst_ip \
                              + "/32 next-hop " + pnh + " community 3333:10000 tag " + std::to_string(pid);
+            std::string exec_prts = "/home/mitya/build/gobgp/src/gobgp global rib del -a ipv4 " + dst_ip + "/32 community " + pcomm;         
+            goexec(exec_prts.c_str());
             std::string plo0asbr = br.get_asbr_lo(prev_peer_id);
             pfr_asbr_parm pp = br.get_asbr(plo0asbr);
             struct nc_session *pncs = pp.get_session();
-            /*
-            std::cout << "ppfr_create_set_jrouter_rt(): " << plo0asbr << std::endl;
-            std::cout << "ppfr_create_set_jrouter_rt() nc_session: " << pncs << std::endl;
-            std::cout << "ppfr_create_set_jrouter_rt(): " << prts << std::endl;
-            */
+
             syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", plo0asbr);
             //syslog_logger->debug("ppfr_create_set_jrouter_rt() nc_session: {}", pncs);
             syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", prts);
         } 
         std::string rts = "set routing-instances i routing-options static route " + dst_ip \
                         + "/32 next-hop " + nh + " community 3333:10000 tag " + std::to_string(id);
+        std::string exec_rts = "/home/mitya/build/gobgp/src/gobgp global rib add -a ipv4 " + dst_ip + "/32 community " + comm;         
+        goexec(exec_rts.c_str());
     std::string lo0asbr = br.get_asbr_lo(curr_peer_id);
     pfr_asbr_parm p = br.get_asbr(lo0asbr);
     struct nc_session *ncs = p.get_session();
-    /*
-    std::cout << "pfr_create_set_jrouter_rt(): " << lo0asbr << std::endl;
-    std::cout << "pfr_create_set_jrouter_rt() nc_session: " << ncs << std::endl;
-    std::cout << "pfr_create_set_jrouter_rt(): " << rts << std::endl;
-    std::cout << "----------------------------------------------------------" << std::endl;
-    */
     syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", lo0asbr);
     //syslog_logger->debug("ppfr_create_set_jrouter_rt() nc_session: {}", ncs);
     syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", rts);
@@ -250,8 +268,11 @@ void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
             std::string pipasbr = (mm[prev_peer_id]).pfr_peer_get_pe_ip();
             std::string pnameasbr = (mm[prev_peer_id]).get_pe_name();
             std::string pnh = (mm[prev_peer_id]).get_ipv4_peer_address();
+            std::string pcomm = (mm[prev_peer_id]).get_peer_community();
             std::string prts = "del routing-instances i routing-options static route " + dst_ip \
                              + "/32 next-hop " + pnh + " community 3333:10000 tag " + std::to_string(pid);
+            std::string exec_prts = "/home/mitya/build/gobgp/src/gobgp global rib del -a ipv4 " + dst_ip + "/32 community " + pcomm;         
+            goexec(exec_prts.c_str());
             std::string plo0asbr = br.get_asbr_lo(prev_peer_id);
             pfr_asbr_parm pp = br.get_asbr(plo0asbr);
             struct nc_session *pncs = pp.get_session();
