@@ -105,6 +105,7 @@ int deep_delete = 3; //config_t, pfr_rdata.cpp
 double min_rtt = 50000; //config_t, pfr_data.cpp
 std::string src_addr = "1.0.5.230"; //config_t, ping_send_v4.cpp
 int usleep_between_echo = 2500; //config_t, ping_send_v4.cpp
+std::string gobgp_path;
 
 
 // Global map with parsed config file
@@ -148,6 +149,10 @@ bool load_configuration_file() {
     
     if (configuration_map.count("pid_path") != 0) {
      pid_path = configuration_map["pid_path"];
+    }
+
+    if (configuration_map.count("gobgp_path") != 0) {
+     gobgp_path = configuration_map["gobgp_path"];
     }
 
     if (configuration_map.count("pfr_ping_req") != 0) {
@@ -347,6 +352,7 @@ int main(int argc, char **argv) {
     syslog_logger->debug("max_time_of_echo: {}", max_time_of_echo);
     syslog_logger->debug("pid_file: {}", pid_path);
     syslog_logger->debug("pid: {}", getpid());
+    syslog_logger->debug("gobgp_path: {}", gobgp_path);
 
     if (!load_config_result) {
         syslog_logger->debug("Can't open config file {} please create it!", global_config_path);

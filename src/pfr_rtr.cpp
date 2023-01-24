@@ -18,6 +18,8 @@
 extern std::map<std::string, std::map<int, rt_parm *>> route;
 extern std::shared_ptr<spdlog::logger> syslog_logger;
 
+extern std::string gobgp_path;
+
 /*
 class pfr_asbr_parm {
     private:
@@ -232,7 +234,7 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
             std::string pcomm = (mm[prev_peer_id]).get_peer_community();
             std::string prts = "del routing-instances i routing-options static route " + dst_ip \
                              + "/32 next-hop " + pnh + " community 3333:10000 tag " + std::to_string(pid);
-            std::string exec_prts = "/home/mitya/build/gobgp/src/gobgp global rib del -a ipv4 " + dst_ip + "/32 community " + pcomm;         
+            std::string exec_prts = gobgp_path + " global rib del -a ipv4 " + dst_ip + "/32 community " + pcomm;         
             goexec(exec_prts.c_str());
             std::string plo0asbr = br.get_asbr_lo(prev_peer_id);
             pfr_asbr_parm pp = br.get_asbr(plo0asbr);
@@ -244,7 +246,7 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
         } 
         std::string rts = "set routing-instances i routing-options static route " + dst_ip \
                         + "/32 next-hop " + nh + " community 3333:10000 tag " + std::to_string(id);
-        std::string exec_rts = "/home/mitya/build/gobgp/src/gobgp global rib add -a ipv4 " + dst_ip + "/32 community " + comm;         
+        std::string exec_rts = gobgp_path + " global rib add -a ipv4 " + dst_ip + "/32 community " + comm;         
         goexec(exec_rts.c_str());
     std::string lo0asbr = br.get_asbr_lo(curr_peer_id);
     pfr_asbr_parm p = br.get_asbr(lo0asbr);
@@ -271,7 +273,7 @@ void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
             std::string pcomm = (mm[prev_peer_id]).get_peer_community();
             std::string prts = "del routing-instances i routing-options static route " + dst_ip \
                              + "/32 next-hop " + pnh + " community 3333:10000 tag " + std::to_string(pid);
-            std::string exec_prts = "/home/mitya/build/gobgp/src/gobgp global rib del -a ipv4 " + dst_ip + "/32 community " + pcomm;         
+            std::string exec_prts = gobgp_path + " global rib del -a ipv4 " + dst_ip + "/32 community " + pcomm;         
             goexec(exec_prts.c_str());
             std::string plo0asbr = br.get_asbr_lo(prev_peer_id);
             pfr_asbr_parm pp = br.get_asbr(plo0asbr);
