@@ -15,13 +15,14 @@
 #include "pfr_dst.h"
 #include "pfr_sql.h"
 #include "pfr_sql_list.h"
+#include "pfr_localnets.h"
 
 extern std::shared_ptr<spdlog::logger> syslog_logger;
+extern std::string localnets;
 
 pfr_dst_list::pfr_dst_list() {}
 
 pfr_dst_list::pfr_dst_list(int nlist) {
-        //this->nlist = nlist;
         pfr_sql_list psl = pfr_dst_list::get_pfr_dst_sql();
         std::vector<pfr_sql> pslq = psl.get();
 
@@ -34,10 +35,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
         const char *key_sem0 = "/key_sem0";
         sem_t *sem0;
 
-        //std::cout << "pfr_dst_list(int, int, prevdstList)" << std::endl;
         syslog_logger->debug("pfr_dst_list(int, int, prevdstList)");
 
-        //const char *shm_key_p0 = "/tmp/key0_shm0";
         const char *shm_key_p0 = "/etc/pfrd.conf";
         key_t shm_key0;
         int shm_id = 0;
@@ -54,7 +53,6 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
         sem0 = sem_open(key_sem0, 0, 0);
 
         if(sem_wait(sem0) == 0) {
-            //std::cout << "SEM0: Locked! overload" << std::endl;
             syslog_logger->debug("SEM0: Locked! overload");
         }
 
@@ -63,6 +61,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
            perror("Shared memory 0");
            exit(1);
         }
+
+        pfr_localnets ln = pfr_localnets(localnets);
 
         shm_addr = shmat(shm_id, NULL, 0);
         if(shm_addr == (void *) -1) {
@@ -75,12 +75,13 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
         int dst_id = 0;
         char *token = std::strtok(ret_shm_addr, delimiters);
         while (token) {
-            //std::cout << dst_id << ":" << token << std::endl;
             syslog_logger->debug("{}:{}", dst_id, token);
             token = std::strtok(nullptr, delimiters);
             if(token != NULL) {
-             pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));
-             dst_id++;
+                if(!ln.is_host_in_network(std::string(token))) {
+                    pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));
+                    dst_id++;
+                }
             }
         }
 
@@ -98,7 +99,6 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
 
         shmdt(shm_addr);
         if(sem_post(sem0) == 0) {
-           //std::cout << "SEM0: UnLocked! overload" << std::endl;
            syslog_logger->debug("SEM0: UnLocked! overload");
         }
 
@@ -107,10 +107,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
 pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
         const char *key_sem0 = "/key_sem0";
         sem_t *sem0;
-        //std::cout << "pfr_dst_list(int, int)" << std::endl;
         syslog_logger->debug("pfr_dst_list(int, int)");
 
-        //const char *shm_key_p0 = "/tmp/key0_shm0";
         const char *shm_key_p0 = "/etc/pfrd.conf";
         key_t shm_key0;
         int shm_id = 0;
@@ -141,26 +139,21 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
            perror("Shared memory attach");
            exit(1);
         }
+
+        pfr_localnets ln = pfr_localnets(localnets);
                                  
-        /*
-        std::cout << "shm_addr: " << shm_addr << std::endl;
-        ret_shm_addr = (char *)shm_addr;
-        std::cout << "ret_shm_addr: " << ret_shm_addr << std::endl;
-        std::cout << "-----------------------------------------------: " << std::endl;
-        */
         ret_shm_addr = (char *)shm_addr;
 
         int dst_id = 0;
         char *token = std::strtok(ret_shm_addr, delimiters);
         while (token) {
-            //std::cout << dst_id << ":" << token << std::endl;
             syslog_logger->debug("{}:{}", dst_id, token);
             token = std::strtok(nullptr, delimiters);
             if(token != NULL) {
-             pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));
-             dst_id++;
-             //if(dst_id > 1000)
-               //  break;
+                if(!ln.is_host_in_network(std::string(token))) {
+                    pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));
+                    dst_id++;
+                }
             }
         }
 
