@@ -101,7 +101,6 @@ pfr_asbr_parm::pfr_asbr_parm(std::string peer_name, std::string ip) {
  nc_verbosity(verbose);
  nc_callback_print(clb_print);
  
- // move to config
  // config_t
  nc_callback_error_reply(clb_error_print);
  nc_set_keypair_path("/root/.ssh/id_rsa", "/root/.ssh/id_rsa.pub");
@@ -109,12 +108,10 @@ pfr_asbr_parm::pfr_asbr_parm(std::string peer_name, std::string ip) {
  ncsession = nc_session_connect(ip.c_str(), 0, "pfr", 0); 
 
  if(ncsession == NULL) {
-   //printf("ncsession is NULL\n");
     netconf_conn = NULL;
  }
 
  if(nc_session_get_status(ncsession) == NC_SESSION_STATUS_WORKING) {
-    //printf("NC_SESSION_STATUS_WORKING\n");
     syslog_logger->debug("NC_SESSION_STATUS_WORKING");
     netconf_conn = ncsession;
  }
@@ -143,10 +140,7 @@ pfr_asbrs::pfr_asbrs(std::map<int, pfr_peer> &p) {
 
  for(std::map<std::string, pfr_asbr_parm>::iterator itb = asbrs.begin(); itb != asbrs.end(); ++itb) {
   std::string ip = itb->first;
-  //std::cout << "ASBR Peer ip of loopback: " << ip << std::endl;
-  //std::cout << "ASBR ncsession: " << asbrs[ip].get_session() << std::endl;
   syslog_logger->debug("ASBR Peer ip of loopback: {}", ip);
-  //syslog_logger->debug("ASBR ncsession: {}", asbrs[ip].get_session());
   sleep(5);
  }
 }
@@ -192,15 +186,12 @@ std::string goexec(const char* cmd) {
 void pfr_routes_man(int probe_id, std::map<int, pfr_peer> &mm, \
                     pfr_asbrs &br, std::map<std::string, std::map<int, rt_parm *>> &rroute) {
  for(std::map<std::string, std::map<int, rt_parm *>>::iterator it0 = rroute.begin(); it0 != rroute.end(); it0++) {
-    //for(std::map<int, rt_parm *>::iterator it1 = rroute[it0->first].begin(); it1 != rroute[it0->first].end(); it1++) {
-    //    probe_id = it1->first;
         std::string dst_ip = it0->first;
         int prev_peer_id = rroute[it0->first][probe_id]->get_prev_peer();
         int prev_min = rroute[it0->first][probe_id]->get_pmin_rtt();
         int curr_peer_id = rroute[it0->first][probe_id]->get_curr_peer();
         int cmin_rtt = rroute[it0->first][probe_id]->get_cmin_rtt();
         pfr_create_set_jrouter_rt(mm, br, probe_id, prev_peer_id, curr_peer_id, dst_ip);
-    //} 
  } 
  //
  // get routes from devices?
@@ -241,7 +232,6 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
             struct nc_session *pncs = pp.get_session();
 
             syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", plo0asbr);
-            //syslog_logger->debug("ppfr_create_set_jrouter_rt() nc_session: {}", pncs);
             syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", prts);
         } 
         std::string rts = "set routing-instances i routing-options static route " + dst_ip \
@@ -252,15 +242,10 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
     pfr_asbr_parm p = br.get_asbr(lo0asbr);
     struct nc_session *ncs = p.get_session();
     syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", lo0asbr);
-    //syslog_logger->debug("ppfr_create_set_jrouter_rt() nc_session: {}", ncs);
     syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", rts);
     syslog_logger->debug("-------------------------------------------------------------------");
     pfr_create_xml_jrouter_rt(rts, ncs);
    }
-// create from route[][]
-// set of commands like:
-// del routing-instances i routing-options static route 3.3.3.3/32 next-hop 5.5.5.5 community 3333:10000
-// set routing-instances i routing-options static route 3.3.3.3/32 next-hop 5.5.5.5 community 3333:10000
 }
 
 void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
