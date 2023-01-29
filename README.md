@@ -8,7 +8,8 @@ external peer with min rtt&&packet loss. Gobgp is used for routes injection.
 
 This code isn't production ready!
 
-TODO: 
+TODO:  
 
-   Plan to use grpc to comunicate with gobgp.
-   Add localnets list, this list contains hosts which don't take part in icmp probes.
+Plan to use grpc to comunicate with gobgp. 
+Add localnets list, this list contains hosts which don't take part in icmp probes. 
+ 
