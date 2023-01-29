@@ -10,6 +10,6 @@ This code isn't production ready!
 
 TODO:  
 
-Plan to use grpc to comunicate with gobgp. 
-Add localnets list, this list contains hosts which don't take part in icmp probes. 
+Plan to use grpc to comunicate with gobgp.   
+Add localnets list, this list contains hosts which don't take part in icmp probes.  
  
