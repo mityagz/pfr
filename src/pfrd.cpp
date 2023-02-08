@@ -35,6 +35,16 @@ typedef struct {
 } idata;
 */
 
+bool sig_usr_flag = false;
+
+static void sig_usr(int signo) {
+    if (signo == SIGUSR1) {
+        sig_usr_flag = true;
+    } else if (signo == SIGUSR2) {
+        sig_usr_flag = true;
+    }
+}
+
 void *send_req(void *pin) {
  pthread_t thId = pthread_self();
 
@@ -271,6 +281,9 @@ int main(int argc, char **argv) {
     namespace po = boost::program_options;
     std::string pfrd_version = "0.1";
     
+    signal(SIGUSR1, sig_usr);
+    signal(SIGUSR2, sig_usr);
+
     try {
         po::options_description desc("Allowed options");
         desc.add_options()
@@ -502,6 +515,13 @@ int main(int argc, char **argv) {
          syslog_logger->debug("7.5:s Start of pfr_delete()...");
          pfr_delete(probe_id, m, br);
          syslog_logger->debug("7.5:e End of pfr_delete()...");
+
+            
+         // pfr graceful shutdown
+         if(sig_usr_flag) {
+            syslog_logger->debug("graceful shutdown...");
+            exit(1);       
+         } 
 
          send_stopped = 0;
          req_stopped = 0;
