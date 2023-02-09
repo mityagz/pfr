@@ -35,13 +35,16 @@ typedef struct {
 } idata;
 */
 
-bool sig_usr_flag = false;
+bool sig_usr1_flag = false;
+bool sig_usr2_flag = false;
+bool sig_int_flag = false;
 
 static void sig_usr(int signo) {
-    if (signo == SIGUSR1) {
-        sig_usr_flag = true;
+    if (signo == SIGUSR1 || signo == SIGINT) {
+        sig_usr1_flag = true;
+        sig_int_flag = true;
     } else if (signo == SIGUSR2) {
-        sig_usr_flag = true;
+        sig_usr2_flag = true;
     }
 }
 
@@ -518,10 +521,34 @@ int main(int argc, char **argv) {
 
             
          // pfr graceful shutdown
-         if(sig_usr_flag) {
+         if(sig_usr1_flag || sig_int_flag) {
             syslog_logger->debug("graceful shutdown...");
+            pfr_delete_all(probe_id, m, br);
             exit(1);       
          } 
+
+         // pfr reread conf
+         if(sig_usr2_flag) {
+            syslog_logger->debug("reread configuration...");
+            load_config_result = load_configuration_file();
+            if (!load_config_result) {
+                syslog_logger->debug("Can't open config file(reread) {} please create it!", global_config_path);
+                exit(1);
+            } 
+    
+            syslog_logger->debug("");
+            syslog_logger->debug("-------------------------------------------------------");
+            syslog_logger->debug("pfrd configuration file was reread...");
+            syslog_logger->debug("global vars:");
+            syslog_logger->debug("deep_delete: {}", deep_delete);
+            syslog_logger->debug("min_rtt: {}", min_rtt);
+            syslog_logger->debug("src_addr: {}", src_addr);
+            syslog_logger->debug("max_time_of_echo: {}", max_time_of_echo);
+            syslog_logger->debug("pid_file: {}", pid_path);
+            syslog_logger->debug("pid: {}", getpid());
+            syslog_logger->debug("gobgp_path: {}", gobgp_path);
+            syslog_logger->debug("localnets: {}", localnets);
+         }
 
          send_stopped = 0;
          req_stopped = 0;

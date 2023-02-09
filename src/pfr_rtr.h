@@ -49,5 +49,6 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &bbr, int 
 void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &bbr, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip);
 void pfr_create_xml_jrouter_rt(std::string rt, struct nc_session * ncs);
 void pfr_delete(int probe_id, std::map<int, pfr_peer> &p, pfr_asbrs &br); // delete dst_ip who didn't answer 3 times
+void pfr_delete_all(int probe_id, std::map<int, pfr_peer> &p, pfr_asbrs &br); // delete all dst_ip (graceful shutdown)
 void pfr_delete_r_route(std::map<int, pfr_peer> &p, pfr_asbrs &br, std::string dst_ip, int peer_id); // delete dst_ip subfunction
 #endif // PFR_RTR_H
