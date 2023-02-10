@@ -156,7 +156,7 @@ pfr_asbrs::~pfr_asbrs() {
 
 void pfr_asbrs::set_asbr(int id, std::string ip, class pfr_asbr_parm &parm) {}
 class pfr_asbr_parm pfr_asbrs::get_asbr(std::string ip) { return asbrs[ip]; }
-class pfr_asbr_parm pfr_asbrs::get_asbr(int id_peer) {}
+class pfr_asbr_parm pfr_asbrs::get_asbr(int id_peer) { pfr_asbr_parm ap; return ap; }
 std::string pfr_asbrs::get_asbr_lo(int id_peer) { return asbrIdPeer[id_peer]; }
 
 // https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po
@@ -203,7 +203,7 @@ void pfr_routes_man(int probe_id, std::map<int, pfr_peer> &mm, \
 // get route conf from device to create route_out[][] structure if pfrd was reloaded/restarteed
 void pfr_get_jrouter_rt() {}
 // get route conf from device to return map of strings
-std::map<std::string, std::string> pfr_get_jrouter_rt1() {}
+std::map<std::string, std::string> pfr_get_jrouter_rt1() { std::map<std::string, std::string> ms; return ms; }
 
 std::vector<std::string> pfr_update_jrouter_rt() { std::vector<std::string> vs; return vs; }
 
