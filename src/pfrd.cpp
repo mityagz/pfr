@@ -121,6 +121,13 @@ int usleep_between_echo = 2500; //config_t, ping_send_v4.cpp
 std::string gobgp_path;
 std::string localnets;
 
+// conf parameters for postgres
+std::string pghost = "127.0.0.1";
+std::string pgport = "5432";
+std::string db_name = "vc";
+std::string login = "vc";
+std::string pwd = "vc";
+
 
 // Global map with parsed config file
 //typedef std::map<std::string, std::string> configuration_map_t;
@@ -205,8 +212,24 @@ bool load_configuration_file() {
      sleep_before_next_loop = convert_string_to_integer(configuration_map["sleep_before_next_loop"]);
     }
 
-    if (configuration_map.count("src_addr") != 0) {
-     src_addr = configuration_map["src_addr"];
+    if (configuration_map.count("pghost") != 0) {
+     pghost = configuration_map["pghost"];
+    }
+
+    if (configuration_map.count("pgport") != 0) {
+     pgport = configuration_map["pgport"];
+    }
+
+    if (configuration_map.count("db_name") != 0) {
+     db_name = configuration_map["db_name"];
+    }
+
+    if (configuration_map.count("login") != 0) {
+     login = configuration_map["login"];
+    }
+
+    if (configuration_map.count("pwd") != 0) {
+     pwd = configuration_map["pwd"];
     }
 
    /*
@@ -375,6 +398,12 @@ int main(int argc, char **argv) {
     syslog_logger->debug("pid: {}", getpid());
     syslog_logger->debug("gobgp_path: {}", gobgp_path);
     syslog_logger->debug("localnets: {}", localnets);
+    syslog_logger->debug("pghost: {}", pghost);
+    syslog_logger->debug("pgport: {}", pgport);
+    syslog_logger->debug("db_name: {}", db_name);
+    syslog_logger->debug("login: {}", login);
+    syslog_logger->debug("pwd: {}", pwd);
+
 
     if (!load_config_result) {
         syslog_logger->debug("Can't open config file {} please create it!", global_config_path);

@@ -20,6 +20,13 @@
 extern std::shared_ptr<spdlog::logger> syslog_logger;
 extern std::string localnets;
 
+extern std::string pghost;
+extern std::string pgport;
+extern std::string db_name;
+extern std::string login;
+extern std::string pwd;
+
+
 pfr_dst_list::pfr_dst_list() {}
 
 pfr_dst_list::pfr_dst_list(int nlist) {
@@ -165,40 +172,26 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
 }
 
 pfr_sql_list pfr_dst_list::get_pfr_dst_sql() {
-    const char  *pghost="127.0.0.1",
-    //const char  *pghost="192.168.122.19",
-    *pgport="5432",
-    *pgoptions=NULL,
-    *pgtty=NULL,
-    *dbName="vc",
-    *login="vc",
-    *pwd="vc";
+    const char *pgoptions=NULL,
+               *pgtty=NULL;
 
     PGconn *conn;
     PGresult *res;
 
 
-    conn = PQsetdbLogin(pghost, pgport, pgoptions, pgtty, dbName, login, pwd);
+    conn = PQsetdbLogin(pghost.c_str(), pgport.c_str(), pgoptions, pgtty, db_name.c_str(), login.c_str(), pwd.c_str());
     if(PQstatus(conn) == CONNECTION_BAD) {
-        fprintf(stderr, "Connection to database '%s' failed.\n", dbName);
+        fprintf(stderr, "Connection to database '%s' failed.\n", db_name.c_str());
         fprintf(stderr, "%s", PQerrorMessage(conn));
+        exit(1);
     } else {
 #ifdef DEBUG
-        fprintf(stderr, "Connection to database '%s' Ok.\n", dbName);
+        fprintf(stderr, "Connection to database '%s' Ok.\n", db_name.c_str());
 #endif
     } 
 
     res = PQexec(conn, "select  id, ipv4_dst_address, ipv6_dst_address, description from pfr_dst");
-    //res = PQexec(conn, "select  id, ipv4_dst_address, ipv6_dst_address, description from pfr_dst limit 500");
     int ncols = PQnfields(res);
-    /*
-    printf("There are %d columns:", ncols);
-    for(int i = 0; i < ncols; i++) {
-        char *name = PQfname(res, i);
-        printf(" %s", name);
-    }
-    printf("\n");
-    */
 
     pfr_sql_list psl;
 
@@ -210,7 +203,6 @@ pfr_sql_list pfr_dst_list::get_pfr_dst_sql() {
         std::string ipv6_dst_address = PQgetvalue(res, i, 2);
         std::string description = PQgetvalue(res, i, 3);
         psl.pfr_sql_list_add(pfr_sql(id, ipv4_dst_address, ipv6_dst_address, description));
-        //std::cout << id << ':' << ipv4_dst_address << ':' << ipv6_dst_address << ':' <<  description << '\n';
     }
     PQclear(res);
     PQfinish(conn);
