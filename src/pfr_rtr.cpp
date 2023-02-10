@@ -205,7 +205,7 @@ void pfr_get_jrouter_rt() {}
 // get route conf from device to return map of strings
 std::map<std::string, std::string> pfr_get_jrouter_rt1() {}
 
-std::vector<std::string> pfr_update_jrouter_rt() {}
+std::vector<std::string> pfr_update_jrouter_rt() { std::vector<std::string> vs; return vs; }
 
 int pfr_set_jrouter_rt() { return 0; }
 
