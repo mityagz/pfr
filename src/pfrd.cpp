@@ -53,6 +53,7 @@ void *send_req(void *pin) {
 
  idata *in = (idata*)pin;
  send_v4(in, thId);
+ return (void *)in;
 }
 
 
