@@ -207,7 +207,7 @@ std::map<std::string, std::string> pfr_get_jrouter_rt1() {}
 
 std::vector<std::string> pfr_update_jrouter_rt() {}
 
-int pfr_set_jrouter_rt() {}
+int pfr_set_jrouter_rt() { return 0; }
 
 void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
    syslog_logger->debug("ppfr_create_set_jrouter_rt(): peer_id: {} : {} : {}", probe_id, prev_peer_id, curr_peer_id);
