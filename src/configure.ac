@@ -12,12 +12,18 @@ AC_CONFIG_HEADERS([config.h])
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
+#AC_PROG_CC(clang llvm-gcc gcc)
+#AC_PROG_CXX(clang++ llvm-g++ g++)
+#AC_PROG_CPP
 
 AM_INIT_AUTOMAKE
 
 # Checks for libraries.
 #PKG_CHECK_MODULES([GLIB], [glib-2.0])
 
+CFLAGS="$CFLAGS -I/usr/local/include"
+CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+LDFLAGS="$LDFLAGS -L/usr/local/lib"
 
 # Checks for libraries.
 AC_CHECK_LIB([crypt], [main])
