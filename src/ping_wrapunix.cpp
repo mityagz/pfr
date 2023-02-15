@@ -60,7 +60,8 @@ Fcntl(int fd, int cmd, int arg)
 void
 Gettimeofday(struct timeval *tv, void *foo)
 {
-	if (gettimeofday(tv, (__timezone_ptr_t)foo) == -1)
+	//if (gettimeofday(tv, (__timezone_ptr_t)foo) == -1)
+	if (gettimeofday(tv, 0)
 		err_sys("gettimeofday error");
 	return;
 }
@@ -95,6 +96,7 @@ Malloc(size_t size)
 	return(ptr);
 }
 
+/*
 int Mkstemp(char *tmpl) {
     int i;
 
@@ -110,6 +112,7 @@ int Mkstemp(char *tmpl) {
 
 	return i;
 }
+*/
 
 #include	<sys/mman.h>
 
