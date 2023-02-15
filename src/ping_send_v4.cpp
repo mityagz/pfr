@@ -103,8 +103,8 @@ void send_v4(idata *pin, pthread_t pt) {
     serveraddr.sin_port = htons(0);
     serveraddr.sin_addr.s_addr = inet_addr(src_addr.c_str()); // config_t
 
-    int rc = bind(sockwr, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
-    //
+    //int rc = bind(sockwr, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
+    bind(sockwr, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
 
 
     setuid(getuid());               // don't need special permissions any more
@@ -172,7 +172,7 @@ void send_v4(idata *pin, pthread_t pt) {
 
             icmp_d->peer_id = swap_endian<uint32_t>(in->peer_id);
             icmp_d->probe_id = swap_endian<uint64_t>(in->probe_id);
-            icmp_d->thread_id = swap_endian<uint64_t>(thId);
+            icmp_d->thread_id = swap_endian<uint64_t>((uint64_t)thId);
             icmp_d->timestamp = swap_endian<uint64_t>((unsigned long)time(NULL));
 
             memcpy(sendbuf + 8, icmp_d, sizeof(icmp_payload));
