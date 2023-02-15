@@ -11,21 +11,10 @@ AC_CONFIG_HEADERS([config.h])
 AC_CANONICAL_HOST
 
 # Checks for programs.
-case "${host_os}" in
-    linux*)
-        AC_PROG_CXX
-        AC_PROG_CC
-        AC_PROG_CPP
-        ;;
-    freebsd*)
-        AC_PROG_CC(clang llvm-gcc gcc)
-        AC_PROG_CXX(clang++ llvm-g++ g++)
-        AC_PROG_CPP
-        ;;
-    *)
-        AC_MSG_ERROR(["OS $host_os is not supported"])
-        ;;
-esac
+AC_PROG_CC([clang gcc cc])
+AC_PROG_CXX([clang++ g++ c++])
+AC_PROG_OBJC([clang gcc cc])
+AC_PROG_OBJCXX([clang++ g++ c++])
 
 
 AM_INIT_AUTOMAKE
