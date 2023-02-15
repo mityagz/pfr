@@ -1,0 +1,7 @@
+*.swp
+*.o
+.deps/
+pfrd
+stamp-h1
+depcomp
+autom4te.cache/
