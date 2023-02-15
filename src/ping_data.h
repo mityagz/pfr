@@ -23,7 +23,8 @@
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
 
-typedef struct __attribute__((__packed__)) {
+//typedef struct __attribute__((__packed__)) {
+typedef struct __attribute__((packed, aligned(32))) {
  //struct timeval *tv;
  struct timeval tv;
  uint32_t peer_id;
