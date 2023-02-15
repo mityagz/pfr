@@ -8,13 +8,32 @@ AC_CONFIG_HEADERS([config.h])
 
 : ${CXXFLAGS=-g -Werror -O0}
 
+AC_CANONICAL_HOST
+
 # Checks for programs.
-AC_PROG_CXX
-AC_PROG_CC
-AC_PROG_CPP
+#AC_PROG_CXX
+#AC_PROG_CC
+#AC_PROG_CPP
 #AC_PROG_CC(clang llvm-gcc gcc)
 #AC_PROG_CXX(clang++ llvm-g++ g++)
 #AC_PROG_CPP
+
+case "${host_os}" in
+    linux*)
+        AC_PROG_CXX
+        AC_PROG_CC
+        AC_PROG_CPP
+        ;;
+    freebsd*)
+        AC_PROG_CC(clang llvm-gcc gcc)
+        AC_PROG_CXX(clang++ llvm-g++ g++)
+        AC_PROG_CPP
+        ;;
+    *)
+        AC_MSG_ERROR(["OS $host_os is not supported"])
+        ;;
+esac
+
 
 AM_INIT_AUTOMAKE
 
