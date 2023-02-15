@@ -1,4 +1,5 @@
 #include	"ping0.h"
+#include <pthread.h>
 
 extern pthread_mutex_t mtr;
 extern pthread_mutex_t mt_req_send;
