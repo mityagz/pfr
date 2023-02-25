@@ -512,6 +512,8 @@ int main(int argc, char **argv) {
         //pthread_join(thrdrd, NULL);
         
         pthread_mutex_lock(&mt_req_send);
+        syslog_logger->debug("req_stopped({})", req_stopped);
+        syslog_logger->debug("send_stopped({})", send_stopped);
         if(send_stopped == 1) {
          syslog_logger->debug("3:s Start of pfr_route_update()...");
          //pfr_route_update(probe_id, pfrList);

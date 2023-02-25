@@ -127,16 +127,16 @@ void pfr_route_free(int probe_id) {
      dst_ip = it0->first;
      //for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[dst_ip].begin(); it1 != r[dst_ip].end(); it1++) {
       //probe_id = it1->first;
-       for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end(); it2++) {
+       for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end();) {
         peer_id = it2->first;
-         for(std::map<int, tparm *>::iterator it3 = r[dst_ip][probe_id][peer_id].begin(); it3 != r[dst_ip][probe_id][peer_id].end(); it3++) {
+         for(std::map<int, tparm *>::iterator it3 = r[dst_ip][probe_id][peer_id].begin(); it3 != r[dst_ip][probe_id][peer_id].end();) {
             seq_id = it3->first;
             delete r[dst_ip][probe_id][peer_id][seq_id];
-            r[dst_ip][probe_id][peer_id].erase(seq_id);
+            it3 = r[dst_ip][probe_id][peer_id].erase(it3);
             //std::cout << "ROUTE_FREE delete r[" << dst_ip << "][" << probe_id << "][" << peer_id << "][" << seq_id << "]" << std::endl;
             del_proc_v4_new_cnt++;
          } 
-         r[dst_ip][probe_id].erase(peer_id);
+         it2 = r[dst_ip][probe_id].erase(it2);
        }
        delete route[dst_ip][probe_id];
        route[dst_ip].erase(probe_id);
@@ -196,22 +196,22 @@ void pfr_route_update(int probe_id, pfr_dst_list &dstList, std::map<int, pfr_pee
         }
 
         syslog_logger->debug("ROUTE_UPDATE route[ip] doesn't exist in dstList[ip] need to remove from route[]: {}:{}", cnt_ip, dst_ip);
-        for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[dst_ip].begin(); it1 != r[dst_ip].end(); it1++) {
+        for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it1 = r[dst_ip].begin(); it1 != r[dst_ip].end();) {
             probe_id = it1->first;
-            for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end(); it2++) {
+            for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end();) {
                 peer_id = it2->first;
-                for(std::map<int, tparm *>::iterator it3 = r[dst_ip][probe_id][peer_id].begin(); it3 != r[dst_ip][probe_id][peer_id].end(); it3++) {
+                for(std::map<int, tparm *>::iterator it3 = r[dst_ip][probe_id][peer_id].begin(); it3 != r[dst_ip][probe_id][peer_id].end();) {
                     seq_id = it3->first;
                     deldst.insert(dst_ip);
                     delete r[dst_ip][probe_id][peer_id][seq_id];
-                    r[dst_ip][probe_id][peer_id].erase(seq_id);
+                    it3 = r[dst_ip][probe_id][peer_id].erase(it3);
                 }
                 del_proc_v4_new_cnt++;
-                r[dst_ip][probe_id].erase(peer_id);
+                it2 = r[dst_ip][probe_id].erase(it2);
             }
             delete route[dst_ip][probe_id];
             route[dst_ip].erase(probe_id);
-            r[dst_ip].erase(probe_id);
+            it1 = r[dst_ip].erase(it1);
         }
         del_scan_new_cnt++;
 
@@ -419,19 +419,19 @@ void pfr_delete_r_route(std::map<int, pfr_peer> &p, pfr_asbrs &br, std::string d
     int seq_id = 0;
     int last_peer_id = peer_id;
     syslog_logger->debug("0 pfr_r_route_delete() dst_ip {} : peer_id {}", dst_ip, last_peer_id);
-    for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it0 = r[dst_ip].begin(); it0 != r[dst_ip].end(); it0++) {
+    for(std::map<int, std::map<int, std::map<int, tparm *>>>::iterator it0 = r[dst_ip].begin(); it0 != r[dst_ip].end();) {
        probe_id = it0->first;
-       for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end(); it2++) {
+       for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end();) {
         peer_id = it2->first;
-         for(std::map<int, tparm *>::iterator it3 = r[dst_ip][probe_id][peer_id].begin(); it3 != r[dst_ip][probe_id][peer_id].end(); it3++) {
+         for(std::map<int, tparm *>::iterator it3 = r[dst_ip][probe_id][peer_id].begin(); it3 != r[dst_ip][probe_id][peer_id].end();) {
             seq_id = it3->first;
             delete r[dst_ip][probe_id][peer_id][seq_id];
-            r[dst_ip][probe_id][peer_id].erase(seq_id);
+            it3 = r[dst_ip][probe_id][peer_id].erase(it3);
          } 
-         r[dst_ip][probe_id].erase(peer_id);
+         it2 = r[dst_ip][probe_id].erase(it2);
        }
        delete route[dst_ip][probe_id];
-       r[dst_ip].erase(probe_id);
+       it0 = r[dst_ip].erase(it0);
        route[dst_ip].erase(probe_id);
     }
     syslog_logger->debug("1 pfr_r_route_delete() dst_ip {} : peer_id {}", dst_ip, last_peer_id);
