@@ -173,6 +173,10 @@ bool load_configuration_file() {
      pid_path = configuration_map["pid_path"];
     }
 
+    if (configuration_map.count("src_addr") != 0) {
+     src_addr = configuration_map["src_addr"];
+    }
+
     if (configuration_map.count("gobgp_path") != 0) {
      gobgp_path = configuration_map["gobgp_path"];
     }
