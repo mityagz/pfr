@@ -9,8 +9,6 @@
 #include "ping0.h"
 #include "ping_data.h"
 
-using namespace std;
-
 struct proto    proto_v4 = { proc_v4, NULL, NULL, NULL, NULL, 0, IPPROTO_ICMP };
 
 #ifdef  IPV6
@@ -20,6 +18,7 @@ struct proto    proto_v6 = { proc_v6, send_v6, init_v6, NULL, NULL, 0, IPPROTO_I
 extern int pfr_ping_req;
 extern std::string src_addr;
 extern int usleep_between_echo;
+extern int max_load;
 
 //icmp_payload icmp_d;
 //int datalen = 56;
@@ -103,9 +102,7 @@ void send_v4(idata *pin, pthread_t pt) {
     serveraddr.sin_port = htons(0);
     serveraddr.sin_addr.s_addr = inet_addr(src_addr.c_str()); // config_t
 
-    //int rc = bind(sockwr, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
-    bind(sockwr, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
-
+    int rc = bind(sockwr, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
 
     setuid(getuid());               // don't need special permissions any more
     if (pr->finit)

@@ -121,6 +121,7 @@ std::string src_addr = "1.0.5.230"; //config_t, ping_send_v4.cpp
 int usleep_between_echo = 2500; //config_t, ping_send_v4.cpp
 std::string gobgp_path;
 std::string localnets;
+int max_load = 0;
 
 // conf parameters for postgres
 std::string pghost = "127.0.0.1";
@@ -187,6 +188,10 @@ bool load_configuration_file() {
 
     if (configuration_map.count("pfr_ping_req") != 0) {
      pfr_ping_req = convert_string_to_integer(configuration_map["pfr_ping_req"]);
+    }
+
+    if (configuration_map.count("max_load") != 0) {
+     max_load = convert_string_to_integer(configuration_map["max_load"]);
     }
 
     if (configuration_map.count("max_time_of_echo") != 0) {
