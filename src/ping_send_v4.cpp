@@ -160,8 +160,11 @@ void send_v4(idata *pin, pthread_t pt) {
        //
         for(int seq = 0; seq < pfr_ping_req; seq++) {
             icmp->icmp_seq = seq;
-            icmp_payload *icmp_d = (icmp_payload *)malloc(sizeof(icmp_payload));
+            //icmp_payload *icmp_d = (icmp_payload *)malloc(sizeof(icmp_payload));
+            icmp_payload *icmp_d = (icmp_payload *)malloc(sizeof(icmp_payload) + max_load);
             struct timeval  *stv = (struct timeval *)malloc(sizeof(struct timeval));
+            if(max_load > 0)
+             memset(icmp_d, 0xa5, sizeof(icmp_payload) + max_load); // fill with pattern
             //Gettimeofday((struct timeval *) icmp_d->tv, NULL);
             //Gettimeofday((struct timeval *) stv, NULL);
             Gettimeofday((struct timeval *) &(icmp_d->tv), NULL);
@@ -172,9 +175,12 @@ void send_v4(idata *pin, pthread_t pt) {
             icmp_d->thread_id = swap_endian<uint64_t>((uint64_t)thId);
             icmp_d->timestamp = swap_endian<uint64_t>((unsigned long)time(NULL));
 
-            memcpy(sendbuf + 8, icmp_d, sizeof(icmp_payload));
 
-            len = 8 + sizeof(icmp_payload);      // checksum ICMP header and data
+            //memcpy(sendbuf + 8, icmp_d, sizeof(icmp_payload));
+            memcpy(sendbuf + 8, icmp_d, sizeof(icmp_payload) + max_load);
+
+            //len = 8 + sizeof(icmp_payload);      // checksum ICMP header and data
+            len = 8 + sizeof(icmp_payload) + max_load;      // checksum ICMP header and data
             icmp->icmp_cksum = 0;
             icmp->icmp_cksum = in_cksum((u_short *) icmp, len);
 

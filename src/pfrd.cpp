@@ -413,6 +413,7 @@ int main(int argc, char **argv) {
     syslog_logger->debug("db_name: {}", db_name);
     syslog_logger->debug("login: {}", login);
     syslog_logger->debug("pwd: {}", pwd);
+    syslog_logger->debug("max_load: {}", max_load);
 
 
     if (!load_config_result) {
