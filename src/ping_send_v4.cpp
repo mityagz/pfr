@@ -6,6 +6,10 @@
 #include <sys/time.h>
 #include <pthread.h>
 #include <time.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 #include "ping0.h"
 #include "ping_data.h"
 
@@ -19,6 +23,7 @@ extern int pfr_ping_req;
 extern std::string src_addr;
 extern int usleep_between_echo;
 extern int max_load;
+extern int df;
 
 //icmp_payload icmp_d;
 //int datalen = 56;
@@ -109,6 +114,17 @@ void send_v4(idata *pin, pthread_t pt) {
         (*pr->finit)();
     size = 60 * 1024;               // OK if setsockopt fails
     setsockopt(sockwr, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
+
+    if(df) {
+#if  defined(__FreeBSD__)
+        int val = 1;
+        setsockopt(sd, IPPROTO_IP, IP_DONTFRAG, &val, sizeof(val));
+#else
+        int val = IP_PMTUDISC_DO;
+        setsockopt(sockwr, IPPROTO_IP, IP_MTU_DISCOVER, &val, sizeof(val));
+#endif
+    }
+
     pid = getpid() & 0xffff;    // ICMP ID field is 16 bits 
 
     idata *in = (idata*)pin;
