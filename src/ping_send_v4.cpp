@@ -118,7 +118,7 @@ void send_v4(idata *pin, pthread_t pt) {
     if(df) {
 #if  defined(__FreeBSD__)
         int val = 1;
-        setsockopt(sd, IPPROTO_IP, IP_DONTFRAG, &val, sizeof(val));
+        setsockopt(sockwr, IPPROTO_IP, IP_DONTFRAG, &val, sizeof(val));
 #else
         int val = IP_PMTUDISC_DO;
         setsockopt(sockwr, IPPROTO_IP, IP_MTU_DISCOVER, &val, sizeof(val));
