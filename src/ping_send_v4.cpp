@@ -24,6 +24,7 @@ extern std::string src_addr;
 extern int usleep_between_echo;
 extern int max_load;
 extern int df;
+extern int dscp;
 
 //icmp_payload icmp_d;
 //int datalen = 56;
@@ -45,6 +46,30 @@ source.u = u;
 
 
 
+int set_dscp(int fd, uint8_t dscp) {
+ int val;
+ bool success;
+               
+ if (dscp > 63) {
+  return EINVAL;
+ }
+                    
+ success = false;
+ val = dscp << 2;
+ if (setsockopt(fd, IPPROTO_IP, IP_TOS, &val, sizeof val)) {
+ } else {
+   success = true;
+ }
+ if (setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, &val, sizeof val)) {
+ } else {
+     success = true;
+ }
+ if (!success) {
+   return ENOPROTOOPT;
+ }
+                              
+ return 0;
+}
 
 void send_v4(idata *pin, pthread_t pt) {
     //pthread_detach(pthread_self());
@@ -123,6 +148,10 @@ void send_v4(idata *pin, pthread_t pt) {
         int val = IP_PMTUDISC_DO;
         setsockopt(sockwr, IPPROTO_IP, IP_MTU_DISCOVER, &val, sizeof(val));
 #endif
+    }
+
+    if(dscp) {
+     set_dscp(sockwr, dscp);
     }
 
     pid = getpid() & 0xffff;    // ICMP ID field is 16 bits 

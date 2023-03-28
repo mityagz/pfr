@@ -123,6 +123,7 @@ std::string gobgp_path;
 std::string localnets;
 int max_load = 0;
 int df = 0;
+int dscp = 0; 
 
 // conf parameters for postgres
 std::string pghost = "127.0.0.1";
@@ -197,6 +198,10 @@ bool load_configuration_file() {
 
     if (configuration_map.count("df") != 0) {
      df = convert_string_to_integer(configuration_map["df"]);
+    }
+
+    if (configuration_map.count("dscp") != 0) {
+     dscp = convert_string_to_integer(configuration_map["dscp"]);
     }
 
     if (configuration_map.count("max_time_of_echo") != 0) {
@@ -420,6 +425,7 @@ int main(int argc, char **argv) {
     syslog_logger->debug("pwd: {}", pwd);
     syslog_logger->debug("max_load: {}", max_load);
     syslog_logger->debug("df: {}", df);
+    syslog_logger->debug("dscp: {}", dscp);
 
 
     if (!load_config_result) {
