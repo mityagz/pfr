@@ -124,6 +124,7 @@ std::string localnets;
 int max_load = 0;
 int df = 0;
 int dscp = 0; 
+std::string log_level = "debug";
 
 // conf parameters for postgres
 std::string pghost = "127.0.0.1";
@@ -186,6 +187,10 @@ bool load_configuration_file() {
 
     if (configuration_map.count("localnets") != 0) {
      localnets = configuration_map["localnets"];
+    }
+
+    if (configuration_map.count("log_level") != 0) {
+     log_level = configuration_map["log_level"];
     }
 
     if (configuration_map.count("pfr_ping_req") != 0) {
@@ -329,6 +334,7 @@ int main(int argc, char **argv) {
     
     signal(SIGUSR1, sig_usr);
     signal(SIGUSR2, sig_usr);
+    signal(SIGINT, sig_usr);
 
     try {
         po::options_description desc("Allowed options");
@@ -401,7 +407,11 @@ int main(int argc, char **argv) {
     int max_log_size = 1048576 * 50; //config_t
     int max_log_files = 5; //config_t
     syslog_logger = spdlog::rotating_logger_mt("pfr_syslog", "/var/log/pfrd.log", max_log_size, max_log_files);
-    syslog_logger->set_level(spdlog::level::debug);
+    if (log_level.compare("debug") == 0) {
+        syslog_logger->set_level(spdlog::level::debug);
+    } else {
+        syslog_logger->set_level(spdlog::level::info);
+    }
     spdlog::flush_every(std::chrono::seconds(3)); //config_t
     
     bool load_config_result = load_configuration_file();
@@ -426,6 +436,7 @@ int main(int argc, char **argv) {
     syslog_logger->debug("max_load: {}", max_load);
     syslog_logger->debug("df: {}", df);
     syslog_logger->debug("dscp: {}", dscp);
+    syslog_logger->debug("log_level: {}", log_level);
 
 
     if (!load_config_result) {
