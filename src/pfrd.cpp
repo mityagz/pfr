@@ -125,6 +125,7 @@ int max_load = 0;
 int df = 0;
 int dscp = 0; 
 std::string log_level = "debug";
+bool enable_advertise = true;
 
 // conf parameters for postgres
 std::string pghost = "127.0.0.1";
@@ -257,15 +258,13 @@ bool load_configuration_file() {
      pwd = configuration_map["pwd"];
     }
 
-   /*
-    if (configuration_map.count("enable_connection")) {
-    if (configuration_map["enable_connection"] == "on") {
-        enable_conection = true;
-    } else {
-        enable_conection = false;
+    if (configuration_map.count("enable_advertise")) {
+        if (configuration_map["enable_advertise"] == "on") {
+            enable_advertise = true;
+        } else {
+            enable_advertise = false;
+        }
     }
-    }
-    */
     return true;
 }
 
@@ -437,6 +436,7 @@ int main(int argc, char **argv) {
     syslog_logger->debug("df: {}", df);
     syslog_logger->debug("dscp: {}", dscp);
     syslog_logger->debug("log_level: {}", log_level);
+    syslog_logger->debug("enable_advertise: {}", enable_advertise);
 
 
     if (!load_config_result) {
@@ -613,15 +613,18 @@ int main(int argc, char **argv) {
             syslog_logger->debug("pid: {}", getpid());
             syslog_logger->debug("gobgp_path: {}", gobgp_path);
             syslog_logger->debug("localnets: {}", localnets);
+            syslog_logger->debug("enable_advertise: {}", enable_advertise);
          }
 
          send_stopped = 0;
          req_stopped = 0;
 
          //start routes manipulation
-         syslog_logger->debug("8:s Start of pfr_routes_man()...");
-         pfr_routes_man(probe_id, m, br, route);
-         syslog_logger->debug("8:e End of pfr_routes_man()...");
+         if (enable_advertise) {
+            syslog_logger->debug("8:s Start of pfr_routes_man()...");
+            pfr_routes_man(probe_id, m, br, route);
+            syslog_logger->debug("8:e End of pfr_routes_man()...");
+         }
 
          syslog_logger->debug("proc_v4_new_cnt: {}", proc_v4_new_cnt);
          syslog_logger->debug("avg_rtt_new_cnt: {}", avg_rtt_new_cnt);
