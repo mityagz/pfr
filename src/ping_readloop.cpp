@@ -50,6 +50,7 @@ void * readloop(void  *ina) {
         sres = select(maxfd + 1, &readset, NULL, NULL, &stv);
 
         if (sres == -1) {
+
         } else if (sres) {
 		    //msg.msg_namelen = pr->salen;
 		    msg.msg_controllen = sizeof(controlbuf);
