@@ -24,6 +24,7 @@
 #include "pfr_rdata.h"
 #include "pfr_rtr.h"
 #include "ping0.h"
+#include "pfr_sql_log.h"
 
 using namespace std;
 
@@ -126,6 +127,7 @@ int df = 0;
 int dscp = 0; 
 std::string log_level = "debug";
 bool enable_advertise = true;
+bool enable_sql_log = true;
 
 // conf parameters for postgres
 std::string pghost = "127.0.0.1";
@@ -265,6 +267,15 @@ bool load_configuration_file() {
             enable_advertise = false;
         }
     }
+
+    if (configuration_map.count("enable_sql_log")) {
+        if (configuration_map["enable_sql_log"] == "on") {
+            enable_sql_log = true;
+        } else {
+            enable_sql_log = false;
+        }
+    }
+
     return true;
 }
 
@@ -437,6 +448,7 @@ int main(int argc, char **argv) {
     syslog_logger->debug("dscp: {}", dscp);
     syslog_logger->debug("log_level: {}", log_level);
     syslog_logger->debug("enable_advertise: {}", enable_advertise);
+    syslog_logger->debug("enable_sql_log: {}", enable_sql_log);
 
 
     if (!load_config_result) {
@@ -475,6 +487,8 @@ int main(int argc, char **argv) {
         syslog_logger->debug("exit(1)");
         exit(1);
     }
+
+    pfr_sql_log sql_log = pfr_sql_log(enable_sql_log);
 
     //pfr_dst_list pfrList(10);
     pfrList = pfr_dst_list(10, 10);
@@ -565,7 +579,7 @@ int main(int argc, char **argv) {
          //pfr_print_avg_rtt(probe_id);
 
          syslog_logger->debug("5:s Start of pfr_route_scan()...");
-         pfr_route_scan(probe_id);
+         pfr_route_scan(probe_id, sql_log);
          syslog_logger->debug("5:e Start of pfr_route_scan()...");
 
          syslog_logger->debug("6:s Start of pfr_route_free()...");

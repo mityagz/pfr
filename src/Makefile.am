@@ -11,6 +11,7 @@ pfrd_SOURCES= \
 	pfr_rtr.cpp \
 	pfr_lib.cpp \
 	pfr_localnets.cpp \
+	pfr_sql_log.cpp \
 	error.cpp \
 	ping_calloc.cpp \
 	ping_data.cpp \

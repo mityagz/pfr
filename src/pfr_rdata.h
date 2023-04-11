@@ -3,6 +3,7 @@
 #include<vector>
 #include "pfr_dst_list.h"
 #include "pfr_peers.h"
+#include "pfr_sql_log.h"
 
 class tparm {
   double avg_rtt;
@@ -61,7 +62,7 @@ class tlog {
     int get_timestamp();
 };
 
-void pfr_route_scan(int probe_id); // finds min average rtt from [seq == 99]
+void pfr_route_scan(int probe_id, pfr_sql_log &sql_log); // finds min average rtt from [seq == 99]
 void pfr_route_print(int probe_id); // print min average rtt from [seq == 99]
 
 class pfr_rdata {

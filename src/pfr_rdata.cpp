@@ -11,6 +11,7 @@
 #include "pfr_rtr.h"
 #include "pfr_dst_list.h"
 #include "pfr_peers.h"
+#include "pfr_sql_log.h"
 
 extern pfr_dst_list pfrList;
 extern std::shared_ptr<spdlog::logger> syslog_logger;
@@ -245,7 +246,7 @@ void pfr_log_print(int curr_probe_id) {
 /* This function calculates min rtt and takes place it route[dst_ip][probe_id] 
    also this one fills route_log1[probe_id]
 */
-void pfr_route_scan(int probe_id) {
+void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
     //double min_rtt = 50000; //config_t, was made a global
     double curr_rtt = 0; 
     double avg_rtt = 0; 
@@ -290,6 +291,7 @@ void pfr_route_scan(int probe_id) {
        if(probe_id == 0) {
          syslog_logger->info("pfr_log->sql_hist probe_id == 0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
          route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
+         sql_log.insert(dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
        } else if(probe_id > 0) {
          if(route.count(dst_ip) == 1 && route[dst_ip].count(probe_id - 1) == 1) {
             if(peer_id == 0) { 
@@ -302,6 +304,7 @@ void pfr_route_scan(int probe_id) {
                 //              |dsp_ip               |probe_id     |peer_id
                 //extern std::map<std::string, std::map<int, tlog *>> route_log1;
                 route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
+                sql_log.insert(dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
                 scan_new_cnt++;
             } else {
                 // case 2.1 there is answer from dst
@@ -310,6 +313,7 @@ void pfr_route_scan(int probe_id) {
                 syslog_logger->debug("pfr_route_scan(): x -> y : probe_id : {} : {} : {}", probe_id, route[dst_ip][probe_id - 1]->get_curr_peer(), peer_id);
                 syslog_logger->info("pfr_log->sql_hist 2.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
                 route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
+                sql_log.insert(dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
             }
          } else {
             // case 1.1 there isn't prev answer from dst
@@ -319,6 +323,7 @@ void pfr_route_scan(int probe_id) {
                 syslog_logger->debug("pfr_route_scan() probe_id - 1: {}: peer_prev_id : {} : probe_id: {}: peer_id{}", probe_id - 1, 0, probe_id, peer_id);
                 syslog_logger->info("pfr_log->sql_hist 1.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
                 route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
+                sql_log.insert(dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
             }
          }
        min_rtt = 50000; 
