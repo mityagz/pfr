@@ -34,7 +34,7 @@ pfr_sql_log::~pfr_sql_log() {
 int pfr_sql_log::insert(std::string dst_ip, int probe_id, int peer_id, double min_rtt, double avg_rtt, int lost, int ts) {
     if (!this->allow_sql_log)
         return 0;
-    syslog_logger->debug("pfr_sql_log::insert() dst_ip: {}, probe_idi: {}, peer_id: {}, min_rtt: {}, avg_rtt: {}, lost: {}, ts: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+    syslog_logger->debug("pfr_sql_log::insert() dst_ip: {}, probe_id: {}, peer_id: {}, min_rtt: {}, avg_rtt: {}, lost: {}, ts: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
     return 0;
 
 }
