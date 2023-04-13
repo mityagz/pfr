@@ -328,6 +328,7 @@ int main(int argc, char **argv) {
     int t_ct = pp.size();
     pthread_t thrds[t_ct];
     pthread_t thrdrd;
+    pthread_t thrddb;
     bool fthread = 0;
     int m_ct = 10000;
     pthread_mutex_t mtxs[m_ct];
@@ -489,6 +490,8 @@ int main(int argc, char **argv) {
     }
 
     pfr_sql_log sql_log = pfr_sql_log(enable_sql_log);
+    thlog ithlog;
+    ithlog.log = &sql_log;
 
     //pfr_dst_list pfrList(10);
     pfrList = pfr_dst_list(10, 10);
@@ -581,6 +584,14 @@ int main(int argc, char **argv) {
          syslog_logger->debug("5:s Start of pfr_route_scan()...");
          pfr_route_scan(probe_id, sql_log);
          syslog_logger->debug("5:e Start of pfr_route_scan()...");
+         
+         syslog_logger->debug("5.1:s Starting write db thread...");
+         syslog_logger->debug("5.1:s Start of pfr_route_scan_sql()...");
+         ithlog.probe_id = probe_id;
+         pthread_create(&thrddb, NULL, pfr_route_scan_sql, &ithlog);
+         //pfr_route_scan_sql(probe_id, sql_log);
+         syslog_logger->debug("5.1:e Start of pfr_route_scan_sql()...");
+         syslog_logger->debug("5.1:e Starting write db thread...");
 
          syslog_logger->debug("6:s Start of pfr_route_free()...");
          pfr_route_free(probe_id);

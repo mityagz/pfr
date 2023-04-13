@@ -63,6 +63,8 @@ class tlog {
 };
 
 void pfr_route_scan(int probe_id, pfr_sql_log &sql_log); // finds min average rtt from [seq == 99]
+//void pfr_route_scan_sql(int probe_id, pfr_sql_log &sql_log); // finds min average rtt from [seq == 99]
+void *pfr_route_scan_sql(void *); // finds min average rtt from [seq == 99]
 void pfr_route_print(int probe_id); // print min average rtt from [seq == 99]
 
 class pfr_rdata {
