@@ -379,7 +379,7 @@ void *pfr_route_scan_sql(void *ithlog) {
        }
        if(probe_id == 0) {
          syslog_logger->info("pfr_log_sql->sql_hist probe_id == 0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
-         sql_log.insert(0, dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+         sql_log.insert(10, dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
        } else if(probe_id > 0) {
          if(route.count(dst_ip) == 1 && route[dst_ip].count(probe_id - 1) == 1) {
             if(peer_id == 0) { 
