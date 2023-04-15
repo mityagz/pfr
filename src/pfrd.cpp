@@ -559,7 +559,6 @@ int main(int argc, char **argv) {
         syslog_logger->debug("sleep({})", sleep_after_join);
         sleep(sleep_after_join); //config_t, sleep_after_join default: 6
         
-        //pthread_join(thrdrd, NULL);
         
         pthread_mutex_lock(&mt_req_send);
         syslog_logger->debug("req_stopped({})", req_stopped);
@@ -586,11 +585,8 @@ int main(int argc, char **argv) {
          syslog_logger->debug("5:e Start of pfr_route_scan()...");
          
          syslog_logger->debug("5.1:s Starting write db thread...");
-         syslog_logger->debug("5.1:s Start of pfr_route_scan_sql()...");
          ithlog.probe_id = probe_id;
          pthread_create(&thrddb, NULL, pfr_route_scan_sql, &ithlog);
-         //pfr_route_scan_sql(probe_id, sql_log);
-         syslog_logger->debug("5.1:e Start of pfr_route_scan_sql()...");
          syslog_logger->debug("5.1:e Starting write db thread...");
 
          syslog_logger->debug("6:s Start of pfr_route_free()...");
@@ -667,5 +663,6 @@ int main(int argc, char **argv) {
         probe_id++;
         syslog_logger->debug("sleep({}), next for(), probe_id++: {}", sleep_before_next_loop, probe_id);
         sleep(sleep_before_next_loop); //config_t, sleep_before_next_loop default: 20
+        pthread_join(thrddb, NULL);
     }
 }
