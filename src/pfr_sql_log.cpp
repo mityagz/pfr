@@ -1,3 +1,4 @@
+#include <sstream>
 #include "pfr_sql_log.h"
 
 
@@ -35,6 +36,27 @@ int pfr_sql_log::insert(int ccase, std::string dst_ip, int probe_id, int peer_id
     if (!this->allow_sql_log)
         return 0;
     syslog_logger->debug("pfr_sql_log::insert() ccase: {}, dst_ip: {}, probe_id: {}, peer_id: {}, min_rtt: {}, avg_rtt: {}, lost: {}, ts: {}", ccase, dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+
+    PGresult *res;
+    std::string ins0 = "insert into pfr_log (datetime, ccase_id, ipv4_dest_address, probe_id, peer_id, pkts, rtt_min, rtt_avg, pkt_loss, ts) ";
+    std::stringstream ins1;
+    ins1 << "values (now(), " << ccase << ", '" << dst_ip << "', " << probe_id << ", " << peer_id << ", 5, " << min_rtt << ", " << avg_rtt << ", " << lost << ", " << ts << ");";
+
+    ins0 += ins1.str();
+
+
+    syslog_logger->debug("pfr_sql_log::insert() ins0: {}", ins0);
+
+    res = PQexec(conn, ins0.c_str());
+              
+    if(PQresultStatus(res) != PGRES_COMMAND_OK) {
+     syslog_logger->debug("pfr_sql_log::insert() INSERT command failed");
+     PQclear(res);
+    }
+    if(res!=NULL)
+     PQclear(res);
+    /*
+    */
     return 0;
 
 }
