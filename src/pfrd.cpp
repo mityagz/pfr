@@ -106,6 +106,8 @@ int send_stopped = 0;
 int req_stopped = 0;
 pthread_mutex_t mt_req_send;
 
+pthread_mutex_t mt_sql_log;
+
 std::shared_ptr<spdlog::logger> syslog_logger;
 
 // conf parameters
@@ -584,10 +586,15 @@ int main(int argc, char **argv) {
          pfr_route_scan(probe_id, sql_log);
          syslog_logger->debug("5:e Start of pfr_route_scan()...");
          
-         syslog_logger->debug("5.1:s Starting write db thread...");
-         ithlog.probe_id = probe_id;
-         pthread_create(&thrddb, NULL, pfr_route_scan_sql, &ithlog);
-         syslog_logger->debug("5.1:e Starting write db thread...");
+         if(!(sig_usr1_flag || sig_int_flag)) {
+            pthread_mutex_lock(&mt_sql_log);
+            syslog_logger->debug("5.1:s Starting write db thread...");
+            ithlog.probe_id = probe_id;
+            pthread_create(&thrddb, NULL, pfr_route_scan_sql, &ithlog);
+            pthread_join(thrddb, NULL);
+            syslog_logger->debug("5.1:e Starting write db thread...");
+            pthread_mutex_unlock(&mt_sql_log);
+         }
 
          syslog_logger->debug("6:s Start of pfr_route_free()...");
          pfr_route_free(probe_id);
@@ -609,7 +616,9 @@ int main(int argc, char **argv) {
          // pfr graceful shutdown
          if(sig_usr1_flag || sig_int_flag) {
             syslog_logger->debug("graceful shutdown...");
+            pthread_mutex_lock(&mt_sql_log);
             pfr_delete_all(probe_id, m, br);
+            pthread_mutex_unlock(&mt_sql_log);
             exit(1);       
          } 
 
@@ -663,6 +672,5 @@ int main(int argc, char **argv) {
         probe_id++;
         syslog_logger->debug("sleep({}), next for(), probe_id++: {}", sleep_before_next_loop, probe_id);
         sleep(sleep_before_next_loop); //config_t, sleep_before_next_loop default: 20
-        pthread_join(thrddb, NULL);
     }
 }
