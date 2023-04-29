@@ -138,6 +138,17 @@ std::string db_name = "vc";
 std::string login = "vc";
 std::string pwd = "vc";
 
+//sync dst_ip, lost, rtt, ? between nodes master/slave.
+std::string peer_address = "10.0.5.233";
+int peer_port = 8877;
+std::string peer_type = "master";
+     
+//route is moved to a new peer that has rtt at least 10% less than the current path
+int rtt_least_thresh = 10;
+bool rtt_least_move = true;
+     
+//the same peer_id should not send route
+bool enable_advertise_same = true;
 
 // Global map with parsed config file
 //typedef std::map<std::string, std::string> configuration_map_t;
@@ -269,6 +280,47 @@ bool load_configuration_file() {
             enable_advertise = false;
         }
     }
+
+    //sync dst_ip, lost, rtt, ? between nodes master/slave.
+    //peer_address = 10.0.5.233
+    if (configuration_map.count("peer_address") != 0) {
+     peer_address = configuration_map["peer_address"];
+    }
+    
+    //peer_port = 8877
+    if (configuration_map.count("peer_port") != 0) {
+     peer_port = convert_string_to_integer(configuration_map["peer_port"]);
+    }
+
+    //peer_type = master
+    if (configuration_map.count("peer_type") != 0) {
+     peer_type = configuration_map["peer_type"];
+    }
+     
+    //route is moved to a new peer that has rtt at least 10% less than the current path
+    //rtt_least_thresh = 10
+    if (configuration_map.count("rtt_least_thresh") != 0) {
+     rtt_least_thresh = convert_string_to_integer(configuration_map["rtt_least_thresh"]);
+    }
+    
+    //rtt_least_move = on
+    if (configuration_map.count("rtt_least_move")) {
+        if (configuration_map["rtt_least_move"] == "on") {
+            rtt_least_move = true;
+        } else {
+            rtt_least_move = false;
+        }
+    }
+     
+    //the same peer_id should not send route
+    if (configuration_map.count("enable_advertise_same")) {
+        if (configuration_map["enable_advertise_same"] == "on") {
+            enable_advertise_same = true;
+        } else {
+            enable_advertise_same = false;
+        }
+    }
+
 
     if (configuration_map.count("enable_sql_log")) {
         if (configuration_map["enable_sql_log"] == "on") {
@@ -452,6 +504,12 @@ int main(int argc, char **argv) {
     syslog_logger->debug("log_level: {}", log_level);
     syslog_logger->debug("enable_advertise: {}", enable_advertise);
     syslog_logger->debug("enable_sql_log: {}", enable_sql_log);
+    syslog_logger->debug("enable_advertise_same: {}", enable_advertise_same);
+    syslog_logger->debug("rtt_least_move: {}", rtt_least_move);
+    syslog_logger->debug("rtt_least_thresh: {}", rtt_least_thresh);
+    syslog_logger->debug("peer_address: {}", peer_address);
+    syslog_logger->debug("peer_port: {}", peer_port);
+    syslog_logger->debug("peer_type: {}", peer_type);
 
 
     if (!load_config_result) {

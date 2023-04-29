@@ -19,6 +19,7 @@ extern std::map<std::string, std::map<int, rt_parm *>> route;
 extern std::shared_ptr<spdlog::logger> syslog_logger;
 
 extern std::string gobgp_path;
+extern bool enable_advertise_same;
 
 /*
 class pfr_asbr_parm {
@@ -191,6 +192,16 @@ void pfr_routes_man(int probe_id, std::map<int, pfr_peer> &mm, \
         int prev_min = rroute[it0->first][probe_id]->get_pmin_rtt();
         int curr_peer_id = rroute[it0->first][probe_id]->get_curr_peer();
         int cmin_rtt = rroute[it0->first][probe_id]->get_cmin_rtt();
+        
+        if(!enable_advertise_same) {
+            if(prev_peer_id == curr_peer_id) {
+                syslog_logger->debug("pfr_routes_man: prev_peer_id({}) == curr_peer_id({}) don't advertise!", prev_peer_id, curr_peer_id);
+                syslog_logger->debug("pfr_routes_man: dst_ip: {} don't advertise!", dst_ip);
+                syslog_logger->debug("-------------------------------------------------------------------");
+                continue;
+            }
+        }
+        
         pfr_create_set_jrouter_rt(mm, br, probe_id, prev_peer_id, curr_peer_id, dst_ip);
  } 
  //
