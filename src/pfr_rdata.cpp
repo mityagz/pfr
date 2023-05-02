@@ -113,6 +113,9 @@ extern std::map<std::string, std::map<int, rt_parm *>> route;
 extern std::map<std::string, std::map<int, std::map<int,  tlog *>>> route_log0;
 extern std::map<std::string, std::map<int, tlog *>> route_log1;
 
+extern int rtt_least_thresh;
+extern bool rtt_least_move;
+
 /* This function removes all probe from r[0..probe_id - 2] and route[0..probe_id - 2]
  * left only two last probe
 */
@@ -250,9 +253,14 @@ void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
     //double min_rtt = 50000; //config_t, was made a global
     double curr_rtt = 0; 
     double avg_rtt = 0; 
+    double prev_min_rtt = 0;
     int peer_id = 0; 
     int ts = 0; 
     int lost = 0; 
+    double mul = 0;
+    double delta0 = 0;
+    double delta1 = 0;
+    bool fmove = false;
 
     if (configuration_map.count("min_rtt") != 0) {
         //pfr_ping_req = convert_string_to_integer(configuration_map["pfr_ping_req"]);
@@ -308,8 +316,27 @@ void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
                 scan_new_cnt++;
             } else {
                 // case 2.1 there is answer from dst
-                route[dst_ip][probe_id] = \
-                    new rt_parm(route[dst_ip][probe_id - 1]->get_curr_peer(), route[dst_ip][probe_id - 1]->get_cmin_rtt(), peer_id, min_rtt);
+                if(rtt_least_move) {
+                    prev_min_rtt = route[dst_ip][probe_id - 1]->get_cmin_rtt();
+                    mul = rtt_least_thresh / 100.0;
+                    delta0 = min_rtt * mul;
+                    delta1 = prev_min_rtt - delta0;
+                    if(delta1 > min_rtt) {
+                        fmove = true;
+                        syslog_logger->debug("pfr_route_scan(): fmove = {}, mul = {:.2f}, delta0 = {:.2f}, delta1 = {:.2f}, prev_min_rtt = {:.2f}, min_rtt = {:.2f}", fmove, mul, delta0, delta1, prev_min_rtt, min_rtt);
+                    } else {
+                        fmove = false;
+                        syslog_logger->debug("pfr_route_scan(): fmove = {}, mul = {:.2f}, delta0 = {:.2f}, delta1 = {:.2f}, prev_min_rtt = {:.2f}, min_rtt = {:.2f}", fmove, mul, delta0, delta1, prev_min_rtt, min_rtt);
+                    }
+                }
+                if(rtt_least_move && !fmove) {
+                    route[dst_ip][probe_id] = \
+                        new rt_parm(route[dst_ip][probe_id - 1]->get_curr_peer(), route[dst_ip][probe_id - 1]->get_cmin_rtt(), \
+                            route[dst_ip][probe_id - 1]->get_curr_peer(), route[dst_ip][probe_id - 1]->get_cmin_rtt());
+                } else {
+                    route[dst_ip][probe_id] = \
+                        new rt_parm(route[dst_ip][probe_id - 1]->get_curr_peer(), route[dst_ip][probe_id - 1]->get_cmin_rtt(), peer_id, min_rtt);
+                }
                 syslog_logger->debug("pfr_route_scan(): x -> y : probe_id : {} : {} : {}", probe_id, route[dst_ip][probe_id - 1]->get_curr_peer(), peer_id);
                 syslog_logger->info("pfr_log->sql_hist 2.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
                 route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);

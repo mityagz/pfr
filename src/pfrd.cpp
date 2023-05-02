@@ -702,6 +702,13 @@ int main(int argc, char **argv) {
             syslog_logger->debug("gobgp_path: {}", gobgp_path);
             syslog_logger->debug("localnets: {}", localnets);
             syslog_logger->debug("enable_advertise: {}", enable_advertise);
+            syslog_logger->debug("enable_sql_log: {}", enable_sql_log);
+            syslog_logger->debug("enable_advertise_same: {}", enable_advertise_same);
+            syslog_logger->debug("rtt_least_move: {}", rtt_least_move);
+            syslog_logger->debug("rtt_least_thresh: {}", rtt_least_thresh);
+            syslog_logger->debug("peer_address: {}", peer_address);
+            syslog_logger->debug("peer_port: {}", peer_port);
+            syslog_logger->debug("peer_type: {}", peer_type);
          }
 
          send_stopped = 0;

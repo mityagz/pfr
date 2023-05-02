@@ -194,7 +194,7 @@ void pfr_routes_man(int probe_id, std::map<int, pfr_peer> &mm, \
         int cmin_rtt = rroute[it0->first][probe_id]->get_cmin_rtt();
         
         if(!enable_advertise_same) {
-            if(prev_peer_id == curr_peer_id) {
+            if((prev_peer_id == curr_peer_id) && probe_id > 1) {
                 syslog_logger->debug("pfr_routes_man: prev_peer_id({}) == curr_peer_id({}) don't advertise!", prev_peer_id, curr_peer_id);
                 syslog_logger->debug("pfr_routes_man: dst_ip: {} don't advertise!", dst_ip);
                 syslog_logger->debug("-------------------------------------------------------------------");
