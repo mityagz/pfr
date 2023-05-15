@@ -10,7 +10,7 @@ external peer with min rtt && packet loss. Gobgp is used for routes injection.
 
 This code gets list of destination prefixes(top n) from [ipfixcol2pfr](https://github.com/mityagz/ipfixcol2pfr) to use shm ipc.
 
-This code isn't production ready yet!
+The code isn't production ready yet!
 
 TODO:  
 
