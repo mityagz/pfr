@@ -10,5 +10,5 @@ This code isn't production ready yet!
 
 TODO:
 
-Plan to use grpc to comunicate with gobgp.   
-Handle IPv6 routes.
+* Plan to use grpc to comunicate with gobgp.   
+* Handle IPv6 routes.
