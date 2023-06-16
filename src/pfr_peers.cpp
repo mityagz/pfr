@@ -94,7 +94,7 @@ pfr_peers::pfr_peers(std::map<int, pfr_peer> &m) {
 
         res = PQexec(conn, "select p.id, p.peer_group_id, n.ip as ip, n.hostname as pe, p.interface_id, a.address, p.ipv4_peer_address, \
                 p.ipv6_peer_address, p.name, p.pfr_dst_id, p.peer_community from pfr_peers p join node n on n.id = p.node_id \
-                join ipam_addresses a on a.id = p.address_id");
+                join ipam_addresses a on a.id = p.address_id where p.id != 0");
 
                 //p.ipv6_peer_address, p.type, p.name, p.pfr_dst_id  from pfr_peers p join node n on n.id = p.node_id \
 
