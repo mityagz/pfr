@@ -73,6 +73,8 @@ extern double min_rtt; //config_t, was made a global
 
 double tparm::get_rtt() { return rtt; }
 double tparm::get_avg_rtt() { return avg_rtt; }
+double tparm::get_min_rtt() { return min_rtt; }
+void   tparm::set_min_rtt(double min_rtt) { this->min_rtt = min_rtt; }
 int    tparm::get_timestamp() { return timestamp; }
 int    tparm::get_lost() { return lost; }
 
@@ -291,11 +293,28 @@ void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
                 } 
             }
        }
-       if(r[dst_ip][probe_id][it_peer_id->first][99] != NULL) {
+
+       /*
+       if(r.count(dst_ip) == 1 && r[dst_ip].count(probe_id) == 1 && r[dst_ip][probe_id].count(it_peer_id->first) && \
+               r[dst_ip][probe_id][it_peer_id->first].count(99) == 1 && r[dst_ip][probe_id][it_peer_id->first][99] != NULL) {
         avg_rtt = r[dst_ip][probe_id][it_peer_id->first][99]->get_avg_rtt();
         ts = r[dst_ip][probe_id][it_peer_id->first][99]->get_timestamp();
         lost = r[dst_ip][probe_id][it_peer_id->first][99]->get_lost();
        }
+       */
+
+       if(peer_id != 0) {
+        avg_rtt = r[dst_ip][probe_id][peer_id][99]->get_avg_rtt();
+        min_rtt = r[dst_ip][probe_id][peer_id][99]->get_min_rtt();
+        ts = r[dst_ip][probe_id][peer_id][99]->get_timestamp();
+        lost = r[dst_ip][probe_id][peer_id][99]->get_lost();
+       } else {
+        avg_rtt = 0;
+        ts = 0;
+        lost = 0;
+        min_rtt = 0;
+       }
+
        if(probe_id == 0) {
          syslog_logger->info("pfr_log->sql_hist probe_id == 0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
          route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
@@ -399,11 +418,29 @@ void *pfr_route_scan_sql(void *ithlog) {
                 } 
             }
        }
-       if(r[dst_ip][probe_id][it_peer_id->first][99] != NULL) {
+       
+       /*
+       //if(r[dst_ip][probe_id][it_peer_id->first][99] != NULL) {
+       if(r.count(dst_ip) == 1 && r[dst_ip].count(probe_id) == 1 && r[dst_ip][probe_id].count(it_peer_id->first) && \
+               r[dst_ip][probe_id][it_peer_id->first].count(99) == 1 && r[dst_ip][probe_id][it_peer_id->first][99] != NULL) {
         avg_rtt = r[dst_ip][probe_id][it_peer_id->first][99]->get_avg_rtt();
         ts = r[dst_ip][probe_id][it_peer_id->first][99]->get_timestamp();
         lost = r[dst_ip][probe_id][it_peer_id->first][99]->get_lost();
        }
+       */
+       
+       if(peer_id != 0) {
+        avg_rtt = r[dst_ip][probe_id][peer_id][99]->get_avg_rtt();
+        min_rtt = r[dst_ip][probe_id][peer_id][99]->get_min_rtt();
+        ts = r[dst_ip][probe_id][peer_id][99]->get_timestamp();
+        lost = r[dst_ip][probe_id][peer_id][99]->get_lost();
+       } else {
+        avg_rtt = 0;
+        ts = 0;
+        lost = 0;
+        min_rtt = 0;
+       }
+
        if(probe_id == 0) {
          syslog_logger->info("pfr_log_sql->sql_hist probe_id == 0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
          sql_log.insert(10, dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
@@ -555,6 +592,7 @@ void pfr_calc_avg_rtt(int probe_id) {
     int cnt_rtt = 0;
     int alive = 0;
     int ts = 0;
+    double m_rtt = 50000;
     //pthread_mutex_lock(&mtr); 
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); it0++) {
         std::string dst_ip = it0->first;
@@ -566,17 +604,22 @@ void pfr_calc_avg_rtt(int probe_id) {
             int seq_num = it3->first;
             curr_rtt += (it3->second)->get_rtt();
             ts = (it3->second)->get_timestamp();
+            if ((it3->second)->get_rtt()  < m_rtt) {
+                m_rtt = (it3->second)->get_rtt();
+            }
             cnt_rtt++;
             alive++;
-         } 
+         }
          double avg_rtt = ceil(curr_rtt * 100 / cnt_rtt) / 100.0;
          r[dst_ip][probe_id][peer_id][99] = new tparm(0, avg_rtt, pfr_ping_req - alive, ts);
+         r[dst_ip][probe_id][peer_id][99]->set_min_rtt(m_rtt);
          avg_rtt_new_cnt++;
          curr_rtt = 0;
          cnt_rtt = 0;
          alive = 0;
          ts = 0;
          avg_rtt = 0;
+         m_rtt = 50000;
        }
      //} 
     }

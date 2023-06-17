@@ -6,6 +6,7 @@
 #include "pfr_sql_log.h"
 
 class tparm {
+  double min_rtt;
   double avg_rtt;
   int lost;
   double rtt;
@@ -18,6 +19,8 @@ class tparm {
   this->timestamp = timestamp;
   }
   void print();
+  double get_min_rtt();
+  void set_min_rtt(double min_rtt);
   double get_rtt();
   double get_avg_rtt();
   int get_timestamp();
