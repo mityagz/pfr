@@ -15,6 +15,7 @@ extern std::shared_ptr<spdlog::logger> syslog_logger;
 pfr_sql_log::pfr_sql_log(bool allow_sql_log) {
   if (allow_sql_log) {
     this->allow_sql_log = allow_sql_log;
+    this->ins_head = "insert into pfr_log (datetime, ccase_id, ipv4_dest_address, probe_id, peer_id, pkts, rtt_min, rtt_avg, pkt_loss, ts) values ";
     conn = PQsetdbLogin(pghost.c_str(), pgport.c_str(), pgoptions, pgtty, db_name.c_str(), login.c_str(), pwd.c_str());
     if(PQstatus(conn) == CONNECTION_BAD) {
       fprintf(stderr, "Connection to database '%s' failed.\n", db_name.c_str());
@@ -32,7 +33,7 @@ pfr_sql_log::~pfr_sql_log() {
     PQfinish(conn);
 }
 
-int pfr_sql_log::insert(int ccase, std::string dst_ip, int probe_id, int peer_id, double min_rtt, double avg_rtt, int lost, int ts) {
+int pfr_sql_log::insert1(int ccase, std::string dst_ip, int probe_id, int peer_id, double min_rtt, double avg_rtt, int lost, int ts) {
     if (!this->allow_sql_log)
         return 0;
 
@@ -61,3 +62,44 @@ int pfr_sql_log::insert(int ccase, std::string dst_ip, int probe_id, int peer_id
     return 0;
 
 }
+
+int pfr_sql_log::insert(int ccase, std::string dst_ip, int probe_id, int peer_id, double min_rtt, double avg_rtt, int lost, int ts) {
+
+    if (!this->allow_sql_log)
+        return 0;
+
+    //static std::stringstream ins_multi_l;
+    std::stringstream ins_multi_l;
+
+    //syslog_logger->debug("pfr_sql_log::insert() ccase: {}, dst_ip: {}, probe_id: {}, peer_id: {}, min_rtt: {}, avg_rtt: {}, lost: {}, ts: {}", ccase, dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+
+    ins_multi_l << " (now(), " << ccase << ", '" << dst_ip << "', " << probe_id << ", " << peer_id << ", 5, " << min_rtt << ", " << avg_rtt << ", " << lost << ", " << ts << "), ";
+    ins_multi += ins_multi_l.str();
+    
+    return 0;
+
+}
+
+int pfr_sql_log::commit() {
+
+    ins_multi = ins_multi.substr(0, ins_multi.size() - 2);
+    ins_multi += ";";
+    ins_head += ins_multi;
+
+    syslog_logger->debug("pfr_sql_log::insert() ins_head: {}", ins_head);
+    
+    ///*
+    res = PQexec(conn, ins_head.c_str());
+              
+    if(PQresultStatus(res) != PGRES_COMMAND_OK) {
+     syslog_logger->debug("pfr_sql_log::insert() INSERT command failed");
+     PQclear(res);
+    }
+    if(res!=NULL)
+     PQclear(res);
+    //*/
+    this->ins_head = "insert into pfr_log (datetime, ccase_id, ipv4_dest_address, probe_id, peer_id, pkts, rtt_min, rtt_avg, pkt_loss, ts) values ";
+    ins_multi = "";
+    return 0;
+}
+

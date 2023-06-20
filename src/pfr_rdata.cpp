@@ -470,6 +470,7 @@ void *pfr_route_scan_sql(void *ithlog) {
        curr_rtt = 0; 
        peer_id = 0; 
     }
+    sql_log.commit();
     //pthread_mutex_unlock(&mtr); 
     return NULL;
 }
