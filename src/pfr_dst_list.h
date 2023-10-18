@@ -2,6 +2,7 @@
 #define PFR_DST_LIST_H
 
 #include <vector>
+#include <map>
 #include "pfr_dst.h"
 #include "pfr_sql_list.h"
 
@@ -46,6 +47,7 @@ class pfr_dst_list {
     void pfr_dst_print();
     int size();
     pfr_sql_list get_pfr_dst_sql();
+    std::map<std::string, bool> pfr_dst_getmap();
     iterator begin() { return iterator(*this); }
     iterator end() { return iterator(*this, true); }
 };
