@@ -185,6 +185,7 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
         }
         // add dst addr to ipfix dstlist from db
         for (auto iter = ipv4_dst_db.begin(); iter != ipv4_dst_db.end(); ++iter) {
+             syslog_logger->debug("DST_DB: {}:{}", dst_id, iter->first);
              pfrDstList.push_back(pfr_dst(dst_id , iter->first, "" ,""));
              dst_id++;
         }
