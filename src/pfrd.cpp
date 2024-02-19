@@ -129,6 +129,7 @@ int df = 0;
 int dscp = 0; 
 std::string log_level = "debug";
 bool enable_advertise = true;
+bool enable_explicit_withdraw = false;
 bool enable_sql_log = true;
 
 // conf parameters for postgres
@@ -278,6 +279,14 @@ bool load_configuration_file() {
             enable_advertise = true;
         } else {
             enable_advertise = false;
+        }
+    }
+
+    if (configuration_map.count("enable_explicit_withdraw")) {
+        if (configuration_map["enable_explicit_withdraw"] == "on") {
+            enable_explicit_withdraw = true;
+        } else {
+            enable_explicit_withdraw = false;
         }
     }
 

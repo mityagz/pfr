@@ -20,6 +20,7 @@ extern std::shared_ptr<spdlog::logger> syslog_logger;
 
 extern std::string gobgp_path;
 extern bool enable_advertise_same;
+extern bool enable_explicit_withdraw;
 
 /*
 class pfr_asbr_parm {
@@ -234,16 +235,21 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
             std::string pnameasbr = (mm[prev_peer_id]).get_pe_name();
             std::string pnh = (mm[prev_peer_id]).get_ipv4_peer_address();
             std::string pcomm = (mm[prev_peer_id]).get_peer_community();
-            std::string prts = "del routing-instances i routing-options static route " + dst_ip \
-                             + "/32 next-hop " + pnh + " community 3333:10000 tag " + std::to_string(pid);
-            std::string exec_prts = gobgp_path + " global rib del -a ipv4 " + dst_ip + "/32 community " + pcomm;         
-            goexec(exec_prts.c_str());
             std::string plo0asbr = br.get_asbr_lo(prev_peer_id);
             pfr_asbr_parm pp = br.get_asbr(plo0asbr);
             struct nc_session *pncs = pp.get_session();
 
-            syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", plo0asbr);
-            syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", prts);
+            std::string prts = "del routing-instances i routing-options static route " + dst_ip \
+                             + "/32 next-hop " + pnh + " community 3333:10000 tag " + std::to_string(pid);
+            std::string exec_prts = gobgp_path + " global rib del -a ipv4 " + dst_ip + "/32 community " + pcomm;         
+            if (enable_explicit_withdraw) {
+             goexec(exec_prts.c_str());
+             syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", plo0asbr);
+             syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", prts);
+            } else {
+             syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", plo0asbr);
+             syslog_logger->debug("ppfr_create_set_jrouter_rt(): implicit withdraw: {}", prts);
+            }
         } 
         std::string rts = "set routing-instances i routing-options static route " + dst_ip \
                         + "/32 next-hop " + nh + " community 3333:10000 tag " + std::to_string(id);
