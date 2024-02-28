@@ -5,6 +5,7 @@
 #include <map>
 #include "pfr_dst.h"
 #include "pfr_sql_list.h"
+#include "pfr_customer.h"
 
 class pfr_dst_list {
     int nlist;
@@ -42,8 +43,8 @@ class pfr_dst_list {
 
     pfr_dst_list();
     pfr_dst_list(int nlist);
-    pfr_dst_list(int nlist, int nnlist);
-    pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList);
+    pfr_dst_list(int nlist, int nnlist, pfr_customer &cust);
+    pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList, pfr_customer &cust);
     void pfr_dst_print();
     int size();
     pfr_sql_list get_pfr_dst_sql();

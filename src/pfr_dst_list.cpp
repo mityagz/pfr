@@ -50,7 +50,7 @@ pfr_dst_list::pfr_dst_list(int nlist) {
         }
 }
 
-pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
+pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList, pfr_customer &cust) {
         const char *key_sem0 = "/key_sem0";
         sem_t *sem0;
 
@@ -98,7 +98,7 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
             syslog_logger->debug("{}:{}", dst_id, token);
             token = std::strtok(nullptr, delimiters);
             if(token != NULL) {
-                if(!ln.is_host_in_network(std::string(token)) && !ipv4_dst_db.count(std::string(token))) {
+                if(!ln.is_host_in_network(std::string(token)) && !ipv4_dst_db.count(std::string(token)) && cust.ispfxhit("1.0.5.230")) {
                     pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));
                     dst_id++;
                 }
@@ -130,7 +130,7 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList) {
 
 }
 
-pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
+pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_customer &cust) {
         const char *key_sem0 = "/key_sem0";
         sem_t *sem0;
         syslog_logger->debug("pfr_dst_list(int, int)");
@@ -177,7 +177,7 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist) {
             syslog_logger->debug("{}:{}", dst_id, token);
             token = std::strtok(nullptr, delimiters);
             if(token != NULL) {
-                if(!ln.is_host_in_network(std::string(token)) && !ipv4_dst_db.count(std::string(token))) {
+                if(!ln.is_host_in_network(std::string(token)) && !ipv4_dst_db.count(std::string(token)) && cust.ispfxhit("1.0.5.230")) {
                     pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));
                     dst_id++;
                 }

@@ -25,6 +25,7 @@
 #include "pfr_rtr.h"
 #include "ping0.h"
 #include "pfr_sql_log.h"
+#include "pfr_customer.h"
 
 using namespace std;
 
@@ -81,6 +82,8 @@ void print_rdata();
 //pfr_dst_list pfrList(10, 10);
 pfr_dst_list pfrL;
 pfr_dst_list &pfrList = pfrL;
+pfr_customer pfrC;
+pfr_customer &pfrCust = pfrC;
 
 //       |dsp_ip               |probe_id     |peer_id      |seq_num
 std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>> r;
@@ -111,6 +114,7 @@ pthread_mutex_t mt_sql_log;
 std::shared_ptr<spdlog::logger> syslog_logger;
 
 // conf parameters
+int customer_id = 0;
 int pfr_ping_req = 5; //config_t, pfr_rdata.cpp, ping_send_v4.cpp
 long int max_time_of_echo = 1200; // max time secs spent to send echo. config_t
 int sleep_after_join = 6;
@@ -208,6 +212,10 @@ bool load_configuration_file() {
 
     if (configuration_map.count("log_level") != 0) {
      log_level = configuration_map["log_level"];
+    }
+
+    if (configuration_map.count("customer_id") != 0) {
+     customer_id = convert_string_to_integer(configuration_map["customer_id"]);
     }
 
     if (configuration_map.count("pfr_ping_req") != 0) {
@@ -494,6 +502,7 @@ int main(int argc, char **argv) {
     syslog_logger->debug("-------------------------------------------------------");
     syslog_logger->debug("pfrd was started...");
     syslog_logger->debug("global vars:");
+    syslog_logger->debug("customer_id: {}", customer_id);
     syslog_logger->debug("deep_delete: {}", deep_delete);
     syslog_logger->debug("min_rtt: {}", min_rtt);
     syslog_logger->debug("src_addr: {}", src_addr);
@@ -562,8 +571,9 @@ int main(int argc, char **argv) {
     thlog ithlog;
     ithlog.log = &sql_log;
 
+    pfrCust = pfr_customer(customer_id);
     //pfr_dst_list pfrList(10);
-    pfrList = pfr_dst_list(10, 10);
+    pfrList = pfr_dst_list(10, 10, pfrCust);
 
     //create asbr structure and connect to asbr by netconf
     pfr_asbrs br(m);
@@ -577,7 +587,8 @@ int main(int argc, char **argv) {
         if(probe_id > 0) {
             //std::cout << "probe_id > 0: " << probe_id << std::endl;
             syslog_logger->debug("probe_id > 0: {}", probe_id);
-            pfrList = pfr_dst_list(10, 10, pfrList);
+            pfrCust = pfr_customer(7);
+            pfrList = pfr_dst_list(10, 10, pfrList, pfrCust);
         }
 
         for(int i = 0; i < t_ct; i++) {
@@ -702,6 +713,7 @@ int main(int argc, char **argv) {
             syslog_logger->debug("-------------------------------------------------------");
             syslog_logger->debug("pfrd configuration file was reread...");
             syslog_logger->debug("global vars:");
+            syslog_logger->debug("customer_id: {}", customer_id);
             syslog_logger->debug("deep_delete: {}", deep_delete);
             syslog_logger->debug("min_rtt: {}", min_rtt);
             syslog_logger->debug("src_addr: {}", src_addr);
