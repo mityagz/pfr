@@ -103,19 +103,21 @@ bool pfr_prefix6::ispfxhit(std::string srcaddr6) {
      
 pfr_customer::pfr_customer() {}
 pfr_customer::pfr_customer(int customer_id) {
- std::string p0, p1, p2, p3, p4;
+ std::string p0, p1, p2, p3, p4, p5;
  if(customer_id == 7) {
   p0 = "1.0.5.128/25";
   p1 = "1.0.6.0/27";
   p2 = "1.0.8.0/22";
   p3 = "1.248.0.0/14";
   p4 = "128.0.0.0/6";
+  p5 = "192.168.122.19/32";
  } 
  prefix4.push_back(pfr_prefix4(p0));
  prefix4.push_back(pfr_prefix4(p1));
  prefix4.push_back(pfr_prefix4(p2));
  prefix4.push_back(pfr_prefix4(p3));
  prefix4.push_back(pfr_prefix4(p4));
+ prefix4.push_back(pfr_prefix4(p5));
 }
 
 bool pfr_customer::ispfxhit(std::string srcaddr) { 

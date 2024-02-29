@@ -95,14 +95,23 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList, pfr
         char *token = std::strtok(ret_shm_addr, delimiters);
         std::map<std::string, bool> ipv4_dst_db = pfr_dst_getmap();
         while (token) {
-            syslog_logger->debug("{}:{}", dst_id, token);
-            token = std::strtok(nullptr, delimiters);
+            size_t pos = 0;
+            std::string addr(token);
+            std::string saddr, daddr;
+            if((pos = addr.find(",")) != std::string::npos) {
+              saddr= addr.substr(0, pos);
+              addr.erase(0, pos + 1);
+            }
+            daddr = addr;
+
+            syslog_logger->debug("{}:{}", dst_id, daddr);
             if(token != NULL) {
-                if(!ln.is_host_in_network(std::string(token)) && !ipv4_dst_db.count(std::string(token)) && cust.ispfxhit("1.0.5.230")) {
-                    pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));
+                if(!ln.is_host_in_network(daddr) && !ipv4_dst_db.count(daddr) && cust.ispfxhit(saddr)) {
+                    pfrDstList.push_back(pfr_dst(dst_id , daddr, "" ,""));
                     dst_id++;
                 }
             }
+            token = std::strtok(nullptr, delimiters);
         }
 
         if(pfrDstList.size() < 3) {
@@ -171,6 +180,29 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_customer &cust) {
         ret_shm_addr = (char *)shm_addr;
 
         int dst_id = 0;
+        char *token = std::strtok(ret_shm_addr, delimiters);
+        std::map<std::string, bool> ipv4_dst_db = pfr_dst_getmap();
+        while (token) {
+            size_t pos = 0;
+            std::string addr(token);
+            std::string saddr, daddr;
+            if((pos = addr.find(",")) != std::string::npos) {
+              saddr= addr.substr(0, pos);
+              addr.erase(0, pos + 1);
+            }
+            daddr = addr;
+
+            syslog_logger->debug("{}:{}", dst_id, daddr);
+            if(token != NULL) {
+                if(!ln.is_host_in_network(daddr) && !ipv4_dst_db.count(daddr) && cust.ispfxhit(saddr)) {
+                    pfrDstList.push_back(pfr_dst(dst_id , daddr, "" ,""));
+                    dst_id++;
+                }
+            }
+            token = std::strtok(nullptr, delimiters);
+        }
+
+        /*
         std::map<std::string, bool> ipv4_dst_db = pfr_dst_getmap();
         char *token = std::strtok(ret_shm_addr, delimiters);
         while (token) {
@@ -183,6 +215,8 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_customer &cust) {
                 }
             }
         }
+        */
+
         // add dst addr to ipfix dstlist from db
         for (auto iter = ipv4_dst_db.begin(); iter != ipv4_dst_db.end(); ++iter) {
              syslog_logger->debug("DST_DB: {}:{}", dst_id, iter->first);
