@@ -104,10 +104,10 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_dst_list &prevdstList, pfr
             }
             daddr = addr;
 
-            syslog_logger->debug("{}:{}", dst_id, daddr);
             if(token != NULL) {
                 if(!ln.is_host_in_network(daddr) && !ipv4_dst_db.count(daddr) && cust.ispfxhit(saddr)) {
                     pfrDstList.push_back(pfr_dst(dst_id , daddr, "" ,""));
+                    syslog_logger->debug("{}:{}", dst_id, daddr);
                     dst_id++;
                 }
             }
@@ -192,10 +192,10 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_customer &cust) {
             }
             daddr = addr;
 
-            syslog_logger->debug("{}:{}", dst_id, daddr);
             if(token != NULL) {
                 if(!ln.is_host_in_network(daddr) && !ipv4_dst_db.count(daddr) && cust.ispfxhit(saddr)) {
                     pfrDstList.push_back(pfr_dst(dst_id , daddr, "" ,""));
+                    syslog_logger->debug("{}:{}", dst_id, daddr);
                     dst_id++;
                 }
             }
