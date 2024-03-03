@@ -202,21 +202,6 @@ pfr_dst_list::pfr_dst_list(int nlist, int nnlist, pfr_customer &cust) {
             token = std::strtok(nullptr, delimiters);
         }
 
-        /*
-        std::map<std::string, bool> ipv4_dst_db = pfr_dst_getmap();
-        char *token = std::strtok(ret_shm_addr, delimiters);
-        while (token) {
-            syslog_logger->debug("{}:{}", dst_id, token);
-            token = std::strtok(nullptr, delimiters);
-            if(token != NULL) {
-                if(!ln.is_host_in_network(std::string(token)) && !ipv4_dst_db.count(std::string(token)) && cust.ispfxhit("1.0.5.230")) {
-                    pfrDstList.push_back(pfr_dst(dst_id , std::string(token), "" ,""));
-                    dst_id++;
-                }
-            }
-        }
-        */
-
         // add dst addr to ipfix dstlist from db
         for (auto iter = ipv4_dst_db.begin(); iter != ipv4_dst_db.end(); ++iter) {
              syslog_logger->debug("DST_DB: {}:{}", dst_id, iter->first);

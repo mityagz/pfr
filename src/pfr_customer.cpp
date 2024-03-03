@@ -8,9 +8,16 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/syslog_sink.h>
 #include <spdlog/sinks/basic_file_sink.h>
+#include <libpq-fe.h>
 
 extern std::shared_ptr<spdlog::logger> syslog_logger;
 extern int customer_id;
+
+extern std::string pghost;
+extern std::string pgport;
+extern std::string db_name;
+extern std::string login;
+extern std::string pwd;
 
 // This func converts ip[46] addr string to int
 ssize_t ip4_bin(int family, std::string srcaddr) {
@@ -101,23 +108,40 @@ bool pfr_prefix6::ispfxhit(std::string srcaddr6) {
  return false; 
 }
      
-pfr_customer::pfr_customer() {}
+pfr_customer::pfr_customer() {
+}
+
 pfr_customer::pfr_customer(int customer_id) {
- std::string p0, p1, p2, p3, p4, p5;
- if(customer_id == 7) {
-  p0 = "1.0.5.128/25";
-  p1 = "1.0.6.0/27";
-  p2 = "1.0.8.0/22";
-  p3 = "1.248.0.0/14";
-  p4 = "128.0.0.0/6";
-  p5 = "192.168.122.19/32";
- } 
- prefix4.push_back(pfr_prefix4(p0));
- prefix4.push_back(pfr_prefix4(p1));
- prefix4.push_back(pfr_prefix4(p2));
- prefix4.push_back(pfr_prefix4(p3));
- prefix4.push_back(pfr_prefix4(p4));
- prefix4.push_back(pfr_prefix4(p5));
+ const char *pgoptions=NULL,
+            *pgtty=NULL;
+
+ PGconn *conn;
+ PGresult *res;
+
+
+ conn = PQsetdbLogin(pghost.c_str(), pgport.c_str(), pgoptions, pgtty, db_name.c_str(), login.c_str(), pwd.c_str());
+ if(PQstatus(conn) == CONNECTION_BAD) {
+   fprintf(stderr, "Connection to database '%s' failed.\n", db_name.c_str());
+   fprintf(stderr, "%s", PQerrorMessage(conn));
+   exit(1);
+ } else {
+#ifdef DEBUG
+   fprintf(stderr, "Connection to database '%s' Ok.\n", db_name.c_str());
+#endif
+
+   std::string req = std::string("select p4.prefix from pfr_prefix4 p4 join pfr_customer c on p4.customer_id = c.id where c.id = ") + \
+                     std::to_string(customer_id) + std::string(";");
+   res = PQexec(conn, req.c_str());
+   int ncols = PQnfields(res);
+
+   int nrows = PQntuples(res);
+   for(int i = 0; i < nrows; i++) {
+    std::string pfx = PQgetvalue(res, i, 0);
+    prefix4.push_back(pfr_prefix4(pfx));
+   }
+   PQclear(res);
+   PQfinish(conn);
+ }
 }
 
 bool pfr_customer::ispfxhit(std::string srcaddr) { 
