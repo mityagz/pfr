@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <cmath>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/syslog_sink.h>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -61,22 +60,18 @@ pfr_prefix4::pfr_prefix4(std::string sprefix) : prefix(sprefix) {
  int oct = 0;
  std::string sshir;
  if(prefix_len >= 0 && prefix_len < 8) {
-    //hbits = std::pow(2, (8 - prefix_len)) - 1;
     hbits = 255 >> 8 - (8 - prefix_len);
     oct = std::stoi(shir[0]) | hbits;
     sshir = std::to_string(oct) + ".255.255.255";
  } else if(prefix_len >= 8 && prefix_len < 16) {
-    //hbits = std::pow(2, (16 - prefix_len)) - 1;
     hbits = 255 >> 8 - (16 - prefix_len);
     oct = std::stoi(shir[1]) | hbits;
     sshir = shir[0] + "." + std::to_string(oct) + ".255.255";
  } else if(prefix_len >= 16 && prefix_len < 24) {
-    //hbits = std::pow(2, (24 - prefix_len)) - 1;
     hbits = 255 >> 8 - (24 - prefix_len);
     oct = std::stoi(shir[2]) | hbits;
     sshir = shir[0] + "." + shir[1] + "." + std::to_string(oct) + ".255";
  } else if(prefix_len >= 24 && prefix_len <= 32) {
-    // hbits = std::pow(2, (32 - prefix_len)) - 1;
     hbits = 255 >> 8 - (32 - prefix_len);
     oct = std::stoi(shir[3]) | hbits;
     sshir = shir[0] + "." + shir[1] + "." + shir[2] + "." + std::to_string(oct);
