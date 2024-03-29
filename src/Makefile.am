@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -std=c++11 -Wno-write-strings -Wno-pointer-arith
+AM_CPPFLAGS = -std=c++11 -Wno-write-strings -Wno-pointer-arith -Wno-error=deprecated-declarations
 bin_PROGRAMS=pfrd
 pfrd_SOURCES= \
 	pfrd.cpp \
@@ -13,6 +13,13 @@ pfrd_SOURCES= \
 	pfr_localnets.cpp \
 	pfr_sql_log.cpp \
 	pfr_customer.cpp \
+	grpc/pfr_gobgp_grpc.cpp \
+	grpc/gobgp.pb.cc \
+	grpc/gobgp.grpc.pb.cc \
+	grpc/capability.pb.cc \
+	grpc/capability.grpc.pb.cc \
+	grpc/attribute.pb.cc \
+	grpc/attribute.grpc.pb.cc \
 	error.cpp \
 	ping_calloc.cpp \
 	ping_data.cpp \

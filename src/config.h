@@ -7,6 +7,9 @@
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 /* #undef HAVE_ARPA_INET_H */
 
+/* Define to 1 if you have the <boost/foreach.hpp> header file. */
+#define HAVE_BOOST_FOREACH_HPP 1
+
 /* Define to 1 if you have the `bzero' function. */
 /* #undef HAVE_BZERO */
 
@@ -31,14 +34,39 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
+/* Define to 1 if you have the `boost_program_options' library
+   (-lboost_program_options). */
+#define HAVE_LIBBOOST_PROGRAM_OPTIONS 1
+
+/* Define to 1 if you have the `boost_regex' library (-lboost_regex). */
+#define HAVE_LIBBOOST_REGEX 1
+
+/* Define to 1 if you have the `boost_system' library (-lboost_system). */
+#define HAVE_LIBBOOST_SYSTEM 1
+
 /* Define to 1 if you have the `crypt' library (-lcrypt). */
 #define HAVE_LIBCRYPT 1
+
+/* Define to 1 if you have the `grpc' library (-lgrpc). */
+#define HAVE_LIBGRPC 1
+
+/* Define to 1 if you have the `grpc++' library (-lgrpc++). */
+#define HAVE_LIBGRPC__ 1
+
+/* Define to 1 if you have the `netconf' library (-lnetconf). */
+#define HAVE_LIBNETCONF 1
 
 /* Define to 1 if you have the `pq' library (-lpq). */
 #define HAVE_LIBPQ 1
 
+/* Define to 1 if you have the `protobuf' library (-lprotobuf). */
+#define HAVE_LIBPROTOBUF 1
+
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #define HAVE_LIBPTHREAD 1
+
+/* Define to 1 if you have the `spdlog' library (-lspdlog). */
+#define HAVE_LIBSPDLOG 1
 
 /* Define to 1 if your system has a GNU libc compatible `malloc' function, and
    to 0 otherwise. */

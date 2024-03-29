@@ -171,7 +171,7 @@ void pfr_route_print(int probe_id) {
   its removes entities from r[] && route[] which don't exist in ipfix
   Important: need to remove entities from mxs too before remove from r[] && route[].
 */
-void pfr_route_update(int probe_id, pfr_dst_list &dstList, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
+void pfr_route_update(int probe_id, pfr_dst_list &dstList, gobgp_grpc &grpcc, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
         std::map<std::string, int> rdst;
         std::set<std::string> deldst;
 
@@ -198,7 +198,7 @@ void pfr_route_update(int probe_id, pfr_dst_list &dstList, std::map<int, pfr_pee
         // to remove entry from mxs
         if(route[dst_ip].count(probe_id - 1) == 1 && route[dst_ip][probe_id - 1]->get_curr_peer() > 0) {
           peer_id = route[dst_ip][probe_id - 1]->get_curr_peer();
-          pfr_delete_set_jrouter_rt(p, br, 0, 0, peer_id, dst_ip);
+          pfr_delete_set_jrouter_rt(p, grpcc, br, 0, 0, peer_id, dst_ip);
         }
 
         syslog_logger->debug("ROUTE_UPDATE route[ip] doesn't exist in dstList[ip] need to remove from route[]: {}:{}", cnt_ip, dst_ip);
@@ -500,7 +500,7 @@ void *pfr_route_scan_sql(void *ithlog) {
 /* This function deletes dst_ip && route from mxs 
  * which no response 3 times
 */
-void pfr_delete(int probe_id, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
+void pfr_delete(int probe_id, gobgp_grpc &grpcc, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
 //                |dsp_ip               |probe_id
 //extern std::map<std::string, std::map<int, tlog *>> route_log1;
 // TODO: conf_deep_delete
@@ -537,7 +537,7 @@ void pfr_delete(int probe_id, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
    if(route.count(dst_ip) == 1 && route[dst_ip].count(probe_id) == 1 && route[dst_ip][probe_id] != NULL) {
     peer_id = route[dst_ip][probe_id]->get_curr_peer();
     syslog_logger->debug("pfr_delete() : delete_flag {}: dst_ip {} : probe_id - 1: {}: peer_prev_id : {} : probe_id: {}: peer_id {}", delete_flag, dst_ip, probe_id - 1, 0, probe_id, peer_id);
-    pfr_delete_r_route(p, br, dst_ip, peer_id);
+    pfr_delete_r_route(p, grpcc, br, dst_ip, peer_id);
    }
    // delete r[dst_ip], route[dst_ip], delete_from_mx(dst_ip, peer_id)
    delete_flag = true;
@@ -546,7 +546,7 @@ void pfr_delete(int probe_id, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
  }
 }
 
-void pfr_delete_all(int probe_id, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
+void pfr_delete_all(int probe_id, gobgp_grpc &grpcc, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
  int peer_id = 0;
  std::map<int, tlog *>::iterator it_peer_id;
  std::string dst_ip;
@@ -556,12 +556,12 @@ void pfr_delete_all(int probe_id, std::map<int, pfr_peer> &p, pfr_asbrs &br) {
    if(route.count(dst_ip) == 1 && route[dst_ip].count(probe_id) == 1 && route[dst_ip][probe_id] != NULL) {
     peer_id = route[dst_ip][probe_id]->get_curr_peer();
     syslog_logger->debug("pfr_delete_all() : dst_ip {} : probe_id - 1: {}: peer_prev_id : {} : probe_id: {}: peer_id {}", dst_ip, probe_id - 1, 0, probe_id, peer_id);
-    pfr_delete_r_route(p, br, dst_ip, peer_id);
+    pfr_delete_r_route(p, grpcc, br, dst_ip, peer_id);
    }
  }
 }
 
-void pfr_delete_r_route(std::map<int, pfr_peer> &p, pfr_asbrs &br, std::string dst_ip, int peer_id) {
+void pfr_delete_r_route(std::map<int, pfr_peer> &p, gobgp_grpc &grpcc, pfr_asbrs &br, std::string dst_ip, int peer_id) {
     int probe_id = 0;
     int seq_id = 0;
     int last_peer_id = peer_id;
@@ -582,7 +582,7 @@ void pfr_delete_r_route(std::map<int, pfr_peer> &p, pfr_asbrs &br, std::string d
        route[dst_ip].erase(probe_id);
     }
     syslog_logger->debug("1 pfr_r_route_delete() dst_ip {} : peer_id {}", dst_ip, last_peer_id);
-    pfr_delete_set_jrouter_rt(p, br, 0, 0, last_peer_id, dst_ip);
+    pfr_delete_set_jrouter_rt(p, grpcc, br, 0, 0, last_peer_id, dst_ip);
     r.erase(dst_ip);
     route.erase(dst_ip);
 }

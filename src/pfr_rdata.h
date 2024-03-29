@@ -4,6 +4,7 @@
 #include "pfr_dst_list.h"
 #include "pfr_peers.h"
 #include "pfr_sql_log.h"
+#include "grpc/pfr_gobgp_grpc.h"
 
 class tparm {
   double min_rtt;

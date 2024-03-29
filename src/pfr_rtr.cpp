@@ -21,6 +21,7 @@ extern std::shared_ptr<spdlog::logger> syslog_logger;
 extern std::string gobgp_path;
 extern bool enable_advertise_same;
 extern bool enable_explicit_withdraw;
+extern bool enable_gobgp_grpc;
 
 /*
 class pfr_asbr_parm {
@@ -185,7 +186,7 @@ std::string goexec(const char* cmd) {
 
 // set of method for manipulation of routes on juniper routers
 // we are going to use netconf and ephemerial db
-void pfr_routes_man(int probe_id, std::map<int, pfr_peer> &mm, \
+void pfr_routes_man(int probe_id, std::map<int, pfr_peer> &mm, gobgp_grpc &grpcc, \
                     pfr_asbrs &br, std::map<std::string, std::map<int, rt_parm *>> &rroute) {
  for(std::map<std::string, std::map<int, rt_parm *>>::iterator it0 = rroute.begin(); it0 != rroute.end(); it0++) {
         std::string dst_ip = it0->first;
@@ -203,7 +204,7 @@ void pfr_routes_man(int probe_id, std::map<int, pfr_peer> &mm, \
             }
         }
         
-        pfr_create_set_jrouter_rt(mm, br, probe_id, prev_peer_id, curr_peer_id, dst_ip);
+        pfr_create_set_jrouter_rt(mm, grpcc, br, probe_id, prev_peer_id, curr_peer_id, dst_ip);
  } 
  //
  // get routes from devices?
@@ -221,7 +222,7 @@ std::vector<std::string> pfr_update_jrouter_rt() { std::vector<std::string> vs; 
 
 int pfr_set_jrouter_rt() { return 0; }
 
-void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
+void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, gobgp_grpc &grpcc, pfr_asbrs &br, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
    syslog_logger->debug("ppfr_create_set_jrouter_rt(): peer_id: {} : {} : {}", probe_id, prev_peer_id, curr_peer_id);
    if(probe_id > 0) {
     int id = (mm[curr_peer_id]).pfr_peer_get_id();
@@ -243,7 +244,11 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
                              + "/32 next-hop " + pnh + " community 3333:10000 tag " + std::to_string(pid);
             std::string exec_prts = gobgp_path + " global rib del -a ipv4 " + dst_ip + "/32 community " + pcomm;         
             if (enable_explicit_withdraw) {
-             goexec(exec_prts.c_str());
+             if(!enable_gobgp_grpc) {
+              goexec(exec_prts.c_str());
+             } else { //
+              grpcc.del_route4(dst_ip, pnh, pcomm);
+             }
              syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", plo0asbr);
              syslog_logger->debug("ppfr_create_set_jrouter_rt(): {}", prts);
             } else {
@@ -254,7 +259,11 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
         std::string rts = "set routing-instances i routing-options static route " + dst_ip \
                         + "/32 next-hop " + nh + " community 3333:10000 tag " + std::to_string(id);
         std::string exec_rts = gobgp_path + " global rib add -a ipv4 " + dst_ip + "/32 community " + comm;         
-        goexec(exec_rts.c_str());
+        if(!enable_gobgp_grpc) {
+         goexec(exec_rts.c_str());
+        } else { //
+         grpcc.add_route4(dst_ip, nh, comm);
+        }
     std::string lo0asbr = br.get_asbr_lo(curr_peer_id);
     pfr_asbr_parm p = br.get_asbr(lo0asbr);
     struct nc_session *ncs = p.get_session();
@@ -265,7 +274,7 @@ void pfr_create_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
    }
 }
 
-void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
+void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, gobgp_grpc &grpcc, pfr_asbrs &br, int probe_id, int prev_peer_id, int curr_peer_id, std::string dst_ip) {
    syslog_logger->debug("ppfr_delete_set_jrouter_rt(): probe_id: {} : dst_ip {} : {} : {}", probe_id, dst_ip, prev_peer_id, curr_peer_id);
    prev_peer_id = curr_peer_id;
             int pid = (mm[prev_peer_id]).pfr_peer_get_id();
@@ -276,7 +285,11 @@ void pfr_delete_set_jrouter_rt(std::map<int, pfr_peer> &mm, pfr_asbrs &br, int p
             std::string prts = "del routing-instances i routing-options static route " + dst_ip \
                              + "/32 next-hop " + pnh + " community 3333:10000 tag " + std::to_string(pid);
             std::string exec_prts = gobgp_path + " global rib del -a ipv4 " + dst_ip + "/32 community " + pcomm;         
-            goexec(exec_prts.c_str());
+            if(!enable_gobgp_grpc) {
+             goexec(exec_prts.c_str());
+            } else { //
+             grpcc.del_route4(dst_ip, pnh, pcomm);
+            }
             std::string plo0asbr = br.get_asbr_lo(prev_peer_id);
             pfr_asbr_parm pp = br.get_asbr(plo0asbr);
             struct nc_session *pncs = pp.get_session();

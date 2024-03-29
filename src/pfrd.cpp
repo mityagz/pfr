@@ -26,6 +26,7 @@
 #include "ping0.h"
 #include "pfr_sql_log.h"
 #include "pfr_customer.h"
+#include "grpc/pfr_gobgp_grpc.h"
 
 using namespace std;
 
@@ -84,6 +85,8 @@ pfr_dst_list pfrL;
 pfr_dst_list &pfrList = pfrL;
 pfr_customer pfrC;
 pfr_customer &pfrCust = pfrC;
+gobgp_grpc grpcL;
+gobgp_grpc &grpcc = grpcL;
 
 //       |dsp_ip               |probe_id     |peer_id      |seq_num
 std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>> r;
@@ -127,6 +130,7 @@ double min_rtt = 50000; //config_t, pfr_data.cpp
 std::string src_addr = "1.0.5.230"; //config_t, ping_send_v4.cpp
 int usleep_between_echo = 2500; //config_t, ping_send_v4.cpp
 std::string gobgp_path;
+bool enable_gobgp_grpc = false;
 std::string localnets;
 int max_load = 0;
 int df = 0;
@@ -295,6 +299,14 @@ bool load_configuration_file() {
             enable_explicit_withdraw = true;
         } else {
             enable_explicit_withdraw = false;
+        }
+    }
+
+    if (configuration_map.count("enable_gobgp_grpc")) {
+        if (configuration_map["enable_gobgp_grpc"] == "on") {
+            enable_gobgp_grpc = true;
+        } else {
+            enable_gobgp_grpc = false;
         }
     }
 
@@ -578,6 +590,10 @@ int main(int argc, char **argv) {
     //create asbr structure and connect to asbr by netconf
     pfr_asbrs br(m);
 
+    //create grpc client for gobgp
+    grpcc = gobgp_grpc(grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials()));
+    syslog_logger->debug("Create grpc client for gobgp");
+
     for(;;) {
         //pfrList = pfr_dst_list(10, 10);
 
@@ -646,7 +662,7 @@ int main(int argc, char **argv) {
         if(send_stopped == 1) {
          syslog_logger->debug("3:s Start of pfr_route_update()...");
          //pfr_route_update(probe_id, pfrList);
-         pfr_route_update(probe_id, pfrList, m, br);
+         pfr_route_update(probe_id, pfrList, grpcc, m, br);
          syslog_logger->debug("3:e End of pfr_route_update()...");
 
          syslog_logger->debug("sleep({})", sleep_after_update);
@@ -687,7 +703,7 @@ int main(int argc, char **argv) {
 
          //start routes delete
          syslog_logger->debug("7.5:s Start of pfr_delete()...");
-         pfr_delete(probe_id, m, br);
+         pfr_delete(probe_id, grpcc, m, br);
          syslog_logger->debug("7.5:e End of pfr_delete()...");
 
             
@@ -695,7 +711,7 @@ int main(int argc, char **argv) {
          if(sig_usr1_flag || sig_int_flag) {
             syslog_logger->debug("graceful shutdown...");
             pthread_mutex_lock(&mt_sql_log);
-            pfr_delete_all(probe_id, m, br);
+            pfr_delete_all(probe_id, grpcc, m, br);
             pthread_mutex_unlock(&mt_sql_log);
             exit(1);       
          } 
@@ -738,7 +754,7 @@ int main(int argc, char **argv) {
          //start routes manipulation
          if (enable_advertise) {
             syslog_logger->debug("8:s Start of pfr_routes_man()...");
-            pfr_routes_man(probe_id, m, br, route);
+            pfr_routes_man(probe_id, m, grpcc, br, route);
             syslog_logger->debug("8:e End of pfr_routes_man()...");
          }
 

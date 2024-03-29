@@ -22,13 +22,14 @@ AM_INIT_AUTOMAKE
 # Checks for libraries.
 #PKG_CHECK_MODULES([GLIB], [glib-2.0])
 
-CFLAGS="$CFLAGS -I/usr/local/include"
-CPPFLAGS="$CPPFLAGS -I/usr/local/include"
-LDFLAGS="$LDFLAGS -L/usr/local/lib"
+#CFLAGS="$CFLAGS -I/usr/local/include"
+#CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+#LDFLAGS="$LDFLAGS -L/usr/local/lib64 -L/usr/local/lib"
 
 # Checks for libraries.
 AC_CHECK_LIB([crypt], [main])
 AC_CHECK_LIB([pq], [main])
+#
 AC_CHECK_HEADER([glib.h])
 #PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.28])
 #AC_CHECK_LIB([glib], [main])
@@ -38,7 +39,21 @@ AC_CHECK_LIB([spdlog], [main])
 AC_CHECK_LIB([boost_system], [main])
 AC_CHECK_LIB([boost_program_options], [main])
 AC_CHECK_LIB([boost_regex], [main])
+#
+AC_CHECK_LIB([protobuf], [main])
+AC_CHECK_LIB([grpc], [main])
+AC_CHECK_LIB([grpc++], [main])
+PKG_CHECK_MODULES([PROTOBUF], [protobuf])
+PKG_CHECK_MODULES([GRPC], [grpc])
+PKG_CHECK_MODULES([GRPC_CPP], [grpc++])
+#
 
+AC_SUBST([PROTOBUF_LDFLAGS])
+AC_SUBST([PROTOBUF_LIBS])
+AC_SUBST([GRPC_LDFLAGS])
+AC_SUBST([GRPC_LIBS])
+AC_SUBST([GRPC_CPP_LDFLAGS])
+AC_SUBST([GRPC_CPP_LIBS])
 
 ##
 AC_LANG_PUSH([C++])
@@ -49,9 +64,10 @@ AC_LANG_POP([C++])
 #AX_BOOST_BASE([MINIMUM-VERSION], [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
 #AX_BOOST_BASE([1.0], )
 
-CFLAGS="$CFLAGS $GLIB_CFLAGS -std=gnu99 $(echo '${UFLAGS}')"
-CPPFLAGS="$CPPFLAGS $GLIB_CPPFLAG"
-LDFLAGS="$LDFLAGS $GLIB_LDFLAGS"
+CFLAGS="$CFLAGS -I/usr/local/include $GLIB_CFLAGS $PROTOBUF_CFLAGS $GRPC_CPPFLAGS $GRPC_CPP_CFLAGS -std=gnu99 $(echo '${UFLAGS}')"
+CPPFLAGS="$CPPFLAGS -I/usr/local/include $GLIB_CPPFLAG $PROTOBUF_CPPFLAGS $GRPC_CPPFLAGS $GRPC_CPP_CPPFLAGS"
+#LDFLAGS="$LDFLAGS -L/usr/local/lib64 -L/usr/local/lib $GLIB_LDFLAGS $PROTOBUF_LDFLAGS $GRPC_LDFLAGS $GRPC_CPP_LDFLAGS"
+LIBS="-L/usr/local/lib64 -L/usr/local/lib $LIBS  $PROTOBUF_LIBS $GRPC_LIBS $GRPC_CPP_LIBS $LDFLAGS"
 
 
 # Checks for header files.

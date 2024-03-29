@@ -76,12 +76,15 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+build_triplet = x86_64-unknown-linux-gnu
+host_triplet = x86_64-unknown-linux-gnu
 bin_PROGRAMS = pfrd$(EXEEXT)
 subdir = .
 DIST_COMMON = INSTALL NEWS README AUTHORS ChangeLog \
 	$(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
-	$(srcdir)/config.h.in depcomp COPYING install-sh missing
+	$(srcdir)/config.h.in depcomp COPYING config.guess config.sub \
+	install-sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -97,7 +100,13 @@ PROGRAMS = $(bin_PROGRAMS)
 am_pfrd_OBJECTS = pfrd.$(OBJEXT) pfr_dst.$(OBJEXT) \
 	pfr_dst_list.$(OBJEXT) pfr_peers.$(OBJEXT) pfr_sql.$(OBJEXT) \
 	pfr_sql_list.$(OBJEXT) pfr_rdata.$(OBJEXT) pfr_rtr.$(OBJEXT) \
-	error.$(OBJEXT) ping_calloc.$(OBJEXT) ping_data.$(OBJEXT) \
+	pfr_lib.$(OBJEXT) pfr_localnets.$(OBJEXT) \
+	pfr_sql_log.$(OBJEXT) pfr_customer.$(OBJEXT) \
+	pfr_gobgp_grpc.$(OBJEXT) gobgp.pb.$(OBJEXT) \
+	gobgp.grpc.pb.$(OBJEXT) capability.pb.$(OBJEXT) \
+	capability.grpc.pb.$(OBJEXT) attribute.pb.$(OBJEXT) \
+	attribute.grpc.pb.$(OBJEXT) error.$(OBJEXT) \
+	ping_calloc.$(OBJEXT) ping_data.$(OBJEXT) \
 	ping_host_serv.$(OBJEXT) ping_in_cksum.$(OBJEXT) \
 	ping_inet_ntop.$(OBJEXT) ping_inet_pton_ipv4.$(OBJEXT) \
 	ping_m.$(OBJEXT) ping_proc_v4.$(OBJEXT) \
@@ -123,6 +132,10 @@ DEFAULT_INCLUDES = -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
+AM_V_lt = $(am__v_lt_$(V))
+am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 AM_V_CXX = $(am__v_CXX_$(V))
@@ -191,10 +204,11 @@ AUTOMAKE = ${SHELL} /home/mitya/wrk/pfr/src/missing automake-1.13
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2  -std=gnu99 ${UFLAGS}
+CFLAGS = -g -O2 -I/usr/local/include  -lpthread -I/usr/local/include    -I/usr/local/include   -std=gnu99 ${UFLAGS}
 CPP = gcc -E
-CPPFLAGS =  
+CPPFLAGS =  -I/usr/local/include    
 CXX = g++
+CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
 CXXFLAGS = -g -Werror -O0
 CYGPATH_W = echo
@@ -206,17 +220,29 @@ ECHO_T =
 EGREP = /usr/bin/grep -E
 EXEEXT = 
 GREP = /usr/bin/grep
+GRPC_CFLAGS = -I/usr/local/include  
+GRPC_CPP_CFLAGS = -I/usr/local/include  
+GRPC_CPP_LDFLAGS = 
+GRPC_CPP_LIBS = -L/usr/local/lib -lgrpc++ -lgrpc -laddress_sorting -lre2 -lupb -lcares -lz -labsl_raw_hash_set -labsl_hashtablez_sampler -labsl_exponential_biased -labsl_hash -labsl_bad_variant_access -labsl_city -labsl_status -labsl_cord -labsl_bad_optional_access -lgpr -labsl_str_format_internal -labsl_synchronization -labsl_graphcycles_internal -labsl_symbolize -labsl_demangle_internal -labsl_stacktrace -labsl_debugging_internal -labsl_malloc_internal -labsl_time -labsl_time_zone -labsl_civil_time -labsl_strings -labsl_strings_internal -labsl_throw_delegate -labsl_int128 -labsl_base -labsl_spinlock_wait -labsl_raw_logging_internal -labsl_log_severity -labsl_dynamic_annotations -lssl -lcrypto  
+GRPC_LDFLAGS = 
+GRPC_LIBS = -L/usr/local/lib -lgrpc -laddress_sorting -lre2 -lupb -lcares -lz -labsl_raw_hash_set -labsl_hashtablez_sampler -labsl_exponential_biased -labsl_hash -labsl_bad_variant_access -labsl_city -labsl_status -labsl_cord -labsl_bad_optional_access -lgpr -labsl_str_format_internal -labsl_synchronization -labsl_graphcycles_internal -labsl_symbolize -labsl_demangle_internal -labsl_stacktrace -labsl_debugging_internal -labsl_malloc_internal -labsl_time -labsl_time_zone -labsl_civil_time -labsl_strings -labsl_strings_internal -labsl_throw_delegate -labsl_int128 -labsl_base -labsl_spinlock_wait -labsl_raw_logging_internal -labsl_log_severity -labsl_dynamic_annotations -lssl -lcrypto  
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LDFLAGS =  
+LDFLAGS = 
 LIBOBJS =  ${LIBOBJDIR}malloc$U.o
-LIBS = -lspdlog -lnetconf -lpthread -lpq -lcrypt 
+LIBS = -L/usr/local/lib64 -L/usr/local/lib -lgrpc++ -lgrpc -lprotobuf -lboost_regex -lboost_program_options -lboost_system -lspdlog -lnetconf -lpthread -lpq -lcrypt   -L/usr/local/lib64 -lprotobuf -lpthread   -L/usr/local/lib -lgrpc -laddress_sorting -lre2 -lupb -lcares -lz -labsl_raw_hash_set -labsl_hashtablez_sampler -labsl_exponential_biased -labsl_hash -labsl_bad_variant_access -labsl_city -labsl_status -labsl_cord -labsl_bad_optional_access -lgpr -labsl_str_format_internal -labsl_synchronization -labsl_graphcycles_internal -labsl_symbolize -labsl_demangle_internal -labsl_stacktrace -labsl_debugging_internal -labsl_malloc_internal -labsl_time -labsl_time_zone -labsl_civil_time -labsl_strings -labsl_strings_internal -labsl_throw_delegate -labsl_int128 -labsl_base -labsl_spinlock_wait -labsl_raw_logging_internal -labsl_log_severity -labsl_dynamic_annotations -lssl -lcrypto   -L/usr/local/lib -lgrpc++ -lgrpc -laddress_sorting -lre2 -lupb -lcares -lz -labsl_raw_hash_set -labsl_hashtablez_sampler -labsl_exponential_biased -labsl_hash -labsl_bad_variant_access -labsl_city -labsl_status -labsl_cord -labsl_bad_optional_access -lgpr -labsl_str_format_internal -labsl_synchronization -labsl_graphcycles_internal -labsl_symbolize -labsl_demangle_internal -labsl_stacktrace -labsl_debugging_internal -labsl_malloc_internal -labsl_time -labsl_time_zone -labsl_civil_time -labsl_strings -labsl_strings_internal -labsl_throw_delegate -labsl_int128 -labsl_base -labsl_spinlock_wait -labsl_raw_logging_internal -labsl_log_severity -labsl_dynamic_annotations -lssl -lcrypto   
 LTLIBOBJS =  ${LIBOBJDIR}malloc$U.lo
 MAKEINFO = ${SHELL} /home/mitya/wrk/pfr/src/missing makeinfo
 MKDIR_P = /usr/bin/mkdir -p
+OBJC = gcc
+OBJCDEPMODE = depmode=gcc3
+OBJCFLAGS = 
+OBJCXX = g++
+OBJCXXDEPMODE = depmode=gcc3
+OBJCXXFLAGS = 
 OBJEXT = o
 PACKAGE = pfrd
 PACKAGE_BUGREPORT = mityagz@gmail.com
@@ -226,6 +252,12 @@ PACKAGE_TARNAME = pfrd
 PACKAGE_URL = 
 PACKAGE_VERSION = 0.01
 PATH_SEPARATOR = :
+PKG_CONFIG = /usr/bin/pkg-config
+PKG_CONFIG_LIBDIR = /usr/local/lib64/pkgconfig:/usr/local/lib/pkgconfig
+PKG_CONFIG_PATH = /usr/local/lib64/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib64:/usr/local/lib:/usr/lib64/pkgconfig:/usr/lib/pkgconfig
+PROTOBUF_CFLAGS = -lpthread -I/usr/local/include  
+PROTOBUF_LDFLAGS = 
+PROTOBUF_LIBS = -L/usr/local/lib64 -lprotobuf -lpthread  
 SET_MAKE = 
 SHELL = /bin/sh
 STRIP = 
@@ -236,20 +268,30 @@ abs_top_builddir = /home/mitya/wrk/pfr/src
 abs_top_srcdir = /home/mitya/wrk/pfr/src
 ac_ct_CC = gcc
 ac_ct_CXX = g++
+ac_ct_OBJC = gcc
+ac_ct_OBJCXX = g++
 am__include = include
 am__leading_dot = .
 am__quote = 
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
 bindir = ${exec_prefix}/bin
+build = x86_64-unknown-linux-gnu
 build_alias = 
+build_cpu = x86_64
+build_os = linux-gnu
+build_vendor = unknown
 builddir = .
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
+host = x86_64-unknown-linux-gnu
 host_alias = 
+host_cpu = x86_64
+host_os = linux-gnu
+host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
@@ -273,7 +315,7 @@ target_alias =
 top_build_prefix = 
 top_builddir = .
 top_srcdir = .
-AM_CPPFLAGS = -std=c++11 -Wno-write-strings -Wno-pointer-arith
+AM_CPPFLAGS = -std=c++11 -Wno-write-strings -Wno-pointer-arith -Wno-error=deprecated-declarations
 pfrd_SOURCES = \
 	pfrd.cpp \
 	pfr_dst.cpp \
@@ -283,6 +325,17 @@ pfrd_SOURCES = \
 	pfr_sql_list.cpp \
 	pfr_rdata.cpp \
 	pfr_rtr.cpp \
+	pfr_lib.cpp \
+	pfr_localnets.cpp \
+	pfr_sql_log.cpp \
+	pfr_customer.cpp \
+	grpc/pfr_gobgp_grpc.cpp \
+	grpc/gobgp.pb.cc \
+	grpc/gobgp.grpc.pb.cc \
+	grpc/capability.pb.cc \
+	grpc/capability.grpc.pb.cc \
+	grpc/attribute.pb.cc \
+	grpc/attribute.grpc.pb.cc \
 	error.cpp \
 	ping_calloc.cpp \
 	ping_data.cpp \
@@ -305,7 +358,7 @@ all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .cpp .o .obj
+.SUFFIXES: .cc .cpp .o .obj
 am--refresh: Makefile
 	@:
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
@@ -408,14 +461,25 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/attribute.grpc.pb.Po
+include ./$(DEPDIR)/attribute.pb.Po
+include ./$(DEPDIR)/capability.grpc.pb.Po
+include ./$(DEPDIR)/capability.pb.Po
 include ./$(DEPDIR)/error.Po
+include ./$(DEPDIR)/gobgp.grpc.pb.Po
+include ./$(DEPDIR)/gobgp.pb.Po
+include ./$(DEPDIR)/pfr_customer.Po
 include ./$(DEPDIR)/pfr_dst.Po
 include ./$(DEPDIR)/pfr_dst_list.Po
+include ./$(DEPDIR)/pfr_gobgp_grpc.Po
+include ./$(DEPDIR)/pfr_lib.Po
+include ./$(DEPDIR)/pfr_localnets.Po
 include ./$(DEPDIR)/pfr_peers.Po
 include ./$(DEPDIR)/pfr_rdata.Po
 include ./$(DEPDIR)/pfr_rtr.Po
 include ./$(DEPDIR)/pfr_sql.Po
 include ./$(DEPDIR)/pfr_sql_list.Po
+include ./$(DEPDIR)/pfr_sql_log.Po
 include ./$(DEPDIR)/pfrd.Po
 include ./$(DEPDIR)/ping_calloc.Po
 include ./$(DEPDIR)/ping_data.Po
@@ -433,6 +497,118 @@ include ./$(DEPDIR)/ping_sock_ntop_host.Po
 include ./$(DEPDIR)/ping_wrapsock.Po
 include ./$(DEPDIR)/ping_wrapunix.Po
 include ./$(DEPDIR)/tv_sub.Po
+
+.cc.o:
+	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+#	$(AM_V_CXX)source='$<' object='$@' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXXCOMPILE) -c -o $@ $<
+
+.cc.obj:
+	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+#	$(AM_V_CXX)source='$<' object='$@' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+pfr_gobgp_grpc.o: grpc/pfr_gobgp_grpc.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pfr_gobgp_grpc.o -MD -MP -MF $(DEPDIR)/pfr_gobgp_grpc.Tpo -c -o pfr_gobgp_grpc.o `test -f 'grpc/pfr_gobgp_grpc.cpp' || echo '$(srcdir)/'`grpc/pfr_gobgp_grpc.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/pfr_gobgp_grpc.Tpo $(DEPDIR)/pfr_gobgp_grpc.Po
+#	$(AM_V_CXX)source='grpc/pfr_gobgp_grpc.cpp' object='pfr_gobgp_grpc.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pfr_gobgp_grpc.o `test -f 'grpc/pfr_gobgp_grpc.cpp' || echo '$(srcdir)/'`grpc/pfr_gobgp_grpc.cpp
+
+pfr_gobgp_grpc.obj: grpc/pfr_gobgp_grpc.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pfr_gobgp_grpc.obj -MD -MP -MF $(DEPDIR)/pfr_gobgp_grpc.Tpo -c -o pfr_gobgp_grpc.obj `if test -f 'grpc/pfr_gobgp_grpc.cpp'; then $(CYGPATH_W) 'grpc/pfr_gobgp_grpc.cpp'; else $(CYGPATH_W) '$(srcdir)/grpc/pfr_gobgp_grpc.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/pfr_gobgp_grpc.Tpo $(DEPDIR)/pfr_gobgp_grpc.Po
+#	$(AM_V_CXX)source='grpc/pfr_gobgp_grpc.cpp' object='pfr_gobgp_grpc.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pfr_gobgp_grpc.obj `if test -f 'grpc/pfr_gobgp_grpc.cpp'; then $(CYGPATH_W) 'grpc/pfr_gobgp_grpc.cpp'; else $(CYGPATH_W) '$(srcdir)/grpc/pfr_gobgp_grpc.cpp'; fi`
+
+gobgp.pb.o: grpc/gobgp.pb.cc
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT gobgp.pb.o -MD -MP -MF $(DEPDIR)/gobgp.pb.Tpo -c -o gobgp.pb.o `test -f 'grpc/gobgp.pb.cc' || echo '$(srcdir)/'`grpc/gobgp.pb.cc
+	$(AM_V_at)$(am__mv) $(DEPDIR)/gobgp.pb.Tpo $(DEPDIR)/gobgp.pb.Po
+#	$(AM_V_CXX)source='grpc/gobgp.pb.cc' object='gobgp.pb.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o gobgp.pb.o `test -f 'grpc/gobgp.pb.cc' || echo '$(srcdir)/'`grpc/gobgp.pb.cc
+
+gobgp.pb.obj: grpc/gobgp.pb.cc
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT gobgp.pb.obj -MD -MP -MF $(DEPDIR)/gobgp.pb.Tpo -c -o gobgp.pb.obj `if test -f 'grpc/gobgp.pb.cc'; then $(CYGPATH_W) 'grpc/gobgp.pb.cc'; else $(CYGPATH_W) '$(srcdir)/grpc/gobgp.pb.cc'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/gobgp.pb.Tpo $(DEPDIR)/gobgp.pb.Po
+#	$(AM_V_CXX)source='grpc/gobgp.pb.cc' object='gobgp.pb.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o gobgp.pb.obj `if test -f 'grpc/gobgp.pb.cc'; then $(CYGPATH_W) 'grpc/gobgp.pb.cc'; else $(CYGPATH_W) '$(srcdir)/grpc/gobgp.pb.cc'; fi`
+
+gobgp.grpc.pb.o: grpc/gobgp.grpc.pb.cc
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT gobgp.grpc.pb.o -MD -MP -MF $(DEPDIR)/gobgp.grpc.pb.Tpo -c -o gobgp.grpc.pb.o `test -f 'grpc/gobgp.grpc.pb.cc' || echo '$(srcdir)/'`grpc/gobgp.grpc.pb.cc
+	$(AM_V_at)$(am__mv) $(DEPDIR)/gobgp.grpc.pb.Tpo $(DEPDIR)/gobgp.grpc.pb.Po
+#	$(AM_V_CXX)source='grpc/gobgp.grpc.pb.cc' object='gobgp.grpc.pb.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o gobgp.grpc.pb.o `test -f 'grpc/gobgp.grpc.pb.cc' || echo '$(srcdir)/'`grpc/gobgp.grpc.pb.cc
+
+gobgp.grpc.pb.obj: grpc/gobgp.grpc.pb.cc
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT gobgp.grpc.pb.obj -MD -MP -MF $(DEPDIR)/gobgp.grpc.pb.Tpo -c -o gobgp.grpc.pb.obj `if test -f 'grpc/gobgp.grpc.pb.cc'; then $(CYGPATH_W) 'grpc/gobgp.grpc.pb.cc'; else $(CYGPATH_W) '$(srcdir)/grpc/gobgp.grpc.pb.cc'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/gobgp.grpc.pb.Tpo $(DEPDIR)/gobgp.grpc.pb.Po
+#	$(AM_V_CXX)source='grpc/gobgp.grpc.pb.cc' object='gobgp.grpc.pb.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o gobgp.grpc.pb.obj `if test -f 'grpc/gobgp.grpc.pb.cc'; then $(CYGPATH_W) 'grpc/gobgp.grpc.pb.cc'; else $(CYGPATH_W) '$(srcdir)/grpc/gobgp.grpc.pb.cc'; fi`
+
+capability.pb.o: grpc/capability.pb.cc
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT capability.pb.o -MD -MP -MF $(DEPDIR)/capability.pb.Tpo -c -o capability.pb.o `test -f 'grpc/capability.pb.cc' || echo '$(srcdir)/'`grpc/capability.pb.cc
+	$(AM_V_at)$(am__mv) $(DEPDIR)/capability.pb.Tpo $(DEPDIR)/capability.pb.Po
+#	$(AM_V_CXX)source='grpc/capability.pb.cc' object='capability.pb.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o capability.pb.o `test -f 'grpc/capability.pb.cc' || echo '$(srcdir)/'`grpc/capability.pb.cc
+
+capability.pb.obj: grpc/capability.pb.cc
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT capability.pb.obj -MD -MP -MF $(DEPDIR)/capability.pb.Tpo -c -o capability.pb.obj `if test -f 'grpc/capability.pb.cc'; then $(CYGPATH_W) 'grpc/capability.pb.cc'; else $(CYGPATH_W) '$(srcdir)/grpc/capability.pb.cc'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/capability.pb.Tpo $(DEPDIR)/capability.pb.Po
+#	$(AM_V_CXX)source='grpc/capability.pb.cc' object='capability.pb.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o capability.pb.obj `if test -f 'grpc/capability.pb.cc'; then $(CYGPATH_W) 'grpc/capability.pb.cc'; else $(CYGPATH_W) '$(srcdir)/grpc/capability.pb.cc'; fi`
+
+capability.grpc.pb.o: grpc/capability.grpc.pb.cc
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT capability.grpc.pb.o -MD -MP -MF $(DEPDIR)/capability.grpc.pb.Tpo -c -o capability.grpc.pb.o `test -f 'grpc/capability.grpc.pb.cc' || echo '$(srcdir)/'`grpc/capability.grpc.pb.cc
+	$(AM_V_at)$(am__mv) $(DEPDIR)/capability.grpc.pb.Tpo $(DEPDIR)/capability.grpc.pb.Po
+#	$(AM_V_CXX)source='grpc/capability.grpc.pb.cc' object='capability.grpc.pb.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o capability.grpc.pb.o `test -f 'grpc/capability.grpc.pb.cc' || echo '$(srcdir)/'`grpc/capability.grpc.pb.cc
+
+capability.grpc.pb.obj: grpc/capability.grpc.pb.cc
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT capability.grpc.pb.obj -MD -MP -MF $(DEPDIR)/capability.grpc.pb.Tpo -c -o capability.grpc.pb.obj `if test -f 'grpc/capability.grpc.pb.cc'; then $(CYGPATH_W) 'grpc/capability.grpc.pb.cc'; else $(CYGPATH_W) '$(srcdir)/grpc/capability.grpc.pb.cc'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/capability.grpc.pb.Tpo $(DEPDIR)/capability.grpc.pb.Po
+#	$(AM_V_CXX)source='grpc/capability.grpc.pb.cc' object='capability.grpc.pb.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o capability.grpc.pb.obj `if test -f 'grpc/capability.grpc.pb.cc'; then $(CYGPATH_W) 'grpc/capability.grpc.pb.cc'; else $(CYGPATH_W) '$(srcdir)/grpc/capability.grpc.pb.cc'; fi`
+
+attribute.pb.o: grpc/attribute.pb.cc
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT attribute.pb.o -MD -MP -MF $(DEPDIR)/attribute.pb.Tpo -c -o attribute.pb.o `test -f 'grpc/attribute.pb.cc' || echo '$(srcdir)/'`grpc/attribute.pb.cc
+	$(AM_V_at)$(am__mv) $(DEPDIR)/attribute.pb.Tpo $(DEPDIR)/attribute.pb.Po
+#	$(AM_V_CXX)source='grpc/attribute.pb.cc' object='attribute.pb.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o attribute.pb.o `test -f 'grpc/attribute.pb.cc' || echo '$(srcdir)/'`grpc/attribute.pb.cc
+
+attribute.pb.obj: grpc/attribute.pb.cc
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT attribute.pb.obj -MD -MP -MF $(DEPDIR)/attribute.pb.Tpo -c -o attribute.pb.obj `if test -f 'grpc/attribute.pb.cc'; then $(CYGPATH_W) 'grpc/attribute.pb.cc'; else $(CYGPATH_W) '$(srcdir)/grpc/attribute.pb.cc'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/attribute.pb.Tpo $(DEPDIR)/attribute.pb.Po
+#	$(AM_V_CXX)source='grpc/attribute.pb.cc' object='attribute.pb.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o attribute.pb.obj `if test -f 'grpc/attribute.pb.cc'; then $(CYGPATH_W) 'grpc/attribute.pb.cc'; else $(CYGPATH_W) '$(srcdir)/grpc/attribute.pb.cc'; fi`
+
+attribute.grpc.pb.o: grpc/attribute.grpc.pb.cc
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT attribute.grpc.pb.o -MD -MP -MF $(DEPDIR)/attribute.grpc.pb.Tpo -c -o attribute.grpc.pb.o `test -f 'grpc/attribute.grpc.pb.cc' || echo '$(srcdir)/'`grpc/attribute.grpc.pb.cc
+	$(AM_V_at)$(am__mv) $(DEPDIR)/attribute.grpc.pb.Tpo $(DEPDIR)/attribute.grpc.pb.Po
+#	$(AM_V_CXX)source='grpc/attribute.grpc.pb.cc' object='attribute.grpc.pb.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o attribute.grpc.pb.o `test -f 'grpc/attribute.grpc.pb.cc' || echo '$(srcdir)/'`grpc/attribute.grpc.pb.cc
+
+attribute.grpc.pb.obj: grpc/attribute.grpc.pb.cc
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT attribute.grpc.pb.obj -MD -MP -MF $(DEPDIR)/attribute.grpc.pb.Tpo -c -o attribute.grpc.pb.obj `if test -f 'grpc/attribute.grpc.pb.cc'; then $(CYGPATH_W) 'grpc/attribute.grpc.pb.cc'; else $(CYGPATH_W) '$(srcdir)/grpc/attribute.grpc.pb.cc'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/attribute.grpc.pb.Tpo $(DEPDIR)/attribute.grpc.pb.Po
+#	$(AM_V_CXX)source='grpc/attribute.grpc.pb.cc' object='attribute.grpc.pb.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o attribute.grpc.pb.obj `if test -f 'grpc/attribute.grpc.pb.cc'; then $(CYGPATH_W) 'grpc/attribute.grpc.pb.cc'; else $(CYGPATH_W) '$(srcdir)/grpc/attribute.grpc.pb.cc'; fi`
 
 .cpp.o:
 	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
