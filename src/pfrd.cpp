@@ -130,7 +130,6 @@ double min_rtt = 50000; //config_t, pfr_data.cpp
 std::string src_addr = "1.0.5.230"; //config_t, ping_send_v4.cpp
 int usleep_between_echo = 2500; //config_t, ping_send_v4.cpp
 std::string gobgp_path;
-bool enable_gobgp_grpc = false;
 std::string localnets;
 int max_load = 0;
 int df = 0;
@@ -139,6 +138,11 @@ std::string log_level = "debug";
 bool enable_advertise = true;
 bool enable_explicit_withdraw = false;
 bool enable_sql_log = true;
+
+// conf parameters for grpc
+bool enable_gobgp_grpc = false;
+std::string gobgp_grpc_host = "127.0.0.1";
+int gobgp_grpc_port = 50051;
 
 // conf parameters for postgres
 std::string pghost = "127.0.0.1";
@@ -308,6 +312,16 @@ bool load_configuration_file() {
         } else {
             enable_gobgp_grpc = false;
         }
+    }
+
+    //gobgp_grpc_host = 127.0.0.1
+    if (configuration_map.count("gobgp_grpc_host") != 0) {
+     gobgp_grpc_host = configuration_map["gobgp_grpc_host"];
+    }
+    
+    //gobgp_grpc_port = 50051
+    if (configuration_map.count("gobgp_grpc_port") != 0) {
+     gobgp_grpc_port = convert_string_to_integer(configuration_map["gobgp_grpc_port"]);
     }
 
     //sync dst_ip, lost, rtt, ? between nodes master/slave.
@@ -540,6 +554,8 @@ int main(int argc, char **argv) {
     syslog_logger->debug("peer_address: {}", peer_address);
     syslog_logger->debug("peer_port: {}", peer_port);
     syslog_logger->debug("peer_type: {}", peer_type);
+    syslog_logger->debug("gobgp_grpc_host: {}", gobgp_grpc_host);
+    syslog_logger->debug("gobgp_grpc_port: {}", gobgp_grpc_port);
 
 
     if (!load_config_result) {
@@ -591,8 +607,8 @@ int main(int argc, char **argv) {
     pfr_asbrs br(m);
 
     //create grpc client for gobgp
-    grpcc = gobgp_grpc(grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials()));
-    syslog_logger->debug("Create grpc client for gobgp");
+    grpcc = gobgp_grpc(grpc::CreateChannel(gobgp_grpc_host + ":" + std::to_string(gobgp_grpc_port), grpc::InsecureChannelCredentials()));
+    syslog_logger->debug("Create grpc client for gobgp {}:{}", gobgp_grpc_host, gobgp_grpc_port);
 
     for(;;) {
         //pfrList = pfr_dst_list(10, 10);
@@ -746,6 +762,8 @@ int main(int argc, char **argv) {
             syslog_logger->debug("peer_address: {}", peer_address);
             syslog_logger->debug("peer_port: {}", peer_port);
             syslog_logger->debug("peer_type: {}", peer_type);
+            syslog_logger->debug("gobgp_grpc_host: {}", gobgp_grpc_host);
+            syslog_logger->debug("gobgp_grpc_port: {}", gobgp_grpc_port);
          }
 
          send_stopped = 0;
