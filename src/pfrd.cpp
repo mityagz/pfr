@@ -671,7 +671,7 @@ int main(int argc, char **argv) {
         for(int i = 0; i < ct_data; i++) {
              pthread_create(&thrds[i], NULL, send_req, &itdata[i]);
              pthread_setname_np(thrds[i], "pfrd_sndr");
-             pthread_setname_np(thrds[i], sndr_name(i, pfrd_sndr_name_digit).c_str());
+             pthread_setname_np(thrds[i], sndr_name(itdata[i].peer_id, pfrd_sndr_name_digit).c_str());
         }
         syslog_logger->debug("1:e");
 
