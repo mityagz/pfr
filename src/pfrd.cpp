@@ -10,6 +10,7 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <typeinfo>
+#include <string>
 
 // Boost libs
 //#include <boost/thread.hpp>
@@ -49,6 +50,20 @@ static void sig_usr(int signo) {
     } else if (signo == SIGUSR2) {
         sig_usr2_flag = true;
     }
+}
+
+std::string sndr_name(int n_peer, int ndigit) {
+    std::string dn = "";
+    std::string thname = "pfrd_sndr";
+    std::string np = std::to_string(n_peer);
+    int np_l = np.length();
+    if(np_l > ndigit)
+      return thname;
+    for(int i = np_l; i < ndigit; ++i) {
+      dn += "0";
+    }
+    thname = thname + "_" + dn + np;
+    return thname;
 }
 
 void *send_req(void *pin) {
@@ -138,6 +153,7 @@ std::string log_level = "debug";
 bool enable_advertise = true;
 bool enable_explicit_withdraw = false;
 bool enable_sql_log = true;
+int pfrd_sndr_name_digit = 5;
 
 // conf parameters for grpc
 bool enable_gobgp_grpc = false;
@@ -229,6 +245,11 @@ bool load_configuration_file() {
     if (configuration_map.count("pfr_ping_req") != 0) {
      pfr_ping_req = convert_string_to_integer(configuration_map["pfr_ping_req"]);
     }
+
+    if (configuration_map.count("pfrd_sndr_name_digit") != 0) {
+     pfrd_sndr_name_digit = convert_string_to_integer(configuration_map["pfrd_sndr_name_digit"]);
+    }
+
 
     if (configuration_map.count("max_load") != 0) {
      max_load = convert_string_to_integer(configuration_map["max_load"]);
@@ -637,6 +658,7 @@ int main(int argc, char **argv) {
         syslog_logger->debug("0:s Starting readloop thread...");
         if(!fthread) {
             pthread_create(&thrdrd, NULL, readloop, NULL);
+            pthread_setname_np(thrdrd, "pfrd_rcvr");
             fthread = true;
         }
         syslog_logger->debug("0:e");
@@ -648,6 +670,8 @@ int main(int argc, char **argv) {
         syslog_logger->debug("1:s Starting send_req threads...");
         for(int i = 0; i < ct_data; i++) {
              pthread_create(&thrds[i], NULL, send_req, &itdata[i]);
+             pthread_setname_np(thrds[i], "pfrd_sndr");
+             pthread_setname_np(thrds[i], sndr_name(i, pfrd_sndr_name_digit).c_str());
         }
         syslog_logger->debug("1:e");
 
@@ -701,6 +725,7 @@ int main(int argc, char **argv) {
             syslog_logger->debug("5.1:s Starting write db thread...");
             ithlog.probe_id = probe_id;
             pthread_create(&thrddb, NULL, pfr_route_scan_sql, &ithlog);
+            pthread_setname_np(thrddb, "pfrd_wrdb_log");
             pthread_join(thrddb, NULL);
             syslog_logger->debug("5.1:e Starting write db thread...");
             pthread_mutex_unlock(&mt_sql_log);
