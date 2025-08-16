@@ -7,6 +7,7 @@
 #include <math.h>
 #include <spdlog/sinks/syslog_sink.h>
 #include <spdlog/sinks/basic_file_sink.h>
+#include <cmath>
 #include "pfr_rdata.h"
 #include "pfr_rtr.h"
 #include "pfr_dst_list.h"
@@ -74,7 +75,13 @@ extern double min_rtt; //config_t, was made a global
 double tparm::get_rtt() { return rtt; }
 double tparm::get_avg_rtt() { return avg_rtt; }
 double tparm::get_min_rtt() { return min_rtt; }
+double tparm::get_max_rtt() { return max_rtt; }
+double tparm::get_stddev_rtt() { return stddev_rtt; }
+double tparm::get_median_rtt() { return median_rtt; }
 void   tparm::set_min_rtt(double min_rtt) { this->min_rtt = min_rtt; }
+void   tparm::set_max_rtt(double max_rtt) { this->max_rtt = max_rtt; }
+void   tparm::set_stddev_rtt(double stddev_rtt) { this->stddev_rtt = stddev_rtt; }
+void   tparm::set_median_rtt(double median_rtt) { this->median_rtt = median_rtt; }
 int    tparm::get_timestamp() { return timestamp; }
 int    tparm::get_lost() { return lost; }
 
@@ -594,6 +601,7 @@ void pfr_calc_avg_rtt(int probe_id) {
     int alive = 0;
     int ts = 0;
     double m_rtt = 50000;
+    double max_rtt = 0;
     //pthread_mutex_lock(&mtr); 
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); it0++) {
         std::string dst_ip = it0->first;
@@ -605,8 +613,13 @@ void pfr_calc_avg_rtt(int probe_id) {
             int seq_num = it3->first;
             curr_rtt += (it3->second)->get_rtt();
             ts = (it3->second)->get_timestamp();
+            // min_rtt calculate
             if ((it3->second)->get_rtt()  < m_rtt) {
                 m_rtt = (it3->second)->get_rtt();
+            }
+            // max_rtt calculate
+            if ((it3->second)->get_rtt() > max_rtt) {
+                max_rtt = (it3->second)->get_rtt();
             }
             cnt_rtt++;
             alive++;
@@ -614,6 +627,7 @@ void pfr_calc_avg_rtt(int probe_id) {
          double avg_rtt = ceil(curr_rtt * 100 / cnt_rtt) / 100.0;
          r[dst_ip][probe_id][peer_id][99] = new tparm(0, avg_rtt, pfr_ping_req - alive, ts);
          r[dst_ip][probe_id][peer_id][99]->set_min_rtt(m_rtt);
+         r[dst_ip][probe_id][peer_id][99]->set_max_rtt(max_rtt);
          avg_rtt_new_cnt++;
          curr_rtt = 0;
          cnt_rtt = 0;
@@ -621,10 +635,57 @@ void pfr_calc_avg_rtt(int probe_id) {
          ts = 0;
          avg_rtt = 0;
          m_rtt = 50000;
+         max_rtt = 0;
        }
      //} 
     }
     //pthread_mutex_unlock(&mtr); 
+}
+
+void pfr_calc_stddev_rtt(int probe_id) {
+    double avg_rtt = 0.0;
+    double curr_rtt = 0.0;
+    int cnt_rtt = 0;
+    int alive = 0;
+    int ts = 0;
+    double m_rtt = 50000;
+    double max_rtt = 0.0;
+    double delta = 0.0;
+    double dispersion = 0.0;
+    double stddev = 0.0;
+    tparm *tp99;
+    tparm *tp;
+    for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); it0++) {
+       std::string dst_ip = it0->first;
+       for(std::map<int, std::map<int, tparm *>>::iterator it2 = r[dst_ip][probe_id].begin(); it2 != r[dst_ip][probe_id].end(); it2++) {
+         int peer_id = it2->first;
+         tp99 = r[dst_ip][probe_id][peer_id][99];
+         avg_rtt = tp99->get_avg_rtt();
+         for(std::map<int, tparm *>::iterator it3 = r[dst_ip][probe_id][peer_id].begin(); it3 != r[dst_ip][probe_id][peer_id].end(); it3++) {
+            int seq_num = it3->first;
+            if(seq_num != 99) {
+              tp = it3->second;
+              cnt_rtt++;
+              curr_rtt = tp->get_rtt();
+              dispersion += pow(curr_rtt - avg_rtt, 2.0);
+              syslog_logger->debug("pfr_calc_stddev_rtt() probe_id: {}: peer_id {} : seq_num {}", probe_id, peer_id, seq_num);
+            }
+          }
+         int n = pfr_ping_req;
+         dispersion = dispersion / (double)cnt_rtt; 
+         stddev = sqrt(dispersion);
+         stddev = ceil(stddev * 100 / cnt_rtt) / 100.0;
+         tp99->set_stddev_rtt(stddev);
+         syslog_logger->debug("pfr_calc_stddev_rtt() probe_id {}: peer_id {}: min_rtt {}: max_rtt {}: avg_rtt {}: stddev {}", \
+                               probe_id, peer_id, tp99->get_min_rtt(), \
+                               tp99->get_max_rtt(), tp99->get_avg_rtt(), tp99->get_stddev_rtt());
+         avg_rtt = 0.0;
+         curr_rtt = 0.0;
+         dispersion = 0.0;
+         cnt_rtt = 0;
+         stddev = 0.0;
+       }
+    }
 }
 
 void pfr_print_avg_rtt(int probe_id) {

@@ -8,6 +8,9 @@
 
 class tparm {
   double min_rtt;
+  double max_rtt;
+  double stddev_rtt;
+  double median_rtt;
   double avg_rtt;
   int lost;
   double rtt;
@@ -21,7 +24,13 @@ class tparm {
   }
   void print();
   double get_min_rtt();
+  double get_max_rtt();
+  double get_stddev_rtt();
+  double get_median_rtt();
   void set_min_rtt(double min_rtt);
+  void set_max_rtt(double max_rtt);
+  void set_stddev_rtt(double stddev_rtt);
+  void set_median_rtt(double median_rtt);
   double get_rtt();
   double get_avg_rtt();
   int get_timestamp();
@@ -29,6 +38,7 @@ class tparm {
 };
 
 void pfr_calc_avg_rtt(int probe_id); // calculate average rtt && saves it to r...[seq == 99]
+void pfr_calc_stddev_rtt(int probe_id); // calculate stddev rtt && saves it to r...[seq == 99]
 void pfr_print_avg_rtt(int probe_id); // print average rtt from [seq == 99]
 void pfr_route_free(int probe_id); // free/delete route 
 //void pfr_route_update(int probe_id, pfr_dst_list &p); // update from ipfix 

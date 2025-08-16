@@ -712,6 +712,7 @@ int main(int argc, char **argv) {
 
          syslog_logger->debug("4:s Start of pfr_calc_avg_rtt()...");
          pfr_calc_avg_rtt(probe_id);
+         pfr_calc_stddev_rtt(probe_id);
          syslog_logger->debug("4:e End of pfr_calc_avg_rtt()...");
 
          //pfr_print_avg_rtt(probe_id);
