@@ -77,11 +77,11 @@ double tparm::get_avg_rtt() { return avg_rtt; }
 double tparm::get_min_rtt() { return min_rtt; }
 double tparm::get_max_rtt() { return max_rtt; }
 double tparm::get_stddev_rtt() { return stddev_rtt; }
-double tparm::get_median_rtt() { return median_rtt; }
+double tparm::get_mediana_rtt() { return mediana_rtt; }
 void   tparm::set_min_rtt(double min_rtt) { this->min_rtt = min_rtt; }
 void   tparm::set_max_rtt(double max_rtt) { this->max_rtt = max_rtt; }
 void   tparm::set_stddev_rtt(double stddev_rtt) { this->stddev_rtt = stddev_rtt; }
-void   tparm::set_median_rtt(double median_rtt) { this->median_rtt = median_rtt; }
+void   tparm::set_mediana_rtt(double mediana_rtt) { this->mediana_rtt = mediana_rtt; }
 int    tparm::get_timestamp() { return timestamp; }
 int    tparm::get_lost() { return lost; }
 
@@ -392,6 +392,11 @@ void *pfr_route_scan_sql(void *ithlog) {
     int peer_id = 0; 
     int ts = 0; 
     int lost = 0; 
+    double max_rtt = 0.0;
+    double delta = 0.0;
+    double dispersion = 0.0;
+    double stddev = 0.0;
+    double mediana = 0.0;
 
     thlog *thl = (thlog*)ithlog;
     int probe_id = thl->probe_id;
@@ -441,41 +446,53 @@ void *pfr_route_scan_sql(void *ithlog) {
         min_rtt = r[dst_ip][probe_id][peer_id][99]->get_min_rtt();
         ts = r[dst_ip][probe_id][peer_id][99]->get_timestamp();
         lost = r[dst_ip][probe_id][peer_id][99]->get_lost();
+        max_rtt = r[dst_ip][probe_id][peer_id][99]->get_max_rtt();
+        stddev = r[dst_ip][probe_id][peer_id][99]->get_stddev_rtt();
+        mediana = r[dst_ip][probe_id][peer_id][99]->get_mediana_rtt();
        } else {
         avg_rtt = 0;
         ts = 0;
         lost = 0;
         min_rtt = 0;
+        max_rtt = 0.0;
+        stddev = 0.0;
+        mediana = 0.0;
        }
 
        if(probe_id == 0) {
-         syslog_logger->info("pfr_log_sql->sql_hist probe_id == 0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+         syslog_logger->info("pfr_log_sql->sql_hist probe_id == 0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt {}:max_rtt: {}: stddev: {}: mediana: {}: lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, max_rtt, stddev, mediana, lost, ts);
          sql_log.insert(10, dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
        } else if(probe_id > 0) {
          if(route.count(dst_ip) == 1 && route[dst_ip].count(probe_id - 1) == 1) {
             if(peer_id == 0) { 
                 // case 2.0 no answer from dst
                 syslog_logger->debug("pfr_route_scan_sql(): x -> x : probe_id : {} : {} : {}", probe_id, route[dst_ip][probe_id - 1]->get_curr_peer(), peer_id);
-                syslog_logger->info("pfr_log_sql->sql_hist 2.0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+                //syslog_logger->info("pfr_log_sql->sql_hist 2.0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+                syslog_logger->info("pfr_log_sql->sql_hist 2.0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt {}:max_rtt: {}: stddev: {}: mediana: {}: lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, max_rtt, stddev, mediana, lost, ts);
                 //              |dsp_ip               |probe_id     |peer_id
                 //extern std::map<std::string, std::map<int, tlog *>> route_log1;
                 sql_log.insert(20, dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
             } else {
                 // case 2.1 there is answer from dst
                 syslog_logger->debug("pfr_route_scan_sql(): x -> y : probe_id : {} : {} : {}", probe_id, route[dst_ip][probe_id - 1]->get_curr_peer(), peer_id);
-                syslog_logger->info("pfr_log_sql->sql_hist 2.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+                //syslog_logger->info("pfr_log_sql->sql_hist 2.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+                syslog_logger->info("pfr_log_sql->sql_hist 2.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt {}:max_rtt: {}: stddev: {}: mediana: {}: lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, max_rtt, stddev, mediana, lost, ts);
                 sql_log.insert(21, dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
             }
          } else {
             // case 1.1 there isn't prev answer from dst
                 syslog_logger->debug("pfr_route_scan_sql() probe_id - 1: {}: peer_prev_id : {} : probe_id: {}: peer_id{}", probe_id - 1, 0, probe_id, peer_id);
-                syslog_logger->info("pfr_log_sql->sql_hist 1.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+                //syslog_logger->info("pfr_log_sql->sql_hist 1.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
+                syslog_logger->info("pfr_log_sql->sql_hist 1.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt {}:max_rtt: {}: stddev: {}: mediana: {}: lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, max_rtt, stddev, mediana, lost, ts);
                 sql_log.insert(11, dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
             }
          }
        min_rtt = 50000; 
        curr_rtt = 0; 
        peer_id = 0; 
+       max_rtt = 0.0;
+       stddev = 0.0;
+       mediana = 0.0;
     }
     sql_log.commit();
     //pthread_mutex_unlock(&mtr); 
@@ -642,6 +659,10 @@ void pfr_calc_avg_rtt(int probe_id) {
     //pthread_mutex_unlock(&mtr); 
 }
 
+/**
+ * This function calculates stddev and mediana of rtt
+*/
+
 void pfr_calc_stddev_rtt(int probe_id) {
     double avg_rtt = 0.0;
     double curr_rtt = 0.0;
@@ -653,6 +674,9 @@ void pfr_calc_stddev_rtt(int probe_id) {
     double delta = 0.0;
     double dispersion = 0.0;
     double stddev = 0.0;
+    double mediana = 0.0;
+    std::vector<double> smediana;
+    double dev = 0.0;
     tparm *tp99;
     tparm *tp;
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); it0++) {
@@ -661,13 +685,17 @@ void pfr_calc_stddev_rtt(int probe_id) {
          int peer_id = it2->first;
          tp99 = r[dst_ip][probe_id][peer_id][99];
          avg_rtt = tp99->get_avg_rtt();
+         smediana.clear();
          for(std::map<int, tparm *>::iterator it3 = r[dst_ip][probe_id][peer_id].begin(); it3 != r[dst_ip][probe_id][peer_id].end(); it3++) {
+             // avg_rtt, stddev
             int seq_num = it3->first;
             if(seq_num != 99) {
               tp = it3->second;
               cnt_rtt++;
               curr_rtt = tp->get_rtt();
               dispersion += pow(curr_rtt - avg_rtt, 2.0);
+              // mediana
+              smediana.push_back(curr_rtt);
               syslog_logger->debug("pfr_calc_stddev_rtt() probe_id: {}: peer_id {} : seq_num {}", probe_id, peer_id, seq_num);
             }
           }
@@ -676,14 +704,33 @@ void pfr_calc_stddev_rtt(int probe_id) {
          stddev = sqrt(dispersion);
          stddev = ceil(stddev * 100 / cnt_rtt) / 100.0;
          tp99->set_stddev_rtt(stddev);
-         syslog_logger->debug("pfr_calc_stddev_rtt() probe_id {}: peer_id {}: min_rtt {}: max_rtt {}: avg_rtt {}: stddev {}", \
+         // mediana
+         std::sort(smediana.begin(), smediana.end());
+         int m_size = smediana.size();
+         if(m_size == 0) {
+             mediana = 0.0;
+         } else if(m_size == 1) {
+             mediana = smediana.at(0);
+         } else {
+            int m_rem = m_size % 2;
+            int xnm = m_size / 2;
+            if(m_rem != 0) {
+             mediana = smediana.at(xnm + 1);
+            } else {
+             mediana = (smediana.at(xnm - 1) + smediana.at(xnm)) / 2;
+            }
+         }
+         //mediana = ceil(mediana * 100 / mediana) / 100.0;
+         tp99->set_mediana_rtt(mediana);
+         syslog_logger->debug("pfr_calc_stddev_rtt() probe_id {}: peer_id {}: min_rtt {}: max_rtt {}: avg_rtt {}: stddev {}: mediana {}", \
                                probe_id, peer_id, tp99->get_min_rtt(), \
-                               tp99->get_max_rtt(), tp99->get_avg_rtt(), tp99->get_stddev_rtt());
+                               tp99->get_max_rtt(), tp99->get_avg_rtt(), tp99->get_stddev_rtt(), tp99->get_mediana_rtt());
          avg_rtt = 0.0;
          curr_rtt = 0.0;
          dispersion = 0.0;
          cnt_rtt = 0;
          stddev = 0.0;
+         mediana = 0.0;
        }
     }
 }

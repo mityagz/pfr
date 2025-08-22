@@ -10,7 +10,7 @@ class tparm {
   double min_rtt;
   double max_rtt;
   double stddev_rtt;
-  double median_rtt;
+  double mediana_rtt;
   double avg_rtt;
   int lost;
   double rtt;
@@ -26,11 +26,11 @@ class tparm {
   double get_min_rtt();
   double get_max_rtt();
   double get_stddev_rtt();
-  double get_median_rtt();
+  double get_mediana_rtt();
   void set_min_rtt(double min_rtt);
   void set_max_rtt(double max_rtt);
   void set_stddev_rtt(double stddev_rtt);
-  void set_median_rtt(double median_rtt);
+  void set_mediana_rtt(double mediana_rtt);
   double get_rtt();
   double get_avg_rtt();
   int get_timestamp();
