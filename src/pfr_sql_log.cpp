@@ -9,13 +9,15 @@ extern std::string pgport;
 extern std::string db_name;
 extern std::string login;
 extern std::string pwd;
+extern int pfr_ping_req;
 
 extern std::shared_ptr<spdlog::logger> syslog_logger;
 
 pfr_sql_log::pfr_sql_log(bool allow_sql_log) {
   if (allow_sql_log) {
     this->allow_sql_log = allow_sql_log;
-    this->ins_head = "insert into pfr_log (datetime, ccase_id, ipv4_dest_address, probe_id, peer_id, pkts, rtt_min, rtt_avg, pkt_loss, ts) values ";
+    //this->ins_head = "insert into pfr_log (datetime, ccase_id, ipv4_dest_address, probe_id, peer_id, pkts, rtt_min, rtt_avg, pkt_loss, ts) values ";
+    this->ins_head = "insert into pfr_log (datetime, ccase_id, ipv4_dest_address, probe_id, peer_id, pkts, rtt_min, rtt_avg, max_rtt, stddev_rtt, mediana_rtt ,pkt_loss, ts) values ";
     conn = PQsetdbLogin(pghost.c_str(), pgport.c_str(), pgoptions, pgtty, db_name.c_str(), login.c_str(), pwd.c_str());
     if(PQstatus(conn) == CONNECTION_BAD) {
       fprintf(stderr, "Connection to database '%s' failed.\n", db_name.c_str());
@@ -63,7 +65,8 @@ int pfr_sql_log::insert1(int ccase, std::string dst_ip, int probe_id, int peer_i
 
 }
 
-int pfr_sql_log::insert(int ccase, std::string dst_ip, int probe_id, int peer_id, double min_rtt, double avg_rtt, int lost, int ts) {
+//int pfr_sql_log::insert(int ccase, std::string dst_ip, int probe_id, int peer_id, double min_rtt, double avg_rtt, int lost, int ts) {
+int pfr_sql_log::insert(int ccase, std::string dst_ip, int probe_id, int peer_id, double min_rtt, double avg_rtt, double max_rtt, double stddev_rtt, double mediana_rtt, int lost, int ts) {
 
     if (!this->allow_sql_log)
         return 0;
@@ -73,7 +76,8 @@ int pfr_sql_log::insert(int ccase, std::string dst_ip, int probe_id, int peer_id
 
     //syslog_logger->debug("pfr_sql_log::insert() ccase: {}, dst_ip: {}, probe_id: {}, peer_id: {}, min_rtt: {}, avg_rtt: {}, lost: {}, ts: {}", ccase, dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
 
-    ins_multi_l << " (now(), " << ccase << ", '" << dst_ip << "', " << probe_id << ", " << peer_id << ", 5, " << min_rtt << ", " << avg_rtt << ", " << lost << ", " << ts << "), ";
+    //ins_multi_l << " (now(), " << ccase << ", '" << dst_ip << "', " << probe_id << ", " << peer_id << ", 5, " << min_rtt << ", " << avg_rtt << ", " << lost << ", " << ts << "), ";
+    ins_multi_l << " (now(), " << ccase << ", '" << dst_ip << "', " << probe_id << ", " << peer_id << ", " << pfr_ping_req << ", " << min_rtt << ", " << avg_rtt << ", " << max_rtt << ", " << stddev_rtt << ", " << mediana_rtt << ", " << lost << ", " << ts << "), ";
     ins_multi += ins_multi_l.str();
     
     return 0;
@@ -98,7 +102,8 @@ int pfr_sql_log::commit() {
     if(res!=NULL)
      PQclear(res);
     //*/
-    this->ins_head = "insert into pfr_log (datetime, ccase_id, ipv4_dest_address, probe_id, peer_id, pkts, rtt_min, rtt_avg, pkt_loss, ts) values ";
+    //this->ins_head = "insert into pfr_log (datetime, ccase_id, ipv4_dest_address, probe_id, peer_id, pkts, rtt_min, rtt_avg, pkt_loss, ts) values ";
+    this->ins_head = "insert into pfr_log (datetime, ccase_id, ipv4_dest_address, probe_id, peer_id, pkts, rtt_min, rtt_avg, max_rtt, stddev_rtt, mediana_rtt, pkt_loss, ts) values ";
     ins_multi = "";
     return 0;
 }

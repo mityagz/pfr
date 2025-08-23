@@ -22,7 +22,8 @@ class pfr_sql_log {
  public:
     pfr_sql_log(bool allow_sql_log);
     ~pfr_sql_log();
-    int insert(int ccase, std::string dst_ip, int probe_id, int peer_id, double min_rtt, double avg_rtt, int lost, int ts);
+    //int insert(int ccase, std::string dst_ip, int probe_id, int peer_id, double min_rtt, double avg_rtt, int lost, int ts);
+    int insert(int ccase, std::string dst_ip, int probe_id, int peer_id, double min_rtt, double avg_rtt,double max_rtt, double stddev_rtt, double mediana_rtt, int lost, int ts);
     int insert1(int ccase, std::string dst_ip, int probe_id, int peer_id, double min_rtt, double avg_rtt, int lost, int ts);
     int commit();
 };
