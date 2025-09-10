@@ -67,13 +67,24 @@ class tlog {
     double avg_rtt;
     int lost;
     int timestamp;
+    // from tparm
+    double min_rtt;
+    double max_rtt;
+    double stddev_rtt;
+    double mediana_rtt;
  public:
     tlog(int peer_id, double rtt, double avg_rtt, int lost, int timestamp);
+    tlog(int peer_id, double rtt, double avg_rtt, double min_rtt, double max_rtt, \
+            double stddev_rtt, double mediana_rtt, int lost, int timestamp);
     int get_peer();
     double get_rtt();
     double get_avg_rtt();
     int get_lost();
     int get_timestamp();
+    double get_min_rtt();
+    double get_max_rtt();
+    double get_stddev_rtt();
+    double get_mediana_rtt();
 };
 
 void pfr_route_scan(int probe_id, pfr_sql_log &sql_log); // finds min average rtt from [seq == 99]

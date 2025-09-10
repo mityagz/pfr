@@ -92,11 +92,30 @@ tlog::tlog(int peer_id, double rtt, double avg_rtt, int lost, int timestamp) {
     this->lost = lost;
     this->timestamp;
 }
+
+tlog::tlog(int peer_id, double rtt, double avg_rtt, double min_rtt, \
+        double max_rtt, double stddev_rtt, double mediana_rtt, int lost, int timestamp) {
+    this->peer_id = peer_id;
+    this->rtt = rtt;
+    this->avg_rtt = avg_rtt;
+    this->lost = lost;
+    this->timestamp;
+    this->min_rtt = min_rtt;
+    this->max_rtt = max_rtt;
+    this->stddev_rtt = stddev_rtt;
+    this->mediana_rtt = mediana_rtt;
+}
+
 int tlog::get_peer() { return peer_id; }
 double tlog::get_rtt() { return rtt; }
 double tlog::get_avg_rtt() { return avg_rtt; }
 int tlog::get_lost() { return lost; }
 int tlog::get_timestamp() {return timestamp; }
+double tlog::get_min_rtt() { return min_rtt; }
+double tlog::get_max_rtt() { return max_rtt; }
+double tlog::get_stddev_rtt() { return stddev_rtt; }
+double tlog::get_mediana_rtt() { return mediana_rtt; }
+
 
 rt_parm::rt_parm(int prev_peer_id, double pmin_rtt, int curr_peer_rtt, double cmin_rtt) {
  this->prev_peer_id = prev_peer_id;
@@ -249,8 +268,8 @@ void pfr_log_print(int curr_probe_id) {
         dst_ip = it0->first;
         for(std::map<int, tlog *>::iterator it1 = route_log1[dst_ip].begin(); it1 != route_log1[dst_ip].end(); it1++) {
             probe_id = it1->first;
-            syslog_logger->debug("pfr_log_print(): dst_ip: {} : curr_probe_id: {} : probe_id : {} : peer_id : {}", dst_ip, curr_probe_id, probe_id,  \
-                      route_log1[dst_ip][probe_id]->get_peer());
+            syslog_logger->debug("pfr_log_print(): dst_ip: {} : curr_probe_id: {} : probe_id : {} : peer_id : {} : avg_rtt : {} :min_rtt : {} : max_rtt : {} : stddev_rtt : {} : mediana_rtt {} : lost : {} : timestamp : {}", dst_ip, curr_probe_id, probe_id,  \
+                      route_log1[dst_ip][probe_id]->get_peer(), route_log1[dst_ip][probe_id]->get_avg_rtt(), route_log1[dst_ip][probe_id]->get_min_rtt(), route_log1[dst_ip][probe_id]->get_max_rtt(), route_log1[dst_ip][probe_id]->get_stddev_rtt(), route_log1[dst_ip][probe_id]->get_mediana_rtt(), route_log1[dst_ip][probe_id]->get_lost(), route_log1[dst_ip][probe_id]->get_timestamp());
         }
     }
 }
@@ -270,6 +289,10 @@ void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
     double delta0 = 0;
     double delta1 = 0;
     bool fmove = false;
+    double min_rtt1 = 0.0;
+    double max_rtt = 0.0;
+    double stddev_rtt = 0.0;
+    double mediana_rtt = 0.0;
 
     if (configuration_map.count("min_rtt") != 0) {
         //pfr_ping_req = convert_string_to_integer(configuration_map["pfr_ping_req"]);
@@ -315,16 +338,25 @@ void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
         min_rtt = r[dst_ip][probe_id][peer_id][99]->get_min_rtt();
         ts = r[dst_ip][probe_id][peer_id][99]->get_timestamp();
         lost = r[dst_ip][probe_id][peer_id][99]->get_lost();
+        min_rtt1 = r[dst_ip][probe_id][peer_id][99]->get_min_rtt();
+        max_rtt = r[dst_ip][probe_id][peer_id][99]->get_max_rtt();
+        stddev_rtt = r[dst_ip][probe_id][peer_id][99]->get_stddev_rtt();
+        mediana_rtt = r[dst_ip][probe_id][peer_id][99]->get_mediana_rtt();
        } else {
         avg_rtt = 0;
         ts = 0;
         lost = 0;
         min_rtt = 0;
+        min_rtt1 = 0.0;
+        max_rtt = 0.0;
+        stddev_rtt = 0.0;
+        mediana_rtt = 0.0;
        }
 
        if(probe_id == 0) {
          syslog_logger->info("pfr_log->sql_hist probe_id == 0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
-         route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
+         route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, min_rtt1, max_rtt, stddev_rtt, mediana_rtt, lost, ts);
+         //route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
          //sql_log.insert(dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
        } else if(probe_id > 0) {
          if(route.count(dst_ip) == 1 && route[dst_ip].count(probe_id - 1) == 1) {
@@ -337,7 +369,8 @@ void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
                 syslog_logger->info("pfr_log->sql_hist 2.0: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
                 //              |dsp_ip               |probe_id     |peer_id
                 //extern std::map<std::string, std::map<int, tlog *>> route_log1;
-                route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
+                route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, min_rtt1, max_rtt, stddev_rtt, mediana_rtt, lost, ts);
+                //route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
                 //sql_log.insert(dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
                 scan_new_cnt++;
             } else {
@@ -365,7 +398,8 @@ void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
                 }
                 syslog_logger->debug("pfr_route_scan(): x -> y : probe_id : {} : {} : {}", probe_id, route[dst_ip][probe_id - 1]->get_curr_peer(), peer_id);
                 syslog_logger->info("pfr_log->sql_hist 2.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
-                route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
+                route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, min_rtt1, max_rtt, stddev_rtt, mediana_rtt, lost, ts);
+                //route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
                 //sql_log.insert(dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
             }
          } else {
@@ -375,7 +409,8 @@ void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
                 scan_new_cnt++;
                 syslog_logger->debug("pfr_route_scan() probe_id - 1: {}: peer_prev_id : {} : probe_id: {}: peer_id{}", probe_id - 1, 0, probe_id, peer_id);
                 syslog_logger->info("pfr_log->sql_hist 1.1: dst_ip: {}: probe_id: {} :peer_id {}:min_rtt: {}: avg_rtt: {}:lost: {}: timestamp: {}", dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
-                route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
+                route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, min_rtt1, max_rtt, stddev_rtt, mediana_rtt, lost, ts);
+                //route_log1[dst_ip][probe_id] = new tlog(peer_id, min_rtt, avg_rtt, lost, ts);
                 //sql_log.insert(dst_ip, probe_id, peer_id, min_rtt, avg_rtt, lost, ts);
             }
          }
