@@ -20,3 +20,10 @@ from pfr_log l
 join pfr_peers p on l.peer_id = p.id  
 where probe_id in (select max(probe_id) from pfr_log l) 
 order by ipv4_dest_address, probe_id;
+
+-- 5.
+select n.hostname, l.peer_id, count(l.ipv4_dest_address)
+from pfr_log l
+join pfr_peers p on l.peer_id = p.id
+join node n on p.node_id = n.id
+where probe_id in (select max(probe_id) from pfr_log l) group by n.hostname, l.peer_id;
