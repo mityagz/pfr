@@ -154,6 +154,7 @@ bool enable_advertise = true;
 bool enable_explicit_withdraw = false;
 bool enable_sql_log = true;
 int pfrd_sndr_name_digit = 5;
+std::string path_metric = "metric0";
 
 // conf parameters for grpc
 bool enable_gobgp_grpc = false;
@@ -375,6 +376,23 @@ bool load_configuration_file() {
             rtt_least_move = false;
         }
     }
+
+    // path_metric = "metric0";
+    if (configuration_map.count("path_metric")) {
+        if (configuration_map["path_metric"] == "metric0") {
+            path_metric = "metric0";
+        } else if (configuration_map["path_metric"] == "metric1") {
+            path_metric = "metric1";
+        } else if (configuration_map["path_metric"] == "metric2") {
+            path_metric = "metric2";
+        } else if (configuration_map["path_metric"] == "metric3") {
+            path_metric = "metric3";
+        } else if (configuration_map["path_metric"] == "metric4") {
+            path_metric = "metric4";
+        } else if (configuration_map["path_metric"] == "metric5") {
+            path_metric = "metric5";
+        }
+    }
      
     //the same peer_id should not send route
     if (configuration_map.count("enable_advertise_same")) {
@@ -550,6 +568,7 @@ int main(int argc, char **argv) {
     syslog_logger->debug("pfrd was started...");
     syslog_logger->debug("global vars:");
     syslog_logger->debug("customer_id: {}", customer_id);
+    syslog_logger->debug("path_metric: {}", path_metric);
     syslog_logger->debug("deep_delete: {}", deep_delete);
     syslog_logger->debug("min_rtt: {}", min_rtt);
     syslog_logger->debug("src_addr: {}", src_addr);
@@ -772,6 +791,7 @@ int main(int argc, char **argv) {
             syslog_logger->debug("pfrd configuration file was reread...");
             syslog_logger->debug("global vars:");
             syslog_logger->debug("customer_id: {}", customer_id);
+            syslog_logger->debug("path_metric: {}", path_metric);
             syslog_logger->debug("deep_delete: {}", deep_delete);
             syslog_logger->debug("min_rtt: {}", min_rtt);
             syslog_logger->debug("src_addr: {}", src_addr);

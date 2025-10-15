@@ -14,6 +14,12 @@ class tparm {
   double avg_rtt;
   int lost;
   double rtt;
+  double metric0;
+  double metric1;
+  double metric2;
+  double metric3;
+  double metric4;
+  double metric5;
   int timestamp;
  public:
   tparm(double rtt, double avg_rtt, int lost, int timestamp) {
@@ -31,7 +37,19 @@ class tparm {
   void set_max_rtt(double max_rtt);
   void set_stddev_rtt(double stddev_rtt);
   void set_mediana_rtt(double mediana_rtt);
+  void set_metric0(double metric0);
+  void set_metric1(double metric1);
+  void set_metric2(double metric2);
+  void set_metric3(double metric3);
+  void set_metric4(double metric4);
+  void set_metric5(double metric5);
   double get_rtt();
+  double get_metric0();
+  double get_metric1();
+  double get_metric2();
+  double get_metric3();
+  double get_metric4();
+  double get_metric5();
   double get_avg_rtt();
   int get_timestamp();
   int get_lost();

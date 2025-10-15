@@ -78,10 +78,18 @@ double tparm::get_min_rtt() { return min_rtt; }
 double tparm::get_max_rtt() { return max_rtt; }
 double tparm::get_stddev_rtt() { return stddev_rtt; }
 double tparm::get_mediana_rtt() { return mediana_rtt; }
+double tparm::get_metric0() { return metric0; }
+double tparm::get_metric1() { return metric1; }
 void   tparm::set_min_rtt(double min_rtt) { this->min_rtt = min_rtt; }
 void   tparm::set_max_rtt(double max_rtt) { this->max_rtt = max_rtt; }
 void   tparm::set_stddev_rtt(double stddev_rtt) { this->stddev_rtt = stddev_rtt; }
 void   tparm::set_mediana_rtt(double mediana_rtt) { this->mediana_rtt = mediana_rtt; }
+void   tparm::set_metric0(double metric0) { this-> metric0 = metric0; }
+void   tparm::set_metric1(double metric1) { this-> metric1 = metric1; }
+void   tparm::set_metric2(double metric2) { this-> metric2 = metric2; }
+void   tparm::set_metric3(double metric3) { this-> metric3 = metric3; }
+void   tparm::set_metric4(double metric4) { this-> metric4 = metric4; }
+void   tparm::set_metric5(double metric5) { this-> metric5 = metric5; }
 int    tparm::get_timestamp() { return timestamp; }
 int    tparm::get_lost() { return lost; }
 
@@ -684,6 +692,7 @@ void pfr_calc_avg_rtt(int probe_id) {
          r[dst_ip][probe_id][peer_id][99] = new tparm(0, avg_rtt, pfr_ping_req - alive, ts);
          r[dst_ip][probe_id][peer_id][99]->set_min_rtt(m_rtt);
          r[dst_ip][probe_id][peer_id][99]->set_max_rtt(max_rtt);
+         // set_metric1
          avg_rtt_new_cnt++;
          curr_rtt = 0;
          cnt_rtt = 0;
