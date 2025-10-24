@@ -71,6 +71,7 @@ extern std::map<std::string, std::string> configuration_map;
 
 extern int deep_delete; //config_t
 extern double min_rtt; //config_t, was made a global
+extern std::string path_metric; //config_t
 
 double tparm::get_rtt() { return rtt; }
 double tparm::get_avg_rtt() { return avg_rtt; }
@@ -301,6 +302,12 @@ void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
     double max_rtt = 0.0;
     double stddev_rtt = 0.0;
     double mediana_rtt = 0.0;
+    double metric0 = 0.0;
+    double metric1 = 0.0;
+    double metric2 = 0.0;
+    double metric3 = 0.0;
+    double metric4 = 0.0;
+    double metric5 = 0.0;
 
     if (configuration_map.count("min_rtt") != 0) {
         //pfr_ping_req = convert_string_to_integer(configuration_map["pfr_ping_req"]);
@@ -315,8 +322,11 @@ void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
             it_peer_id = it2;
             if(probe_id == 0) {
                 if(r[dst_ip][probe_id][it2->first][99] != NULL) 
-                 min_rtt = r[dst_ip][probe_id][it2->first][99]->get_avg_rtt();
-                
+                   if (path_metric == "metric0") {
+                        min_rtt = r[dst_ip][probe_id][it2->first][99]->get_avg_rtt();
+                   } else if (path_metric == "metric1") {
+                        min_rtt = r[dst_ip][probe_id][it2->first][99]->get_metric1();
+                   }
                 syslog_logger->debug("pfr_route_scan(): probe_id : {} : {} : {}", probe_id, 0, it2->first);
                 route[it0->first][probe_id] = new rt_parm(0, min_rtt, it2->first, min_rtt);
                 peer_id = it2->first;
@@ -324,7 +334,13 @@ void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
                 break;
             } else {
                 if(r[dst_ip][probe_id][it2->first][99] != NULL) 
-                 curr_rtt = r[dst_ip][probe_id][it2->first][99]->get_avg_rtt();
+                   if (path_metric == "metric0") {
+                        curr_rtt = r[dst_ip][probe_id][it2->first][99]->get_avg_rtt();
+                   } else if (path_metric == "metric1") {
+                        curr_rtt = r[dst_ip][probe_id][it2->first][99]->get_metric1();
+                        syslog_logger->debug("pfr_route_scan(): metric1 : {}", curr_rtt);
+                   }
+                 //curr_rtt = r[dst_ip][probe_id][it2->first][99]->get_avg_rtt();
                 if(curr_rtt < min_rtt) {
                   min_rtt = curr_rtt;
                   peer_id = it2->first;
@@ -343,7 +359,12 @@ void pfr_route_scan(int probe_id, pfr_sql_log &sql_log) {
 
        if(peer_id != 0) {
         avg_rtt = r[dst_ip][probe_id][peer_id][99]->get_avg_rtt();
-        min_rtt = r[dst_ip][probe_id][peer_id][99]->get_min_rtt();
+        if (path_metric == "metric0") {
+           min_rtt = r[dst_ip][probe_id][peer_id][99]->get_avg_rtt();
+        } else if (path_metric == "metric1") {
+           min_rtt = r[dst_ip][probe_id][peer_id][99]->get_metric1();
+        }
+        //min_rtt = r[dst_ip][probe_id][peer_id][99]->get_min_rtt();
         ts = r[dst_ip][probe_id][peer_id][99]->get_timestamp();
         lost = r[dst_ip][probe_id][peer_id][99]->get_lost();
         min_rtt1 = r[dst_ip][probe_id][peer_id][99]->get_min_rtt();
@@ -666,6 +687,12 @@ void pfr_calc_avg_rtt(int probe_id) {
     int ts = 0;
     double m_rtt = 50000;
     double max_rtt = 0;
+    double metric0 = 0.0;
+    double metric1 = 0.0;
+    double metric2 = 0.0;
+    double metric3 = 0.0;
+    double metric4 = 0.0;
+    double metric5 = 0.0;
     //pthread_mutex_lock(&mtr); 
     for(std::map<std::string, std::map<int, std::map<int, std::map<int, tparm *>>>>::iterator it0 = r.begin(); it0 != r.end(); it0++) {
         std::string dst_ip = it0->first;
@@ -692,7 +719,15 @@ void pfr_calc_avg_rtt(int probe_id) {
          r[dst_ip][probe_id][peer_id][99] = new tparm(0, avg_rtt, pfr_ping_req - alive, ts);
          r[dst_ip][probe_id][peer_id][99]->set_min_rtt(m_rtt);
          r[dst_ip][probe_id][peer_id][99]->set_max_rtt(max_rtt);
-         // set_metric1
+         // set_metric
+         metric0 = avg_rtt;
+         r[dst_ip][probe_id][peer_id][99]->set_metric0(metric0);
+         metric1 = m_rtt + m_rtt * r[dst_ip][probe_id][peer_id][99]->get_lost();
+         r[dst_ip][probe_id][peer_id][99]->set_metric1(metric1);
+         r[dst_ip][probe_id][peer_id][99]->set_metric2(metric2);
+         r[dst_ip][probe_id][peer_id][99]->set_metric3(metric3);
+         r[dst_ip][probe_id][peer_id][99]->set_metric4(metric4);
+         r[dst_ip][probe_id][peer_id][99]->set_metric5(metric5);
          avg_rtt_new_cnt++;
          curr_rtt = 0;
          cnt_rtt = 0;
