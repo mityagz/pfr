@@ -38,10 +38,12 @@ class pfr_peer {
    */
 pfr_peer::pfr_peer() {}
 //pfr_peer::pfr_peer(const pfr_peer &) {}
-pfr_peer::pfr_peer(int id, int peer_group_id, std::string pe_ip, std::string pe, int interface_id, std::string address, \
-             std::string ipv4_peer_address, std::string ipv6_peer_address, \
+pfr_peer::pfr_peer(int id, int peer_group_id, std::string pe_ip, std::string pe, int interface_id, std::string interface_name, \
+             std::string interface_unit, std::string address, std::string ipv4_peer_address, std::string ipv6_peer_address, \
              std::string sp_name, int pfr_dst_id, std::string peer_community) : \
-             id(id), pe_ip(pe_ip), pe(pe), address(address), ipv4_peer_address(ipv4_peer_address), peer_community(peer_community) {
+             id(id), pe_ip(pe_ip), pe(pe), interface_id(interface_id), \
+             interface_name(interface_name), interface_unit(interface_unit),
+             address(address), ipv4_peer_address(ipv4_peer_address), peer_community(peer_community) {
 //pfr_peer::pfr_peer(int id, int peer_group_id, std::string pe_ip, std::string pe, int interface_id, std::string address, \
 //             std::string laddress, std::string ipv4_peer_address, std::string lipv4_peer_address, std::string ipv6_peer_address, \
 //             std::string lipv6_peer_address, std::string type, std::string sp_name, int pfr_dst_id) {
@@ -52,6 +54,8 @@ int pfr_peer::peer_group_get_id() { return peer_group_id; }
 std::string pfr_peer::pfr_peer_get_pe_ip() { return pe_ip; }
 std::string pfr_peer::get_pe_name() { return pe; }
 int pfr_peer::get_interface_id() { return interface_id; }
+std::string pfr_peer::get_interface_name() { return interface_name; }
+std::string pfr_peer::get_interface_unit() { return interface_unit; }
 std::string pfr_peer::get_address() { return address; }
 std::string pfr_peer::get_laddress() { return laddress; }
 std::string pfr_peer::get_ipv4_peer_address() { return ipv4_peer_address; }
@@ -92,12 +96,23 @@ pfr_peers::pfr_peers(std::map<int, pfr_peer> &m) {
 #endif
         } 
 
+        res = PQexec(conn, "select p.id, p.peer_group_id, n.ip as ip, n.hostname as pe, p.interface_id, \
+                            i.name, si.unit, a.address, p.ipv4_peer_address, p.ipv6_peer_address, \
+                            p.name, p.pfr_dst_id, p.peer_community \
+                            from pfr_peers p \
+                            join node n on n.id = p.node_id \
+                            join ipam_addresses a on a.id = p.address_id \
+                            join sub_interfaces si on si.id = p.interface_id \
+                            join interface i on si.parent_id = i.id \
+                            where p.id != 0");
+
+/*
         res = PQexec(conn, "select p.id, p.peer_group_id, n.ip as ip, n.hostname as pe, p.interface_id, a.address, p.ipv4_peer_address, \
                 p.ipv6_peer_address, p.name, p.pfr_dst_id, p.peer_community from pfr_peers p join node n on n.id = p.node_id \
                 join ipam_addresses a on a.id = p.address_id where p.id != 0");
 
                 //p.ipv6_peer_address, p.type, p.name, p.pfr_dst_id  from pfr_peers p join node n on n.id = p.node_id \
-
+*/
         int ncols = PQnfields(res);
         /*
         printf("There are %d columns:", ncols);
@@ -115,19 +130,22 @@ pfr_peers::pfr_peers(std::map<int, pfr_peer> &m) {
             std::string pe_ip = PQgetvalue(res, i, 2);
             std::string pe = PQgetvalue(res, i, 3);
             int interface_id = std::stoi(PQgetvalue(res, i, 4));
-            std::string address = PQgetvalue(res, i, 5);
+            std::string interface_name = PQgetvalue(res, i, 5);  
+            std::string interface_unit = PQgetvalue(res, i, 6);
+            std::string address = PQgetvalue(res, i, 7);
             //std::string laddress = PQgetvalue(res, i, 6);
-            std::string ipv4_peer_address = PQgetvalue(res, i, 6);
+            std::string ipv4_peer_address = PQgetvalue(res, i, 8);
             //std::string lipv4_peer_address = PQgetvalue(res, i, 8);
-            std::string ipv6_peer_address = PQgetvalue(res, i, 7);
+            std::string ipv6_peer_address = PQgetvalue(res, i, 9);
             //std::string lipv6_peer_address = PQgetvalue(res, i, 10);
-            std::string sp_name = PQgetvalue(res, i, 8);
-            int pfr_dst_id = std::stoi(PQgetvalue(res, i, 9));
-            std::string peer_community = PQgetvalue(res, i, 10);
+            std::string sp_name = PQgetvalue(res, i, 10);
+            int pfr_dst_id = std::stoi(PQgetvalue(res, i, 11));
+            std::string peer_community = PQgetvalue(res, i, 12);
             //pfr_peers::pfr_peers_v[id] = pfr_peer(id, peer_group_id, pe_ip, pe, interface_id, address, \
             //                              ipv4_peer_address, ipv6_peer_address, \
             //                              sp_name, pfr_dst_id);
-            pfr_peers::pfr_peers_v.insert(std::make_pair(id, pfr_peer(id, peer_group_id, pe_ip, pe, interface_id, address, \
+            pfr_peers::pfr_peers_v.insert(std::make_pair(id, pfr_peer(id, peer_group_id, pe_ip, pe, \
+                                          interface_id, interface_name, interface_unit, address, \
                                           ipv4_peer_address, ipv6_peer_address, \
                                           sp_name, pfr_dst_id, peer_community)));
             //pfr_peers::pfr_peers_v.insert(std::make_pair(id, pfr_peer(id, peer_group_id, pe_ip, pe, interface_id, address, \

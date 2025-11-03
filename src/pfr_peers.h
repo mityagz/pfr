@@ -21,6 +21,8 @@ class pfr_peer {
     std::string pe_ip;
     std::string pe;
     int interface_id;
+    std::string interface_name;
+    std::string interface_unit;
     std::string address;
     std::string laddress;
     std::string ipv4_peer_address;
@@ -34,8 +36,8 @@ class pfr_peer {
    public:
     pfr_peer();
     //pfr_peer(const pfr_peer &);
-    pfr_peer(int id, int peer_group_id, std::string pe_ip, std::string pe, int interface_id, std::string address, \
-             std::string ipv4_peer_address, std::string ipv6_peer_address, \
+    pfr_peer(int id, int peer_group_id, std::string pe_ip, std::string pe, int interface_id, std::string interface_name, \
+             std::string interface_unit, std::string address, std::string ipv4_peer_address, std::string ipv6_peer_address, \
              std::string sp_name, int pfr_dst_id, std::string peer_community);
     //pfr_peer(int id, int peer_group_id, std::string pe_ip, std::string pe, int interface_id, std::string address, \
     //         std::string laddress, std::string ipv4_peer_address, std::string lipv4_peer_address, std::string ipv6_peer_address, \
@@ -45,6 +47,8 @@ class pfr_peer {
     std::string pfr_peer_get_pe_ip();
     std::string get_pe_name();
     int get_interface_id();
+    std::string get_interface_name();
+    std::string get_interface_unit();
     std::string get_address();
     std::string get_laddress();
     std::string get_ipv4_peer_address();
