@@ -41,6 +41,7 @@ class pfr_asbrs {
         class pfr_asbr_parm get_asbr(std::string ip);
         class pfr_asbr_parm get_asbr(int id_peer);
         std::string get_asbr_lo(int id_peer);
+        class pfr_peers get_asbr_peers();
 };
 
 void pfr_route_update(int probe_id, pfr_dst_list &dstList, gobgp_grpc &grpcc, std::map<int, pfr_peer> &p, pfr_asbrs &br);

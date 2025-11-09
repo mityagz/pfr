@@ -161,6 +161,7 @@ void pfr_asbrs::set_asbr(int id, std::string ip, class pfr_asbr_parm &parm) {}
 class pfr_asbr_parm pfr_asbrs::get_asbr(std::string ip) { return asbrs[ip]; }
 class pfr_asbr_parm pfr_asbrs::get_asbr(int id_peer) { pfr_asbr_parm ap; return ap; }
 std::string pfr_asbrs::get_asbr_lo(int id_peer) { return asbrIdPeer[id_peer]; }
+class pfr_peers pfr_asbrs::get_asbr_peers() { return p; }
 
 // https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po
 std::string goexec(const char* cmd) {
