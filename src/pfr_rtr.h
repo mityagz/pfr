@@ -42,6 +42,7 @@ class pfr_asbrs {
         class pfr_asbr_parm get_asbr(int id_peer);
         std::string get_asbr_lo(int id_peer);
         class pfr_peers get_asbr_peers();
+        void set_asbr_peers(class pfr_peers &p);
 };
 
 void pfr_route_update(int probe_id, pfr_dst_list &dstList, gobgp_grpc &grpcc, std::map<int, pfr_peer> &p, pfr_asbrs &br);
@@ -53,4 +54,5 @@ void pfr_create_xml_jrouter_rt(std::string rt, struct nc_session * ncs);
 void pfr_delete(int probe_id, gobgp_grpc &grpcc, std::map<int, pfr_peer> &p, pfr_asbrs &br); // delete dst_ip who didn't answer 3 times
 void pfr_delete_all(int probe_id, gobgp_grpc &grpcc, std::map<int, pfr_peer> &p, pfr_asbrs &br); // delete all dst_ip (graceful shutdown)
 void pfr_delete_r_route(std::map<int, pfr_peer> &p, gobgp_grpc &grpcc, pfr_asbrs &br, std::string dst_ip, int peer_id); // delete dst_ip subfunction
+void pfr_asbr_peers(pfr_asbrs &a);
 #endif // PFR_RTR_H

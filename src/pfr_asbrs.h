@@ -35,6 +35,7 @@ class pfr_asbrs {
     class pfr_asbr_parm get_asbr(int id_peer);
     std::string get_asbr_lo(int id_peer);
     class pfr_peers get_asbr_peers();
+    void set_asbr_peers(class pfr_peers &p);
 };
 
 

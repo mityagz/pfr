@@ -13,6 +13,7 @@ pfrd_SOURCES= \
 	pfr_localnets.cpp \
 	pfr_sql_log.cpp \
 	pfr_customer.cpp \
+	pfr_telemetry.cpp \
 	grpc/pfr_gobgp_grpc.cpp \
 	grpc/gobgp.pb.cc \
 	grpc/gobgp.grpc.pb.cc \

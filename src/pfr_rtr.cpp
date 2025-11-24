@@ -17,6 +17,7 @@
 
 extern std::map<std::string, std::map<int, rt_parm *>> route;
 extern std::shared_ptr<spdlog::logger> syslog_logger;
+extern std::map<std::string, std::map<int, pfr_peer>> asbr_peers;
 
 extern std::string gobgp_path;
 extern bool enable_advertise_same;
@@ -162,6 +163,7 @@ class pfr_asbr_parm pfr_asbrs::get_asbr(std::string ip) { return asbrs[ip]; }
 class pfr_asbr_parm pfr_asbrs::get_asbr(int id_peer) { pfr_asbr_parm ap; return ap; }
 std::string pfr_asbrs::get_asbr_lo(int id_peer) { return asbrIdPeer[id_peer]; }
 class pfr_peers pfr_asbrs::get_asbr_peers() { return p; }
+void pfr_asbrs::set_asbr_peers(class pfr_peers &pp) { p = pp; }
 
 // https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po
 std::string goexec(const char* cmd) {
@@ -309,4 +311,29 @@ void pfr_create_xml_jrouter_rt(std::string rt, struct nc_session *ncs) {
 //  const char *rr2 = "</configuration-set> \
 //  </load-configuration> \
 //  </rpc>";
+}
+
+void pfr_asbr_peers(pfr_asbrs &a) {
+    auto p = (a.get_asbr_peers()).get_pfr_peers();
+    for(std::map<int, pfr_peer>::iterator itm = p.begin(); itm != p.end(); ++itm) {
+       int p_id = itm->first;
+       pfr_peer peer = itm->second;
+       // map peer_id to asbr loopback
+       int peer_id = peer.pfr_peer_get_id();
+       std::string pe_ip = peer.pfr_peer_get_pe_ip();
+       asbr_peers[pe_ip].insert(std::make_pair(p_id, peer));
+    }
+    
+    for(std::map<std::string, std::map<int, pfr_peer>>::iterator itm = asbr_peers.begin(); itm != asbr_peers.end(); ++itm) {
+       std::string pe_ip = itm->first;
+       auto peers = itm->second;
+       // map peer_id to asbr loopback
+       for(std::map<int, pfr_peer>::iterator itp = peers.begin(); itp != peers.end(); ++itp) {
+          int p_id = itp->first;
+          auto peer = itp->second;
+          syslog_logger->debug("-------------------------------------------------------------------");
+          syslog_logger->debug("pfr_asbr_peers(): {} : {}", pe_ip, peer.pfr_peer_get_id());
+          syslog_logger->debug("-------------------------------------------------------------------");
+       }
+    }
 }

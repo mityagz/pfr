@@ -563,6 +563,7 @@ void *pfr_route_scan_sql(void *ithlog) {
        mediana = 0.0;
     }
     sql_log.commit();
+    sleep(180);
     //pthread_mutex_unlock(&mtr); 
     return NULL;
 }

@@ -27,6 +27,7 @@
 #include "ping0.h"
 #include "pfr_sql_log.h"
 #include "pfr_customer.h"
+#include "pfr_telemetry.h"
 #include "grpc/pfr_gobgp_grpc.h"
 
 using namespace std;
@@ -111,6 +112,9 @@ std::map<std::string, std::map<int, rt_parm *>> route;
 //       |dsp_ip               |probe_id     |peer_id
 std::map<std::string, std::map<int, std::map<int,  tlog *>>> route_log0;
 std::map<std::string, std::map<int, tlog *>> route_log1;
+
+//       |asbr_lo               |peer_id
+std::map<std::string, std::map<int, pfr_peer>> asbr_peers;
 
 int proc_v4_new_cnt = 0;
 int avg_rtt_new_cnt = 0;
@@ -645,6 +649,28 @@ int main(int argc, char **argv) {
 
     //create asbr structure and connect to asbr by netconf
     pfr_asbrs br(m);
+    br.set_asbr_peers(pp);
+    pfr_asbr_peers(br);
+    int asbr_ct = asbr_peers.size();
+    pthread_t thtelemetry[asbr_ct];
+    int i = 0;
+    int ret;
+    for(std::map<std::string, std::map<int, pfr_peer>>::iterator itm = asbr_peers.begin(); itm != asbr_peers.end(); ++itm) {
+        std::string pe_ip = itm->first;
+        auto peers = itm->second;
+        syslog_logger->debug("telemetry br: {}", pe_ip);
+        ret = pthread_create(&thtelemetry[i], NULL, telemetry_peers, &peers);
+        //ret = pthread_create(&thtelemetry[i], NULL, telemetry_peers, NULL);
+        pthread_setname_np(thtelemetry[i], "pfrd_telemetry");
+        syslog_logger->debug("telemetry br ret: {}", ret);
+        // pthread_setname_np(thrds[i], sndr_name(itdata[i].peer_id, pfrd_sndr_name_digit).c_str());
+        i++;
+    }
+    /*
+        for(int j = 0; j < asbr_ct; j++) {
+            pthread_join(thtelemetry[j], NULL);
+        }
+*/
 
     //create grpc client for gobgp
     grpcc = gobgp_grpc(grpc::CreateChannel(gobgp_grpc_host + ":" + std::to_string(gobgp_grpc_port), grpc::InsecureChannelCredentials()));
@@ -746,7 +772,7 @@ int main(int argc, char **argv) {
             ithlog.probe_id = probe_id;
             pthread_create(&thrddb, NULL, pfr_route_scan_sql, &ithlog);
             pthread_setname_np(thrddb, "pfrd_wrdb_log");
-            pthread_join(thrddb, NULL);
+            //pthread_join(thrddb, NULL);
             syslog_logger->debug("5.1:e Starting write db thread...");
             pthread_mutex_unlock(&mt_sql_log);
          }

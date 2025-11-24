@@ -164,6 +164,9 @@ pfr_peers::pfr_peers(std::map<int, pfr_peer> &m) {
     int pfr_peers::size() {
         return pfr_peers_v.size();
     }
+    
+    std::map<int, pfr_peer> pfr_peers::get_pfr_peers() { return pfr_peers_v; }
+
     //void pfr_peer_add(int id, pfr_peer p);
     //void pfr_dst_print();
     //std::map<int, pfr_peer> get_pfr_peers() { return pfr_peers::pfr_peers_v; }
