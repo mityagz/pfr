@@ -2,12 +2,58 @@
 #define PFR_TELEMETRY_H
 #include <string>
 #include <map>
-
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/syslog_sink.h>
+#include <spdlog/sinks/basic_file_sink.h>
 #include "pfr_peers.h"
+
+typedef struct {
+    std::string pe_ip;
+    std::map<std::string, std::map<int, pfr_peer>> *p;
+    class pfr_asbrs *parm;
+    class pfr_perf_peers_cont *pppc;
+    std::shared_ptr<spdlog::logger> syslog_logger;
+} perf_peers_input;
 
 
 void *telemetry_peers(void *);
+void *stream_peers(void *);
+void *performance_peers(void *);
 //void telemetry_peers(std::map<int, pfr_peer> *);
+
+class tperf_peer {
+    std::string description;
+    int peer_id;
+    double load;
+    double bandwidth;
+    double capacity;
+    double delay;
+    double throughput; //|delay, 
+    double jitter;
+    double packet_loss;
+    double utilization; //(also called load)..
+    public:
+     tperf_peer(std::string description, int peer_id, double load, double bandwidth, double capacity, double delay, \
+                double throughput, \
+                double jitter, double packet_loss, double utilization);
+};
+
+class pfr_perf_peers_cont {
+    //       | pe_lo               | peer_id     |perf_id
+    std::map<std::string, std::map<int, std::map<int, tperf_peer *>>> ppm;
+    pthread_mutex_t mtx_perf;
+    public:
+      pfr_perf_peers_cont();
+      pfr_perf_peers_cont(std::string pe_ip, int peer_id, int perf_id, tperf_peer *tp);
+      void add(std::string pe_ip, int peer_id, int perf_id, tperf_peer *tp);
+      tperf_peer* del(std::string pe_ip, int peer_id, int perf_id, tperf_peer *tp);
+      tperf_peer* cleanup(std::string pe_ip, int peer_id, int perf_id, int perf_deep, tperf_peer *tp);
+      tperf_peer* get(std::string pe_if, int peer_id, int perf_id, tperf_peer *tp);
+      void log();
+};
+
+
+
 
 /*
 vc=> select p.id, p.peer_group_id, n.ip as ip, n.hostname as pe, p.interface_id, a.address, p.ipv4_peer_address, p.ipv6_peer_address, p.type, p.name, p.pfr_dst_id  from pfr_peers p join node n on n.id = p.node_id join ipam_addresses a on a.id = p.address_id;

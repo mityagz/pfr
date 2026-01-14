@@ -1,3 +1,5 @@
+#ifndef PFR_ASBRS_H
+#define PFR_ASBRS_H
 #include<string>
 #include<map>
 #include<vector>
@@ -155,3 +157,4 @@ class pfr_rdata {
             int seq_num, int rtt, int avg_rtt, int lost);
 };
 */
+#endif // PFR_ASBRS_H

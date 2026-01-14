@@ -53,9 +53,9 @@ static void sig_usr(int signo) {
     }
 }
 
-std::string sndr_name(int n_peer, int ndigit) {
+std::string thread_name(std::string thname, int n_peer, int ndigit) {
     std::string dn = "";
-    std::string thname = "pfrd_sndr";
+    //std::string thname = "pfrd_sndr";
     std::string np = std::to_string(n_peer);
     int np_l = np.length();
     if(np_l > ndigit)
@@ -653,24 +653,32 @@ int main(int argc, char **argv) {
     pfr_asbr_peers(br);
     int asbr_ct = asbr_peers.size();
     pthread_t thtelemetry[asbr_ct];
+    pthread_t thstream[asbr_ct];
+    pthread_t thperformance[asbr_ct];
     int i = 0;
     int ret;
+    pfr_perf_peers_cont *pppci = new pfr_perf_peers_cont; 
+    //perf_peers_input *ppi = new perf_peers_input;
+    //perf_peers_input *ppi = (perf_peers_input*) malloc(sizeof(perf_peers_input) * asbr_ct);
+    //memset(ppi, 0, sizeof(perf_peers_input) * asbr_ct);
+    //perf_peers_input *ppi = (perf_peers_input*) malloc(sizeof(perf_peers_input));
+    perf_peers_input ppi[999];
     for(std::map<std::string, std::map<int, pfr_peer>>::iterator itm = asbr_peers.begin(); itm != asbr_peers.end(); ++itm) {
-        std::string pe_ip = itm->first;
+        auto pe_ip = itm->first;
         auto peers = itm->second;
-        syslog_logger->debug("telemetry br: {}", pe_ip);
-        ret = pthread_create(&thtelemetry[i], NULL, telemetry_peers, &peers);
-        //ret = pthread_create(&thtelemetry[i], NULL, telemetry_peers, NULL);
-        pthread_setname_np(thtelemetry[i], "pfrd_telemetry");
-        syslog_logger->debug("telemetry br ret: {}", ret);
-        // pthread_setname_np(thrds[i], sndr_name(itdata[i].peer_id, pfrd_sndr_name_digit).c_str());
+        std::map<int, pfr_peer>::iterator itp = peers.begin();
+        auto peer = itp->second;
+        auto parm = br.get_asbr(pe_ip);
+        ppi[i] = (perf_peers_input){ .pe_ip = pe_ip, .p = &asbr_peers, .parm = &br, .pppc = pppci };
+        //(ppi + i)->pe_ip = std::string(pe_ip);
+        ret = pthread_create(&thtelemetry[i], NULL, telemetry_peers, &ppi[i]);
+        ret = pthread_create(&thstream[i], NULL, stream_peers, &peers);
+        ret = pthread_create(&thperformance[i], NULL, performance_peers, &ppi[i]);
+        pthread_setname_np(thtelemetry[i], thread_name("pfrd_tlmt", peer.get_node_id(), pfrd_sndr_name_digit).c_str());
+        pthread_setname_np(thstream[i], thread_name("pfrd_strm", peer.get_node_id(), pfrd_sndr_name_digit).c_str());
+        pthread_setname_np(thperformance[i], thread_name("pfrd_perf", peer.get_node_id(), pfrd_sndr_name_digit).c_str());
         i++;
     }
-    /*
-        for(int j = 0; j < asbr_ct; j++) {
-            pthread_join(thtelemetry[j], NULL);
-        }
-*/
 
     //create grpc client for gobgp
     grpcc = gobgp_grpc(grpc::CreateChannel(gobgp_grpc_host + ":" + std::to_string(gobgp_grpc_port), grpc::InsecureChannelCredentials()));
@@ -700,13 +708,13 @@ int main(int argc, char **argv) {
         }
 
 
-        syslog_logger->debug("0:s Starting readloop thread...");
         if(!fthread) {
+            syslog_logger->debug("0:s Starting readloop thread...");
             pthread_create(&thrdrd, NULL, readloop, NULL);
             pthread_setname_np(thrdrd, "pfrd_rcvr");
             fthread = true;
+            syslog_logger->debug("0:e");
         }
-        syslog_logger->debug("0:e");
 
 
         gettimeofday(&tp, NULL);
@@ -716,7 +724,7 @@ int main(int argc, char **argv) {
         for(int i = 0; i < ct_data; i++) {
              pthread_create(&thrds[i], NULL, send_req, &itdata[i]);
              pthread_setname_np(thrds[i], "pfrd_sndr");
-             pthread_setname_np(thrds[i], sndr_name(itdata[i].peer_id, pfrd_sndr_name_digit).c_str());
+             pthread_setname_np(thrds[i], thread_name("pfrd_sndr", itdata[i].peer_id, pfrd_sndr_name_digit).c_str());
         }
         syslog_logger->debug("1:e");
 
@@ -726,6 +734,7 @@ int main(int argc, char **argv) {
             pthread_join(thrds[j], NULL);
         }
         syslog_logger->debug("2:e");
+        /*
         gettimeofday(&tp, NULL);
         end_time_of_echo = tp.tv_sec;
         diff_time_of_echo = end_time_of_echo - start_time_of_echo;
@@ -733,6 +742,8 @@ int main(int argc, char **argv) {
             syslog_logger->debug("max_time_of_echo sleep({})", max_time_of_echo - diff_time_of_echo);
             sleep(max_time_of_echo - diff_time_of_echo);
         }
+        */
+        pppci->log();
 
         pthread_mutex_lock(&mt_req_send); 
         req_stopped = 1;
@@ -861,6 +872,13 @@ int main(int argc, char **argv) {
         pthread_mutex_unlock(&mt_req_send);
 
 
+        gettimeofday(&tp, NULL);
+        end_time_of_echo = tp.tv_sec;
+        diff_time_of_echo = end_time_of_echo - start_time_of_echo;
+        if(max_time_of_echo > diff_time_of_echo && probe_id > 0) {
+            syslog_logger->debug("max_time_of_echo sleep({})", max_time_of_echo - diff_time_of_echo);
+            sleep(max_time_of_echo - diff_time_of_echo);
+        }
         probe_id++;
         syslog_logger->debug("sleep({}), next for(), probe_id++: {}", sleep_before_next_loop, probe_id);
         sleep(sleep_before_next_loop); //config_t, sleep_before_next_loop default: 20
