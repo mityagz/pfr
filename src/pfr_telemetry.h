@@ -5,6 +5,8 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/syslog_sink.h>
 #include <spdlog/sinks/basic_file_sink.h>
+#include <libnetconf.h>
+#include <libnetconf_ssh.h>
 #include "pfr_peers.h"
 
 typedef struct {
@@ -15,11 +17,14 @@ typedef struct {
     std::shared_ptr<spdlog::logger> syslog_logger;
 } perf_peers_input;
 
+class tperf_peer;
 
 void *telemetry_peers(void *);
 void *stream_peers(void *);
 void *performance_peers(void *);
 //void telemetry_peers(std::map<int, pfr_peer> *);
+void get_perf_data_netconf(struct nc_session *nc, std::string pe_ip, pfr_peer pp, tperf_peer *tp);
+void get_perf_data_snmp(std::string pe_ip, pfr_peer pp, tperf_peer *tp);
 
 class tperf_peer {
     std::string description;

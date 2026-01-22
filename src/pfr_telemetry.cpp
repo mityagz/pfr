@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <errno.h>
+#include <libnetconf.h>
+#include <libnetconf_ssh.h>
 #include "pfr_asbrs.h"
 
 extern std::shared_ptr<spdlog::logger> syslog_logger;
@@ -80,6 +82,9 @@ void *stream_peers(void *p) {
     return NULL;
 }
 
+void get_perf_data_netconf(struct nc_session *nc, std::string pe_ip, pfr_peer peer, tperf_peer *tp) { }
+void get_perf_data_snmp(std::string pe_ip, pfr_peer peer, tperf_peer *tp) { }
+
 void *performance_peers(void *p) {
     pthread_t t = pthread_self();
     perf_peers_input *ppi = (perf_peers_input *)p;
@@ -124,6 +129,8 @@ void *performance_peers(void *p) {
             int p_id = itp->first;
             auto peer = itp->second;
             auto *tp = new tperf_peer(pe_ip, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            get_perf_data_netconf(nconn.get_session(), pe_ip, peer, tp);
+            get_perf_data_snmp(pe_ip, peer, tp);
             pppc->add(pe_ip, peer.pfr_peer_get_id(), perf_id, tp);
             syslog_logger->debug("pfr_asbr_peers(): {} : {} : {} : {} : {} : {}", pe_ip, perf_id, peer.pfr_peer_get_id(), peer.get_interface_name(), peer.get_interface_unit(), (void *) tp);
             syslog_logger->debug("-------------------------------------------------------------------");
