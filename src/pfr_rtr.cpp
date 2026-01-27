@@ -24,6 +24,9 @@ extern bool enable_advertise_same;
 extern bool enable_explicit_withdraw;
 extern bool enable_gobgp_grpc;
 
+extern std::string netconf_ip;
+extern std::string snmp_ip;
+
 /*
 class pfr_asbr_parm {
     private:
@@ -135,6 +138,10 @@ pfr_asbrs::pfr_asbrs(std::map<int, pfr_peer> &p) {
   int peer_id = peer.pfr_peer_get_id();
   std::string peer_ip = peer.pfr_peer_get_pe_ip();
   asbrIdPeer[peer_id] = peer.pfr_peer_get_pe_ip();
+  if(netconf_ip == "oob") {
+    peer_ip = peer.pfr_peer_get_mgmt_ip();
+    asbrIdPeer[peer_id] = peer.pfr_peer_get_mgmt_ip();
+  }
   auto s_peer_ip = asbrs.find(peer_ip);
   if(s_peer_ip != asbrs.end()) {
   } else {
@@ -321,6 +328,9 @@ void pfr_asbr_peers(pfr_asbrs &a) {
        // map peer_id to asbr loopback
        int peer_id = peer.pfr_peer_get_id();
        std::string pe_ip = peer.pfr_peer_get_pe_ip();
+       if(netconf_ip == "oob") {
+        pe_ip = peer.pfr_peer_get_mgmt_ip();
+       }
        asbr_peers[pe_ip].insert(std::make_pair(p_id, peer));
     }
     

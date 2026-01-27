@@ -38,11 +38,11 @@ class pfr_peer {
    */
 pfr_peer::pfr_peer() {}
 //pfr_peer::pfr_peer(const pfr_peer &) {}
-pfr_peer::pfr_peer(int id, int node_id, int peer_group_id, std::string pe_ip, std::string pe, \
+pfr_peer::pfr_peer(int id, int node_id, int peer_group_id, std::string pe_ip, std::string mgmt_ip, std::string pe, \
                    int interface_id, std::string interface_name, std::string interface_unit, int snmp_idx, int intf_idx, \
                    std::string address, std::string ipv4_peer_address, std::string ipv6_peer_address, \
                    std::string sp_name, int pfr_dst_id, std::string peer_community) : \
-                   id(id), node_id(node_id), pe_ip(pe_ip), pe(pe), interface_id(interface_id), \
+                   id(id), node_id(node_id), pe_ip(pe_ip), mgmt_ip(mgmt_ip), pe(pe), interface_id(interface_id), \
                    interface_name(interface_name), interface_unit(interface_unit), snmp_idx(snmp_idx), intf_idx(intf_idx), \
                    address(address), ipv4_peer_address(ipv4_peer_address), peer_community(peer_community) {
 //pfr_peer::pfr_peer(int id, int peer_group_id, std::string pe_ip, std::string pe, int interface_id, std::string address, \
@@ -54,6 +54,7 @@ int pfr_peer::pfr_peer_get_id() { return id; }
 int pfr_peer::get_node_id() { return node_id; }
 int pfr_peer::peer_group_get_id() { return peer_group_id; }
 std::string pfr_peer::pfr_peer_get_pe_ip() { return pe_ip; }
+std::string pfr_peer::pfr_peer_get_mgmt_ip() { return mgmt_ip; }
 std::string pfr_peer::get_pe_name() { return pe; }
 int pfr_peer::get_interface_id() { return interface_id; }
 std::string pfr_peer::get_interface_name() { return interface_name; }
@@ -102,7 +103,8 @@ pfr_peers::pfr_peers(std::map<int, pfr_peer> &m) {
 
         res = PQexec(conn, "select p.id, p.peer_group_id, n.ip as ip, n.hostname as pe, p.interface_id, \
                             i.name, si.unit, a.address, p.ipv4_peer_address, p.ipv6_peer_address, \
-                            p.name, p.pfr_dst_id, p.peer_community, n.id as node_id, si.snmp_idx, si.intf_idx \
+                            p.name, p.pfr_dst_id, p.peer_community, n.id as node_id, si.snmp_idx, si.intf_idx, \
+                            n.mgmt_ip \
                             from pfr_peers p \
                             join node n on n.id = p.node_id \
                             join ipam_addresses a on a.id = p.address_id \
@@ -148,10 +150,11 @@ pfr_peers::pfr_peers(std::map<int, pfr_peer> &m) {
             int node_id = std::stoi(PQgetvalue(res, i, 13));
             int snmp_idx = std::stoi(PQgetvalue(res, i, 14));
             int intf_idx = std::stoi(PQgetvalue(res, i, 15));
+            std::string mgmt_ip = PQgetvalue(res, i, 16);
             //pfr_peers::pfr_peers_v[id] = pfr_peer(id, peer_group_id, pe_ip, pe, interface_id, address, \
             //                              ipv4_peer_address, ipv6_peer_address, \
             //                              sp_name, pfr_dst_id);
-            pfr_peers::pfr_peers_v.insert(std::make_pair(id, pfr_peer(id, node_id, peer_group_id, pe_ip, pe, \
+            pfr_peers::pfr_peers_v.insert(std::make_pair(id, pfr_peer(id, node_id, peer_group_id, pe_ip, mgmt_ip, pe, \
                                           interface_id, interface_name, interface_unit, snmp_idx, intf_idx, address, \
                                           ipv4_peer_address, ipv6_peer_address, \
                                           sp_name, pfr_dst_id, peer_community)));

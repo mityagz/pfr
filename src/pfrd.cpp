@@ -160,6 +160,12 @@ bool enable_sql_log = true;
 int pfrd_sndr_name_digit = 5;
 std::string path_metric = "metric0";
 
+// conf parameters for netconf
+std::string netconf_ip = "lo";
+
+// conf parameters for snmp
+std::string snmp_ip = "lo";
+
 // conf parameters for grpc
 bool enable_gobgp_grpc = false;
 std::string gobgp_grpc_host = "127.0.0.1";
@@ -331,6 +337,23 @@ bool load_configuration_file() {
             enable_explicit_withdraw = false;
         }
     }
+
+    if (configuration_map.count("netconf_ip")) {
+        if (configuration_map["netconf_ip"] == "lo") {
+            netconf_ip = "lo";
+        } else {
+            netconf_ip = "oob";
+        }
+    }
+
+    if (configuration_map.count("snmp_ip")) {
+        if (configuration_map["snmp_ip"] == "lo") {
+            snmp_ip = "lo";
+        } else {
+            snmp_ip = "oob";
+        }
+    }
+
 
     if (configuration_map.count("enable_gobgp_grpc")) {
         if (configuration_map["enable_gobgp_grpc"] == "on") {

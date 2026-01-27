@@ -20,6 +20,7 @@ class pfr_peer {
     int node_id; 
     int peer_group_id;
     std::string pe_ip;
+    std::string mgmt_ip;
     std::string pe;
     int interface_id;
     std::string interface_name;
@@ -39,7 +40,7 @@ class pfr_peer {
    public:
     pfr_peer();
     //pfr_peer(const pfr_peer &);
-    pfr_peer(int id, int node_id, int peer_group_id, std::string pe_ip, std::string pe, \
+    pfr_peer(int id, int node_id, int peer_group_id, std::string pe_ip, std::string mgmt_ip, std::string pe, \
              int interface_id, std::string interface_name, std::string interface_unit, int snmp_idx, int intf_idx, \
              std::string address, std::string ipv4_peer_address, std::string ipv6_peer_address, \
              std::string sp_name, int pfr_dst_id, std::string peer_community);
@@ -50,6 +51,7 @@ class pfr_peer {
     int get_node_id();
     int peer_group_get_id();
     std::string pfr_peer_get_pe_ip();
+    std::string pfr_peer_get_mgmt_ip();
     std::string get_pe_name();
     int get_interface_id();
     std::string get_interface_name();
