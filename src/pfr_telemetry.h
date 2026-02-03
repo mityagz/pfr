@@ -18,13 +18,19 @@ typedef struct {
 } perf_peers_input;
 
 class tperf_peer;
+class perf_peer_parse;
 
 void *telemetry_peers(void *);
 void *stream_peers(void *);
 void *performance_peers(void *);
 //void telemetry_peers(std::map<int, pfr_peer> *);
-void get_perf_data_netconf(struct nc_session *nc, std::string pe_ip, pfr_peer pp, tperf_peer *tp);
+void get_perf_data_netconf(struct nc_session *nc, std::string pe_ip, pfr_peer pp, perf_peer_parse ppp, tperf_peer *tp);
+void perf_data_parser(struct nc_session *nc, std::string pe_ip, pfr_peer pp, perf_peer_parse ppp, tperf_peer *tp);
 void get_perf_data_snmp(std::string pe_ip, pfr_peer pp, tperf_peer *tp);
+
+class perf_peer_parse {
+    std::string intf;
+};
 
 class tperf_peer {
     std::string description;

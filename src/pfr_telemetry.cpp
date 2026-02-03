@@ -82,7 +82,8 @@ void *stream_peers(void *p) {
     return NULL;
 }
 
-void get_perf_data_netconf(struct nc_session *nc, std::string pe_ip, pfr_peer peer, tperf_peer *tp) { }
+void get_perf_data_netconf(struct nc_session *nc, std::string pe_ip, pfr_peer peer, perf_peer_parse ppp, tperf_peer *tp) { }
+void perf_data_parser(struct nc_session *nc, std::string pe_ip, pfr_peer pp, perf_peer_parse ppp, tperf_peer *tp) { }
 void get_perf_data_snmp(std::string pe_ip, pfr_peer peer, tperf_peer *tp) { }
 
 void *performance_peers(void *p) {
@@ -129,7 +130,8 @@ void *performance_peers(void *p) {
             int p_id = itp->first;
             auto peer = itp->second;
             auto *tp = new tperf_peer(pe_ip, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-            get_perf_data_netconf(nconn.get_session(), pe_ip, peer, tp);
+            perf_peer_parse ppp;
+            get_perf_data_netconf(nconn.get_session(), pe_ip, peer, ppp, tp);
             get_perf_data_snmp(pe_ip, peer, tp);
             pppc->add(pe_ip, peer.pfr_peer_get_id(), perf_id, tp);
             syslog_logger->debug("pfr_asbr_peers(): {} : {} : {} : {} : {} : {}", pe_ip, perf_id, peer.pfr_peer_get_id(), peer.get_interface_name(), peer.get_interface_unit(), (void *) tp);
