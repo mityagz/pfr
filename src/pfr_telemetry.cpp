@@ -11,9 +11,58 @@
 #include <errno.h>
 #include <libnetconf.h>
 #include <libnetconf_ssh.h>
+#include <libpq-fe.h>
 #include "pfr_asbrs.h"
 
 extern std::shared_ptr<spdlog::logger> syslog_logger;
+
+perf_peer_tmpl::perf_peer_tmpl() {
+    const char  *pghost="127.0.0.1",
+                *pgport="5432",
+                *pgoptions=NULL,
+                *pgtty=NULL,
+                *dbName="vc",
+                *login="vc",
+                *pwd="vc";
+         PGconn *conn;
+       PGresult *res;
+       
+    conn = PQsetdbLogin(pghost, pgport, pgoptions, pgtty, dbName, login, pwd);
+    if(PQstatus(conn) == CONNECTION_BAD) {
+    fprintf(stderr, "Connection to database '%s' failed.\n", dbName);
+    fprintf(stderr, "%s", PQerrorMessage(conn));
+    } else {
+#ifdef DEBUG
+    fprintf(stderr, "Connection to database '%s' Ok.\n", dbName);
+#endif
+    } 
+
+    res = PQexec(conn, "select p.id, p.description, p.head, p.hend \
+                        from pfr_perf_peer_tmpl p \
+                        where p.type = 1");
+
+
+     int ncols = PQnfields(res);
+     int nrows = PQntuples(res);
+              for(int i = 0; i < nrows; i++) {
+                int id = std::stoi(PQgetvalue(res, i, 0));
+                std::string desc = PQgetvalue(res, i, 1);
+                std::string head = PQgetvalue(res, i, 2);
+                std::string hend = PQgetvalue(res, i, 3);
+                this->id = id;
+                this->desc = desc;
+                this->head = head;
+                this->hend = hend;
+              }
+
+              PQclear(res);
+              PQfinish(conn);
+}
+
+int perf_peer_tmpl::get_id() { return id; }
+std::string perf_peer_tmpl::get_desc() { return desc; }
+std::string perf_peer_tmpl::get_head() { return head; }
+std::string perf_peer_tmpl::get_hend() { return hend; }
 
 tperf_peer::tperf_peer(std::string description, int peer_id, double load, double bandwidth, double capacity, double delay, \
            double throughput, \
@@ -82,9 +131,19 @@ void *stream_peers(void *p) {
     return NULL;
 }
 
-void get_perf_data_netconf(struct nc_session *nc, std::string pe_ip, pfr_peer peer, perf_peer_parse ppp, tperf_peer *tp) { }
-void perf_data_parser(struct nc_session *nc, std::string pe_ip, pfr_peer pp, perf_peer_parse ppp, tperf_peer *tp) { }
-void get_perf_data_snmp(std::string pe_ip, pfr_peer peer, tperf_peer *tp) { }
+void get_perf_data_netconf(struct nc_session *nc, std::string pe_ip, \
+        pfr_peer peer, perf_peer_tmpl ppt, perf_peer_parse ppp, tperf_peer *tp) { 
+
+}
+
+void perf_data_parser(struct nc_session *nc, std::string pe_ip, \
+        pfr_peer pp, perf_peer_tmpl ppt, perf_peer_parse ppp, tperf_peer *tp) { 
+
+}
+
+void get_perf_data_snmp(std::string pe_ip, pfr_peer peer, tperf_peer *tp) { 
+
+}
 
 void *performance_peers(void *p) {
     pthread_t t = pthread_self();
@@ -120,6 +179,8 @@ void *performance_peers(void *p) {
         //auto nconn = nconf->get_asbr(pe_ip);
         auto nconn = nconf->get_asbr(pe_ip);
     
+    perf_peer_tmpl ppt;
+
     for(;;) {
         syslog_logger->debug("--------------------------------------------------");
         syslog_logger->debug("tid: {}", t);
@@ -131,10 +192,11 @@ void *performance_peers(void *p) {
             auto peer = itp->second;
             auto *tp = new tperf_peer(pe_ip, 0, 0, 0, 0, 0, 0, 0, 0, 0);
             perf_peer_parse ppp;
-            get_perf_data_netconf(nconn.get_session(), pe_ip, peer, ppp, tp);
+            get_perf_data_netconf(nconn.get_session(), pe_ip, peer, ppt, ppp, tp);
             get_perf_data_snmp(pe_ip, peer, tp);
             pppc->add(pe_ip, peer.pfr_peer_get_id(), perf_id, tp);
             syslog_logger->debug("pfr_asbr_peers(): {} : {} : {} : {} : {} : {}", pe_ip, perf_id, peer.pfr_peer_get_id(), peer.get_interface_name(), peer.get_interface_unit(), (void *) tp);
+            syslog_logger->debug("pfr_asbr_peers(): {}{}.{}{}", ppt.get_head(),  peer.get_interface_name(), peer.get_interface_unit(), ppt.get_hend());
             syslog_logger->debug("-------------------------------------------------------------------");
             auto p = pppc->cleanup(pe_ip, peer.pfr_peer_get_id(), perf_id, 2, NULL);
             delete p;
