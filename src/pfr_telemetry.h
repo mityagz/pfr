@@ -7,6 +7,8 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <libnetconf.h>
 #include <libnetconf_ssh.h>
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
 #include "pfr_peers.h"
 
 typedef struct {

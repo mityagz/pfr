@@ -142,6 +142,16 @@ void perf_data_parser(struct nc_session *nc, std::string pe_ip, \
 }
 
 void get_perf_data_snmp(std::string pe_ip, pfr_peer peer, tperf_peer *tp) { 
+    struct snmp_session session, *ss;
+    struct snmp_pdu *pdu;
+    struct snmp_pdu *response;
+                     
+    oid anOID[MAX_OID_LEN];
+    size_t anOID_len = MAX_OID_LEN;
+                   
+    struct variable_list *vars;
+    int status;
+    init_snmp("snmpapp");
 
 }
 
