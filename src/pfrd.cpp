@@ -177,6 +177,9 @@ std::string pgport = "5432";
 std::string db_name = "vc";
 std::string login = "vc";
 std::string pwd = "vc";
+const char *pgoptions = NULL;
+const char *pgtty = NULL;
+
 
 //sync dst_ip, lost, rtt, ? between nodes master/slave.
 std::string peer_address = "10.0.5.233";

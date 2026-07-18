@@ -17,6 +17,9 @@ extern std::string pgport;
 extern std::string db_name;
 extern std::string login;
 extern std::string pwd;
+extern const char *pgoptions;
+extern const char *pgtty;
+
 
 // This func converts ip[46] addr string to int
 ssize_t ip4_bin(int family, std::string srcaddr) {
@@ -107,8 +110,12 @@ pfr_customer::pfr_customer() {
 }
 
 pfr_customer::pfr_customer(int customer_id) {
+/*
  const char *pgoptions=NULL,
             *pgtty=NULL;
+ pgoptions=NULL,
+ pgtty=NULL;
+*/
 
  PGconn *conn;
  PGresult *res;

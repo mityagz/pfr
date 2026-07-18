@@ -15,8 +15,16 @@
 #include "pfr_asbrs.h"
 
 extern std::shared_ptr<spdlog::logger> syslog_logger;
+extern std::string pghost;
+extern std::string pgport;
+extern std::string db_name;
+extern std::string login;
+extern std::string pwd;
+extern const char *pgoptions;
+extern const char *pgtty;
 
 perf_peer_tmpl::perf_peer_tmpl() {
+    /*
     const char  *pghost="127.0.0.1",
                 *pgport="5432",
                 *pgoptions=NULL,
@@ -24,16 +32,21 @@ perf_peer_tmpl::perf_peer_tmpl() {
                 *dbName="vc",
                 *login="vc",
                 *pwd="vc";
+    const char *pgoptions = NULL,
+               *pgtty = NULL;
+    pgoptions = NULL;
+               pgtty = NULL;
+    */
          PGconn *conn;
        PGresult *res;
        
-    conn = PQsetdbLogin(pghost, pgport, pgoptions, pgtty, dbName, login, pwd);
+    conn = PQsetdbLogin(pghost.c_str() , pgport.c_str(), pgoptions, pgtty, db_name.c_str(), login.c_str(), pwd.c_str());
     if(PQstatus(conn) == CONNECTION_BAD) {
-    fprintf(stderr, "Connection to database '%s' failed.\n", dbName);
+    fprintf(stderr, "Connection to database '%s' failed.\n", db_name.c_str());
     fprintf(stderr, "%s", PQerrorMessage(conn));
     } else {
 #ifdef DEBUG
-    fprintf(stderr, "Connection to database '%s' Ok.\n", dbName);
+    fprintf(stderr, "Connection to database '%s' Ok.\n", db_name.c_str());
 #endif
     } 
 
