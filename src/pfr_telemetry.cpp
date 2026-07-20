@@ -24,21 +24,9 @@ extern const char *pgoptions;
 extern const char *pgtty;
 
 perf_peer_tmpl::perf_peer_tmpl() {
-    /*
-    const char  *pghost="127.0.0.1",
-                *pgport="5432",
-                *pgoptions=NULL,
-                *pgtty=NULL,
-                *dbName="vc",
-                *login="vc",
-                *pwd="vc";
-    const char *pgoptions = NULL,
-               *pgtty = NULL;
-    pgoptions = NULL;
-               pgtty = NULL;
-    */
-         PGconn *conn;
-       PGresult *res;
+       
+    PGconn   *conn;
+    PGresult *res;
        
     conn = PQsetdbLogin(pghost.c_str() , pgport.c_str(), pgoptions, pgtty, db_name.c_str(), login.c_str(), pwd.c_str());
     if(PQstatus(conn) == CONNECTION_BAD) {

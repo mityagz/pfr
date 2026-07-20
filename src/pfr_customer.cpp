@@ -110,12 +110,6 @@ pfr_customer::pfr_customer() {
 }
 
 pfr_customer::pfr_customer(int customer_id) {
-/*
- const char *pgoptions=NULL,
-            *pgtty=NULL;
- pgoptions=NULL,
- pgtty=NULL;
-*/
 
  PGconn *conn;
  PGresult *res;
