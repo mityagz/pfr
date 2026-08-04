@@ -77,6 +77,16 @@ class tperf_peer {
      tperf_peer(std::string description, int peer_id, double load, double bandwidth, double capacity, double delay, \
                 double throughput, \
                 double jitter, double packet_loss, double utilization);
+        std::string get_description();
+        int get_peer_id();
+        double get_load();
+        double get_bandwidth();
+        double get_capacity();
+        double get_delay();
+        double get_throughput(); //|delay, 
+        double get_jitter();
+        double get_packet_loss();
+        double get_utilization(); //(also called load)..
 };
 
 class pfr_perf_peers_cont {
@@ -90,6 +100,7 @@ class pfr_perf_peers_cont {
       tperf_peer* del(std::string pe_ip, int peer_id, int perf_id, tperf_peer *tp);
       tperf_peer* cleanup(std::string pe_ip, int peer_id, int perf_id, int perf_deep, tperf_peer *tp);
       tperf_peer* get(std::string pe_if, int peer_id, int perf_id, tperf_peer *tp);
+      tperf_peer* get(int peer_id);
       void log();
 };
 

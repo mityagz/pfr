@@ -12,6 +12,7 @@
 #include <libnetconf.h>
 #include <libnetconf_ssh.h>
 #include <libpq-fe.h>
+#include <iterator>
 #include "pfr_asbrs.h"
 
 extern std::shared_ptr<spdlog::logger> syslog_logger;
@@ -72,6 +73,16 @@ tperf_peer::tperf_peer(std::string description, int peer_id, double load, double
            throughput(throughput), \
            jitter(jitter), packet_loss(packet_loss), utilization(utilization) {
            }; //(also called load)
+std::string tperf_peer::get_description() { return description; }
+        int tperf_peer::get_peer_id() { return peer_id; }
+     double tperf_peer::get_load() { return load; }
+     double tperf_peer::get_bandwidth() { return bandwidth; }
+     double tperf_peer::get_capacity() { return capacity; }
+     double tperf_peer::get_delay() { return delay; }
+     double tperf_peer::get_throughput() { return throughput; } //|delay, 
+     double tperf_peer::get_jitter() { return jitter; }
+     double tperf_peer::get_packet_loss() { return packet_loss; }
+     double tperf_peer::get_utilization() { return utilization; } //(also called load
 
 pfr_perf_peers_cont::pfr_perf_peers_cont() {};
 pfr_perf_peers_cont::pfr_perf_peers_cont(std::string pe_ip, int peer_id, int perf_id, tperf_peer *tp) {};
@@ -100,6 +111,27 @@ tperf_peer* pfr_perf_peers_cont::get(std::string pe_ip, int peer_id, int perf_id
     auto p = ppm[pe_ip][peer_id][perf_id];
     pthread_mutex_unlock(&mtx_perf); 
     return p;
+}
+
+tperf_peer* pfr_perf_peers_cont::get(int peer_id) {
+    pthread_mutex_lock(&mtx_perf); 
+    for(std::map<std::string, std::map<int, std::map<int, tperf_peer *>>>::iterator it0 = ppm.begin(); it0 != ppm.end(); it0++) {
+        std::string dst_ip = it0->first;
+        for(std::map<int, std::map<int, tperf_peer *>>::iterator it1 = ppm[dst_ip].begin(); it1 != ppm[dst_ip].end(); it1++) {
+            int peer_id0 = it1->first;
+            if(peer_id == peer_id0) {
+               std::map<int, tperf_peer *>::iterator it2 = ppm[dst_ip][peer_id].end();
+               auto ip2 = std::prev(it2, 1);
+                int perf_id = ip2->first;
+                auto tp = ip2->second;
+                syslog_logger->debug("pfr_perf_peers_cont(): probe_id : {} : {} : {}", dst_ip, peer_id, perf_id);
+                pthread_mutex_unlock(&mtx_perf); 
+                return tp;
+            }  
+        }
+    }
+    pthread_mutex_unlock(&mtx_perf); 
+    return NULL;
 }
 
 void pfr_perf_peers_cont::log() {
@@ -201,7 +233,7 @@ void *performance_peers(void *p) {
         for(std::map<int, pfr_peer>::iterator itp = peers.begin(); itp != peers.end(); ++itp) {
             int p_id = itp->first;
             auto peer = itp->second;
-            auto *tp = new tperf_peer(pe_ip, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            auto *tp = new tperf_peer(pe_ip, peer.pfr_peer_get_id(), perf_id, 0, 0, 0, 0, 0, 0, 0);
             perf_peer_parse ppp;
             get_perf_data_netconf(nconn.get_session(), pe_ip, peer, ppt, ppp, tp);
             get_perf_data_snmp(pe_ip, peer, tp);

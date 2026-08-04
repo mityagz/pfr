@@ -13,6 +13,13 @@
 #include "pfr_dst_list.h"
 #include "pfr_peers.h"
 #include "pfr_sql_log.h"
+#include "pfr_telemetry.h"
+
+
+
+
+
+class pfr_perf_peers_cont;
 
 extern pfr_dst_list pfrList;
 extern std::shared_ptr<spdlog::logger> syslog_logger;
@@ -680,7 +687,7 @@ void pfr_delete_r_route(std::map<int, pfr_peer> &p, gobgp_grpc &grpcc, pfr_asbrs
     route.erase(dst_ip);
 }
 
-void pfr_calc_avg_rtt(int probe_id) {
+void pfr_calc_avg_rtt(int probe_id, pfr_perf_peers_cont *pppci) {
     double avg_rtt = 0;
     double curr_rtt = 0;
     int cnt_rtt = 0;
@@ -720,12 +727,33 @@ void pfr_calc_avg_rtt(int probe_id) {
          r[dst_ip][probe_id][peer_id][99] = new tparm(0, avg_rtt, pfr_ping_req - alive, ts);
          r[dst_ip][probe_id][peer_id][99]->set_min_rtt(m_rtt);
          r[dst_ip][probe_id][peer_id][99]->set_max_rtt(max_rtt);
+
          // set_metric
          metric0 = avg_rtt;
          r[dst_ip][probe_id][peer_id][99]->set_metric0(metric0);
+         
          metric1 = m_rtt + m_rtt * r[dst_ip][probe_id][peer_id][99]->get_lost();
          r[dst_ip][probe_id][peer_id][99]->set_metric1(metric1);
+         
+         /*
+          30.1. load peer, bandwidth, capacity, delay, throughput|delay, jitter, packet loss, and utilization (called load)..
+          EIGRP metric calculation:
+          K1 = Bandwidth, K2 = Load, K3 = Delay, K4 & K5 = Reliability
+          By default, the K1 and K3 values are set to 1, and the K2/K4/K5 values are set to 0.
+          These values can then be plugged into the full (rather complicated) EIGRP composite metric calculation:
+          256 * { K1*BW + [(K2*BW)/(256-load)] + (K3*delay) } * { K5/(reliability+K4) }
+          */
+
+         // BW (bandwidth of intf) | load (rate intf) | delay (twamp) | reliability (pkt loss)
+         //metric2 = 256 * { K1*BW + [(K2*BW)/(256-load)] + (K3*delay) } * { K5/(reliability+K4) }
+         auto tp =  pppci->get(peer_id);
+         syslog_logger->debug("pfr_calc_avg_rtt() metric2 probe_id: {}: ", (void *) tp);
+         if(tp != NULL) {
+             //metric2 = 256 * { K1*BW + [(K2*BW)/(256-load)] + (K3*delay) } * { K5/(reliability+K4) }
+             syslog_logger->debug("pfr_calc_avg_rtt() metric2 probe_id {} : peer_id {} : peer_id2 {} : perf_id2 {} : tp_bandwidth {} : tp_load {} : tp_delay {} : tp_reliability {}", probe_id, peer_id, tp->get_peer_id(), tp->get_load(), tp->get_bandwidth(), tp->get_load(), tp->get_delay(), tp->get_packet_loss());
+         }
          r[dst_ip][probe_id][peer_id][99]->set_metric2(metric2);
+         
          r[dst_ip][probe_id][peer_id][99]->set_metric3(metric3);
          r[dst_ip][probe_id][peer_id][99]->set_metric4(metric4);
          r[dst_ip][probe_id][peer_id][99]->set_metric5(metric5);

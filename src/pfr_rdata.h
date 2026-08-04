@@ -5,6 +5,7 @@
 #include "pfr_peers.h"
 #include "pfr_sql_log.h"
 #include "grpc/pfr_gobgp_grpc.h"
+#include "pfr_telemetry.h"
 
 class tparm {
   double min_rtt;
@@ -55,7 +56,7 @@ class tparm {
   int get_lost();
 };
 
-void pfr_calc_avg_rtt(int probe_id); // calculate average rtt && saves it to r...[seq == 99]
+void pfr_calc_avg_rtt(int probe_id, pfr_perf_peers_cont *pppci); // calculate average rtt && saves it to r...[seq == 99]
 void pfr_calc_stddev_rtt(int probe_id); // calculate stddev rtt && saves it to r...[seq == 99]
 void pfr_print_avg_rtt(int probe_id); // print average rtt from [seq == 99]
 void pfr_route_free(int probe_id); // free/delete route 
