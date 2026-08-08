@@ -742,6 +742,20 @@ void pfr_calc_avg_rtt(int probe_id, pfr_perf_peers_cont *pppci) {
           By default, the K1 and K3 values are set to 1, and the K2/K4/K5 values are set to 0.
           These values can then be plugged into the full (rather complicated) EIGRP composite metric calculation:
           256 * { K1*BW + [(K2*BW)/(256-load)] + (K3*delay) } * { K5/(reliability+K4) }
+
+
+          bandwidth = (10000000/bandwidth(i)) * 256
+          where bandwidth(i) is the least bandwidth of all outgoing interfaces on 
+          the route to the destination network represented in kilobits.
+          EIGRP uses the following formula to scale the delay:
+          delay = delay(i) * 256
+          where delay(i) is the sum of the delays configured on the interfaces, 
+          on the route to the destination network, in tens of microseconds. 
+          The delay as shown in the show ip eigrp topology or show interface commands is in microseconds, 
+          so you must divide by 10 before you use it in this formula. Throughout this paper, 
+          we use delay as it is configured and shown on the interface.
+          EIGRP uses these scaled values to determine the total metric to the network:
+          metric = ([K1 * bandwidth + (K2 * bandwidth) / (256 - load) + K3 * delay] * [K5 / (reliability + K4)]) * 256
           */
 
          // BW (bandwidth of intf) | load (rate intf) | delay (twamp) | reliability (pkt loss)
